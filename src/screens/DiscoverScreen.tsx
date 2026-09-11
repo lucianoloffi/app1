@@ -1,50 +1,35 @@
-import { useMemo, useRef, useState } from "react";
+import { useMemo } from "react";
 import { Logo } from "../components/Logo";
 import { CloseIcon, HeartIcon } from "../components/icons/ActionIcons";
-import { CURRENT_USER_INTERESTS, mockProfiles } from "../data/mockProfiles";
+import { CURRENT_USER_INTERESTS } from "../data/mockProfiles";
 import { INTENTION_LABEL, type Profile, type SwipeDirection } from "../types";
 import styles from "./DiscoverScreen.module.css";
 
-const SWIPE_ANIMATION_MS = 240;
-
 interface DiscoverScreenProps {
-  onOpenProfile?: (profile: Profile) => void;
+  current: Profile | null;
+  photoIndex: number;
+  swipeDirection: SwipeDirection;
+  onNextPhoto: () => void;
+  onLike: () => void;
+  onDislike: () => void;
+  onOpenProfile: (profile: Profile) => void;
+  onResetQueue: () => void;
 }
 
-export function DiscoverScreen({ onOpenProfile }: DiscoverScreenProps) {
-  const [queue, setQueue] = useState<Profile[]>(mockProfiles);
-  const [photoIndex, setPhotoIndex] = useState(0);
-  const [swipeDirection, setSwipeDirection] = useState<SwipeDirection>(null);
-  const isAnimating = useRef(false);
-
-  const current = queue[0];
-
+export function DiscoverScreen({
+  current,
+  photoIndex,
+  swipeDirection,
+  onNextPhoto,
+  onLike,
+  onDislike,
+  onOpenProfile,
+  onResetQueue,
+}: DiscoverScreenProps) {
   const commonInterests = useMemo(() => {
     if (!current) return [];
     return current.interests.filter((interest) => CURRENT_USER_INTERESTS.includes(interest));
   }, [current]);
-
-  function handlePhotoTap() {
-    if (!current) return;
-    setPhotoIndex((prev) => (prev + 1) % current.photos.length);
-  }
-
-  function handleSwipe(direction: "left" | "right") {
-    if (isAnimating.current || !current) return;
-    isAnimating.current = true;
-    setSwipeDirection(direction);
-    window.setTimeout(() => {
-      setQueue((prev) => prev.slice(1));
-      setPhotoIndex(0);
-      setSwipeDirection(null);
-      isAnimating.current = false;
-    }, SWIPE_ANIMATION_MS);
-  }
-
-  function resetQueue() {
-    setQueue(mockProfiles);
-    setPhotoIndex(0);
-  }
 
   return (
     <div className={styles.screen}>
@@ -66,7 +51,7 @@ export function DiscoverScreen({ onOpenProfile }: DiscoverScreenProps) {
             <button
               type="button"
               className={styles.photoButton}
-              onClick={handlePhotoTap}
+              onClick={onNextPhoto}
               aria-label="Ver próxima foto"
             >
               <img
@@ -119,7 +104,7 @@ export function DiscoverScreen({ onOpenProfile }: DiscoverScreenProps) {
               <button
                 type="button"
                 className={styles.viewProfileLink}
-                onClick={() => onOpenProfile?.(current)}
+                onClick={() => onOpenProfile(current)}
               >
                 Ver perfil completo
               </button>
@@ -135,10 +120,10 @@ export function DiscoverScreen({ onOpenProfile }: DiscoverScreenProps) {
             busca.
           </p>
           <div className={styles.emptyActions}>
-            <button type="button" className={styles.primaryButton} onClick={resetQueue}>
+            <button type="button" className={styles.primaryButton} onClick={onResetQueue}>
               Aumentar a distância para 50 km
             </button>
-            <button type="button" className={styles.secondaryLink} onClick={resetQueue}>
+            <button type="button" className={styles.secondaryLink} onClick={onResetQueue}>
               Rever filtros
             </button>
           </div>
@@ -150,7 +135,7 @@ export function DiscoverScreen({ onOpenProfile }: DiscoverScreenProps) {
           <button
             type="button"
             className={`${styles.actionButton} ${styles.actionClose}`}
-            onClick={() => handleSwipe("left")}
+            onClick={onDislike}
             aria-label="Dispensar perfil"
           >
             <CloseIcon size={24} />
@@ -158,7 +143,7 @@ export function DiscoverScreen({ onOpenProfile }: DiscoverScreenProps) {
           <button
             type="button"
             className={`${styles.actionButton} ${styles.actionLike}`}
-            onClick={() => handleSwipe("right")}
+            onClick={onLike}
             aria-label="Curtir perfil"
           >
             <HeartIcon size={34} />
