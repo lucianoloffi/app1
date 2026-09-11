@@ -154,6 +154,7 @@ export default function App() {
               discover.resetQueue();
             }}
             onReviewFilters={() => setTab("profile")}
+            onShowToast={showToast}
           />
         )}
         {tab === "chats" && (

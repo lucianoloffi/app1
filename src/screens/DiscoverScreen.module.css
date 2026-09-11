@@ -103,6 +103,67 @@
   border-radius: var(--radius-pill);
 }
 
+.cardMenuWrap {
+  position: absolute;
+  top: 32px;
+  left: 16px;
+  z-index: 3;
+}
+
+.cardMenuButton {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-pill);
+  border: 0;
+  cursor: pointer;
+  background: rgba(22, 33, 26, 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cardMenuBackdrop {
+  position: fixed;
+  inset: 0;
+  border: 0;
+  background: none;
+  cursor: default;
+  z-index: 3;
+}
+
+.cardMenuCard {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: 238px;
+  background: #fff;
+  border-radius: var(--radius-card-sm);
+  box-shadow: 0 20px 40px -18px rgba(15, 40, 25, 0.35);
+  overflow: hidden;
+  z-index: 4;
+}
+
+.cardMenuItem {
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  padding: 14px 16px;
+  font: 600 14px var(--font-ui);
+  color: var(--color-ink);
+}
+
+.cardMenuItem:not(:last-child) {
+  border-bottom: 1px solid var(--color-line-3);
+}
+
+.cardMenuItemDestructive {
+  color: #c8353c;
+}
+
 .gradientOverlay {
   position: absolute;
   left: 0;

@@ -1,6 +1,7 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Logo } from "../components/Logo";
 import { CloseIcon, HeartIcon } from "../components/icons/ActionIcons";
+import { ReportSheet } from "../components/ReportSheet";
 import { CURRENT_USER_INTERESTS } from "../data/mockProfiles";
 import { INTENTION_LABEL, type Profile, type SwipeDirection } from "../types";
 import styles from "./DiscoverScreen.module.css";
@@ -15,6 +16,7 @@ interface DiscoverScreenProps {
   onOpenProfile: (profile: Profile) => void;
   onIncreaseDistance: () => void;
   onReviewFilters: () => void;
+  onShowToast: (message: string) => void;
 }
 
 export function DiscoverScreen({
@@ -27,7 +29,11 @@ export function DiscoverScreen({
   onOpenProfile,
   onIncreaseDistance,
   onReviewFilters,
+  onShowToast,
 }: DiscoverScreenProps) {
+  const [cardMenuOpen, setCardMenuOpen] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
+
   const commonInterests = useMemo(() => {
     if (!current) return [];
     return current.interests.filter((interest) => CURRENT_USER_INTERESTS.includes(interest));
@@ -72,6 +78,64 @@ export function DiscoverScreen({
             </div>
 
             <span className={styles.intentionBadge}>{INTENTION_LABEL[current.intention]}</span>
+
+            <div className={styles.cardMenuWrap}>
+              <button
+                type="button"
+                className={styles.cardMenuButton}
+                aria-label="Mais opções do perfil"
+                onClick={() => setCardMenuOpen((prev) => !prev)}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <circle cx="12" cy="5" r="2" fill="#fff" />
+                  <circle cx="12" cy="12" r="2" fill="#fff" />
+                  <circle cx="12" cy="19" r="2" fill="#fff" />
+                </svg>
+              </button>
+              {cardMenuOpen && (
+                <>
+                  <button
+                    type="button"
+                    className={styles.cardMenuBackdrop}
+                    aria-label="Fechar menu"
+                    onClick={() => setCardMenuOpen(false)}
+                  />
+                  <div className={styles.cardMenuCard}>
+                    <button
+                      type="button"
+                      className={styles.cardMenuItem}
+                      onClick={() => {
+                        setCardMenuOpen(false);
+                        onDislike();
+                      }}
+                    >
+                      Pular este perfil
+                    </button>
+                    <button
+                      type="button"
+                      className={styles.cardMenuItem}
+                      onClick={() => {
+                        setCardMenuOpen(false);
+                        setReportOpen(true);
+                      }}
+                    >
+                      Denunciar perfil
+                    </button>
+                    <button
+                      type="button"
+                      className={`${styles.cardMenuItem} ${styles.cardMenuItemDestructive}`}
+                      onClick={() => {
+                        setCardMenuOpen(false);
+                        onDislike();
+                        onShowToast("Perfil bloqueado.");
+                      }}
+                    >
+                      Bloquear perfil
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
 
             <div className={styles.gradientOverlay}>
               <div>
@@ -146,6 +210,17 @@ export function DiscoverScreen({
             <HeartIcon size={34} />
           </button>
         </div>
+      )}
+
+      {reportOpen && current && (
+        <ReportSheet
+          name={current.name}
+          onCancel={() => setReportOpen(false)}
+          onSelectReason={() => {
+            setReportOpen(false);
+            onShowToast("Denúncia enviada. Obrigado por avisar.");
+          }}
+        />
       )}
     </div>
   );
