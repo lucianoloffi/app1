@@ -1,0 +1,172 @@
+.screen {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg);
+  position: relative;
+}
+
+.scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.header {
+  background: #fff;
+  padding: 8px var(--screen-padding-x) 22px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.avatar {
+  width: 76px;
+  height: 76px;
+  border-radius: var(--radius-pill);
+  border: 3px solid var(--color-accent);
+  object-fit: cover;
+  flex: none;
+  background: var(--color-accent-soft);
+}
+
+.name {
+  margin: 0;
+  font: 800 22px var(--font-ui);
+  letter-spacing: -0.02em;
+}
+
+.meta {
+  margin: 2px 0 0;
+  font: 400 14px var(--font-ui);
+  color: var(--color-ink-60);
+}
+
+.editLink {
+  margin-top: 4px;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  padding: 0;
+  font: 700 13px var(--font-ui);
+  color: var(--color-accent-2);
+}
+
+.section {
+  padding: 18px var(--screen-padding-x);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.metrics {
+  display: flex;
+  gap: 10px;
+}
+
+.metricCard {
+  flex: 1;
+  background: #fff;
+  border-radius: var(--radius-card-lg);
+  padding: 16px;
+  text-align: center;
+}
+
+.metricValue {
+  font: 800 22px var(--font-ui);
+  color: var(--color-accent-2);
+}
+
+.metricLabel {
+  margin-top: 2px;
+  font: 500 12px var(--font-ui);
+  color: var(--color-ink-40);
+}
+
+.card {
+  background: #fff;
+  border-radius: var(--radius-card-lg);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.cardTitle {
+  margin: 0;
+  font: 700 15px var(--font-ui);
+}
+
+.label {
+  font: 600 12px var(--font-ui);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-ink-40);
+}
+
+.chipsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.chip {
+  font: 600 14px var(--font-ui);
+  padding: 9px 15px;
+  border-radius: var(--radius-pill);
+  background: #fff;
+  color: var(--color-ink-60);
+  border: 1px solid var(--color-line-2);
+  cursor: pointer;
+}
+
+.chipActive {
+  background: var(--color-accent-soft);
+  color: var(--color-accent-2);
+  border-color: var(--color-accent-line);
+}
+
+.sliderHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.sliderValue {
+  font: 700 15px var(--font-ui);
+}
+
+.slider {
+  width: 100%;
+  accent-color: var(--color-accent);
+}
+
+.accessList {
+  background: #fff;
+  border-radius: var(--radius-card-lg);
+  overflow: hidden;
+}
+
+.accessRow {
+  width: 100%;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  font: 600 15px var(--font-ui);
+  color: var(--color-ink);
+  text-align: left;
+}
+
+.accessRow:not(:last-child) {
+  border-bottom: 1px solid var(--color-line-3);
+}
+
+.chevron {
+  color: var(--color-ink-40);
+}

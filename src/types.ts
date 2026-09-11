@@ -63,6 +63,17 @@ export interface OnboardingState {
   interests: string[];
 }
 
+export interface MyProfile {
+  name: string;
+  city: string;
+  birthdate: string;
+  gender: Gender;
+  bio: string;
+  photos: string[];
+  intention: Intention;
+  interests: string[];
+}
+
 export interface Filters {
   intention: Intention | "todas";
   distanceKm: number;

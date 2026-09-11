@@ -49,11 +49,15 @@ export function PhotosScreen({ photos, onChangePhotos, onBack, onNext }: PhotosS
         {Array.from({ length: MAX_PHOTOS }, (_, index) => {
           const photo = photos[index];
           return (
-            <button
+            <div
               key={index}
-              type="button"
+              role="button"
+              tabIndex={0}
               className={photo ? `${styles.slot} ${styles.slotFilled}` : `${styles.slot} ${styles.slotEmpty}`}
               onClick={() => inputRefs.current[index]?.click()}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") inputRefs.current[index]?.click();
+              }}
             >
               {photo ? (
                 <>
@@ -100,7 +104,7 @@ export function PhotosScreen({ photos, onChangePhotos, onBack, onNext }: PhotosS
                 accept="image/*"
                 onChange={(e) => handleFile(index, e.target.files?.[0] ?? null)}
               />
-            </button>
+            </div>
           );
         })}
       </div>

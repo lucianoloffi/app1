@@ -13,7 +13,8 @@ interface DiscoverScreenProps {
   onLike: () => void;
   onDislike: () => void;
   onOpenProfile: (profile: Profile) => void;
-  onResetQueue: () => void;
+  onIncreaseDistance: () => void;
+  onReviewFilters: () => void;
 }
 
 export function DiscoverScreen({
@@ -24,7 +25,8 @@ export function DiscoverScreen({
   onLike,
   onDislike,
   onOpenProfile,
-  onResetQueue,
+  onIncreaseDistance,
+  onReviewFilters,
 }: DiscoverScreenProps) {
   const commonInterests = useMemo(() => {
     if (!current) return [];
@@ -120,10 +122,10 @@ export function DiscoverScreen({
             busca.
           </p>
           <div className={styles.emptyActions}>
-            <button type="button" className={styles.primaryButton} onClick={onResetQueue}>
+            <button type="button" className={styles.primaryButton} onClick={onIncreaseDistance}>
               Aumentar a distância para 50 km
             </button>
-            <button type="button" className={styles.secondaryLink} onClick={onResetQueue}>
+            <button type="button" className={styles.secondaryLink} onClick={onReviewFilters}>
               Rever filtros
             </button>
           </div>
