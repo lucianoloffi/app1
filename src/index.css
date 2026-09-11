@@ -9,10 +9,12 @@ html,
 body {
   margin: 0;
   padding: 0;
+  height: 100%;
+  overflow: hidden;
 }
 
 body {
-  min-height: 100dvh;
+  height: 100dvh;
   background: #e9e4f3;
   font-family: var(--font-ui);
   color: var(--color-ink);
@@ -25,7 +27,7 @@ button {
 }
 
 #root {
-  min-height: 100dvh;
+  height: 100dvh;
   display: flex;
   justify-content: center;
 }
@@ -33,7 +35,7 @@ button {
 .app-shell {
   width: 100%;
   max-width: 430px;
-  min-height: 100dvh;
+  height: 100dvh;
   background: var(--color-bg);
   display: flex;
   flex-direction: column;
