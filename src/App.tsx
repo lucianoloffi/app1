@@ -20,9 +20,9 @@ const INITIAL_FILTERS: Filters = {
   intention: "todas",
   distanceKm: 25,
   city: "",
-  minAge: 18,
-  maxAge: 60,
-  interestedIn: null,
+  minAge: 25,
+  maxAge: 45,
+  interestedIn: "mulher",
 };
 
 function buildMyProfile(state: OnboardingState): MyProfile {
@@ -61,6 +61,9 @@ export default function App() {
           <OnboardingFlow
             onComplete={(state) => {
               setMyProfile(buildMyProfile(state));
+              if (state.interestedIn) {
+                setFilters((prev) => ({ ...prev, interestedIn: state.interestedIn! }));
+              }
               setStage("main");
             }}
           />

@@ -6,6 +6,7 @@ export interface Profile {
   id: string;
   name: string;
   age: number;
+  gender: Gender;
   profession: string;
   city: string;
   distanceKm: number;
@@ -80,7 +81,7 @@ export interface Filters {
   city: string;
   minAge: number;
   maxAge: number;
-  interestedIn: Gender | null;
+  interestedIn: Gender;
 }
 
 export type SwipeDirection = "left" | "right" | null;

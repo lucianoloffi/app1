@@ -14,6 +14,8 @@ function applyFilters(profiles: Profile[], filters?: Filters): Profile[] {
   return profiles.filter((profile) => {
     if (filters.intention !== "todas" && profile.intention !== filters.intention) return false;
     if (profile.distanceKm > filters.distanceKm) return false;
+    if (profile.age < filters.minAge || profile.age > filters.maxAge) return false;
+    if (filters.interestedIn !== "outros" && profile.gender !== filters.interestedIn) return false;
     return true;
   });
 }

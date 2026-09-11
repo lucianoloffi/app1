@@ -138,11 +138,6 @@
   font: 700 15px var(--font-ui);
 }
 
-.slider {
-  width: 100%;
-  accent-color: var(--color-accent);
-}
-
 .accessList {
   background: #fff;
   border-radius: var(--radius-card-lg);
