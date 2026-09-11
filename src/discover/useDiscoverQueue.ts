@@ -43,23 +43,31 @@ export function useDiscoverQueue({ onMatch, filters }: UseDiscoverQueueOptions =
     setPhotoIndex((prev) => (prev + 1) % current.photos.length);
   }
 
-  function advance(direction: "left" | "right") {
-    if (isAnimating.current || !current) return;
+  /** Toca a saída do card atual e, ao final, avança a fila. */
+  function completeAdvance() {
     isAnimating.current = true;
-    setSwipeDirection(direction);
-    const liked = direction === "right";
-    const likedProfile = current;
+    setSwipeDirection("left");
     window.setTimeout(() => {
       setQueue((prev) => prev.slice(1));
       setPhotoIndex(0);
       setSwipeDirection(null);
       setSeenCount((prev) => prev + 1);
       isAnimating.current = false;
-      if (liked && likedProfile.likesYou) {
-        setMatchProfile(likedProfile);
-        onMatch?.(likedProfile);
-      }
     }, SWIPE_ANIMATION_MS);
+  }
+
+  function advance(direction: "left" | "right") {
+    if (isAnimating.current || !current) return;
+    const liked = direction === "right";
+
+    if (liked && current.likesYou) {
+      // Deu match: o card fica parado atrás do overlay, sem avançar a fila ainda.
+      setMatchProfile(current);
+      onMatch?.(current);
+      return;
+    }
+
+    completeAdvance();
   }
 
   return {
@@ -71,7 +79,11 @@ export function useDiscoverQueue({ onMatch, filters }: UseDiscoverQueueOptions =
     nextPhoto,
     like: () => advance("right"),
     dislike: () => advance("left"),
-    dismissMatch: () => setMatchProfile(null),
+    dismissMatch: () => {
+      if (!matchProfile) return;
+      setMatchProfile(null);
+      completeAdvance();
+    },
     resetQueue: () => {
       setQueue(filteredProfiles);
       setPhotoIndex(0);
