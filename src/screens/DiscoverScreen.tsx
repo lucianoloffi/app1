@@ -16,6 +16,7 @@ interface DiscoverScreenProps {
   onOpenProfile: (profile: Profile) => void;
   onIncreaseDistance: () => void;
   onReviewFilters: () => void;
+  onRestoreProfiles: () => void;
   onShowToast: (message: string) => void;
 }
 
@@ -29,6 +30,7 @@ export function DiscoverScreen({
   onOpenProfile,
   onIncreaseDistance,
   onReviewFilters,
+  onRestoreProfiles,
   onShowToast,
 }: DiscoverScreenProps) {
   const [cardMenuOpen, setCardMenuOpen] = useState(false);
@@ -186,6 +188,9 @@ export function DiscoverScreen({
             </button>
             <button type="button" className={styles.secondaryLink} onClick={onReviewFilters}>
               Rever filtros
+            </button>
+            <button type="button" className={styles.secondaryLink} onClick={onRestoreProfiles}>
+              Restaurar perfis
             </button>
           </div>
         </div>

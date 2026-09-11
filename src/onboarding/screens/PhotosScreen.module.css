@@ -72,3 +72,12 @@
 .hiddenInput {
   display: none;
 }
+
+.skipLink {
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font: 700 15px var(--font-ui);
+  color: var(--color-accent-2);
+  padding: 4px;
+}

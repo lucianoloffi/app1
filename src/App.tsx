@@ -154,6 +154,7 @@ export default function App() {
               discover.resetQueue();
             }}
             onReviewFilters={() => setTab("profile")}
+            onRestoreProfiles={discover.resetQueue}
             onShowToast={showToast}
           />
         )}

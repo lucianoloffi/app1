@@ -49,5 +49,4 @@ export const INTEREST_OPTIONS = [
 ];
 
 export const MAX_INTERESTS = 6;
-export const MIN_PHOTOS = 3;
 export const MAX_PHOTOS = 4;
