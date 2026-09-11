@@ -42,7 +42,7 @@ export function DiscoverScreen({
   return (
     <div className={styles.screen}>
       <header className={styles.header}>
-        <Logo heartSize={26} textSize={28} />
+        <Logo heartSize={34} textSize={36} />
       </header>
 
       {current ? (
@@ -167,7 +167,7 @@ export function DiscoverScreen({
                 className={styles.viewProfileLink}
                 onClick={() => onOpenProfile(current)}
               >
-                Ver perfil completo
+                Saber mais ›
               </button>
             </div>
           </div>

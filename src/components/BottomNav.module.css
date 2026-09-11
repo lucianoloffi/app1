@@ -33,6 +33,11 @@
   justify-content: center;
 }
 
+.iconWrapLarge {
+  width: 52px;
+  height: 52px;
+}
+
 .badge {
   position: absolute;
   top: -2px;

@@ -8,7 +8,7 @@
 
 .header {
   flex: none;
-  height: 56px;
+  height: 64px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -227,16 +227,28 @@
 }
 
 .viewProfileLink {
-  align-self: flex-start;
-  font: 600 13px var(--font-ui);
+  align-self: center;
+  font: 700 13px var(--font-ui);
   color: #fff;
-  text-decoration: underline;
-  text-underline-offset: 2px;
-  background: none;
-  border: 0;
-  padding: 0;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: var(--radius-pill);
+  padding: 9px 15px;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   cursor: pointer;
   pointer-events: auto;
+  transition:
+    background 160ms var(--ease-standard),
+    transform 160ms var(--ease-standard);
+}
+
+.viewProfileLink:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.viewProfileLink:active {
+  transform: scale(0.96);
 }
 
 .actions {

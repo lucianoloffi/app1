@@ -27,9 +27,13 @@ export function BottomNav({ active, onChange, unreadChats = 0 }: BottomNavProps)
             onClick={() => onChange(tab)}
             aria-current={isActive ? "page" : undefined}
           >
-            <span className={styles.iconWrap}>
+            <span
+              className={
+                tab === "discover" ? `${styles.iconWrap} ${styles.iconWrapLarge}` : styles.iconWrap
+              }
+            >
               {tab === "chats" && <ChatsIcon active={isActive} size={40} />}
-              {tab === "discover" && <DiscoverIcon active={isActive} size={40} />}
+              {tab === "discover" && <DiscoverIcon active={isActive} size={52} />}
               {tab === "profile" && <ProfileIcon active={isActive} size={40} />}
               {tab === "chats" && unreadChats > 0 && (
                 <span className={styles.badge}>{unreadChats}</span>
