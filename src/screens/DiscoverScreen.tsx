@@ -42,13 +42,8 @@ export function DiscoverScreen({
       {current ? (
         <div className={styles.cardArea}>
           <div
-            className={
-              swipeDirection === "left"
-                ? `${styles.card} ${styles.cardExitLeft}`
-                : swipeDirection === "right"
-                  ? `${styles.card} ${styles.cardExitRight}`
-                  : styles.card
-            }
+            key={current.id}
+            className={swipeDirection ? `${styles.card} ${styles.cardExit}` : styles.card}
           >
             <button
               type="button"

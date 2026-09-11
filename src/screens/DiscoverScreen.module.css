@@ -22,6 +22,17 @@
   position: relative;
 }
 
+@keyframes card-enter {
+  from {
+    transform: translateX(70%) rotate(5deg) scale(0.94);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0) rotate(0) scale(1);
+    opacity: 1;
+  }
+}
+
 .card {
   flex: 1;
   border-radius: var(--radius-profile-card);
@@ -32,16 +43,12 @@
   transition:
     transform 240ms var(--ease-standard),
     opacity 240ms var(--ease-standard);
+  animation: card-enter 340ms var(--ease-standard) both;
   touch-action: pan-y;
 }
 
-.cardExitLeft {
+.cardExit {
   transform: translateX(-120%) rotate(-8deg);
-  opacity: 0;
-}
-
-.cardExitRight {
-  transform: translateX(120%) rotate(8deg);
   opacity: 0;
 }
 
