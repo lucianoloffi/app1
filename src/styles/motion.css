@@ -72,6 +72,15 @@
   }
 }
 
+@keyframes lovi-sheet-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
 @keyframes lovi-success-pop {
   0% {
     transform: scale(0.4) rotate(-14deg);

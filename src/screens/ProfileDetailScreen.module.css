@@ -128,14 +128,18 @@
 }
 
 .reportLink {
-  align-self: flex-start;
+  align-self: center;
   border: 0;
   background: none;
   cursor: pointer;
-  font: 600 13px var(--font-ui);
+  font: 600 14px var(--font-ui);
   color: var(--color-ink-40);
   text-decoration: underline;
-  padding: 0;
+  padding: 4px;
+}
+
+.reportLink:hover {
+  color: #c8353c;
 }
 
 .actions {

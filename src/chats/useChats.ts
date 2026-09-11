@@ -47,5 +47,10 @@ export function useChats() {
     );
   }
 
-  return { chats, addMatchChat, openChat, sendMessage, receiveMessage };
+  /** "Desfazer match": encerra a conversa e remove o match da lista. */
+  function removeChat(id: string) {
+    setChats((prev) => prev.filter((chat) => chat.id !== id));
+  }
+
+  return { chats, addMatchChat, openChat, sendMessage, receiveMessage, removeChat };
 }

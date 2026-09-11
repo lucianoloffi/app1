@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { icebreakersFor } from "../chats/icebreakers";
+import { ReportSheet } from "../components/ReportSheet";
 import { CURRENT_USER_INTERESTS, mockProfiles } from "../data/mockProfiles";
 import type { Chat } from "../types";
 import styles from "./ChatScreen.module.css";
@@ -18,11 +19,22 @@ interface ChatScreenProps {
   onBack: () => void;
   onSend: (chatId: string, text: string) => void;
   onReceive: (chatId: string, text: string) => void;
+  onUndoMatch: (chatId: string) => void;
+  onShowToast: (message: string) => void;
 }
 
-export function ChatScreen({ chat, onBack, onSend, onReceive }: ChatScreenProps) {
+export function ChatScreen({
+  chat,
+  onBack,
+  onSend,
+  onReceive,
+  onUndoMatch,
+  onShowToast,
+}: ChatScreenProps) {
   const [draft, setDraft] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
   const bodyRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -62,13 +74,62 @@ export function ChatScreen({ chat, onBack, onSend, onReceive }: ChatScreenProps)
           </div>
           <div className={styles.headerStatus}>{chat.status ?? "online agora"}</div>
         </div>
-        <button type="button" className={styles.menuButton} aria-label="Mais opções">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <circle cx="12" cy="5" r="2" fill="#8A928B" />
-            <circle cx="12" cy="12" r="2" fill="#8A928B" />
-            <circle cx="12" cy="19" r="2" fill="#8A928B" />
-          </svg>
-        </button>
+        <div className={styles.menuWrap}>
+          <button
+            type="button"
+            className={styles.menuButton}
+            aria-label="Mais opções"
+            onClick={() => setMenuOpen((prev) => !prev)}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <circle cx="12" cy="5" r="2" fill="#8A928B" />
+              <circle cx="12" cy="12" r="2" fill="#8A928B" />
+              <circle cx="12" cy="19" r="2" fill="#8A928B" />
+            </svg>
+          </button>
+          {menuOpen && (
+            <>
+              <button
+                type="button"
+                className={styles.menuBackdrop}
+                aria-label="Fechar menu"
+                onClick={() => setMenuOpen(false)}
+              />
+              <div className={styles.menuCard}>
+                <button
+                  type="button"
+                  className={styles.menuItem}
+                  onClick={() => {
+                    setMenuOpen(false);
+                    onBack();
+                  }}
+                >
+                  Finalizar a conversa
+                </button>
+                <button
+                  type="button"
+                  className={styles.menuItem}
+                  onClick={() => {
+                    setMenuOpen(false);
+                    setReportOpen(true);
+                  }}
+                >
+                  Denunciar perfil
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.menuItem} ${styles.menuItemDestructive}`}
+                  onClick={() => {
+                    setMenuOpen(false);
+                    onUndoMatch(chat.id);
+                  }}
+                >
+                  Desfazer match
+                </button>
+              </div>
+            </>
+          )}
+        </div>
       </div>
 
       <div className={styles.body} ref={bodyRef}>
@@ -137,6 +198,17 @@ export function ChatScreen({ chat, onBack, onSend, onReceive }: ChatScreenProps)
           </button>
         </div>
       </div>
+
+      {reportOpen && (
+        <ReportSheet
+          name={chat.name}
+          onCancel={() => setReportOpen(false)}
+          onSelectReason={() => {
+            setReportOpen(false);
+            onShowToast("Denúncia enviada. Obrigado por avisar.");
+          }}
+        />
+      )}
     </div>
   );
 }

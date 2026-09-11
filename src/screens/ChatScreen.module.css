@@ -4,12 +4,13 @@
   display: flex;
   flex-direction: column;
   background: var(--color-bg);
+  position: relative;
 }
 
 .header {
   flex: none;
   background: #fff;
-  padding: 8px 20px 16px;
+  padding: 14px 20px;
   display: flex;
   align-items: center;
   gap: 14px;
@@ -51,6 +52,11 @@
   color: var(--color-accent-2);
 }
 
+.menuWrap {
+  position: relative;
+  flex: none;
+}
+
 .menuButton {
   border: 0;
   background: none;
@@ -61,6 +67,46 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.menuBackdrop {
+  position: fixed;
+  inset: 0;
+  border: 0;
+  background: none;
+  cursor: default;
+  z-index: 35;
+}
+
+.menuCard {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 250px;
+  background: #fff;
+  border-radius: var(--radius-card-sm);
+  box-shadow: 0 20px 40px -18px rgba(15, 40, 25, 0.35);
+  overflow: hidden;
+  z-index: 36;
+}
+
+.menuItem {
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  padding: 14px 18px;
+  font: 600 15px var(--font-ui);
+  color: var(--color-ink);
+}
+
+.menuItem:not(:last-child) {
+  border-bottom: 1px solid var(--color-line-3);
+}
+
+.menuItemDestructive {
+  color: #c8353c;
 }
 
 .body {

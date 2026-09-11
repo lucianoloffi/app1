@@ -1,5 +1,6 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { CloseIcon, HeartIcon } from "../components/icons/ActionIcons";
+import { ReportSheet } from "../components/ReportSheet";
 import { CURRENT_USER_INTERESTS } from "../data/mockProfiles";
 import type { Profile } from "../types";
 import styles from "./ProfileDetailScreen.module.css";
@@ -9,9 +10,17 @@ interface ProfileDetailScreenProps {
   onBack: () => void;
   onLike: () => void;
   onDislike: () => void;
+  onShowToast: (message: string) => void;
 }
 
-export function ProfileDetailScreen({ profile, onBack, onLike, onDislike }: ProfileDetailScreenProps) {
+export function ProfileDetailScreen({
+  profile,
+  onBack,
+  onLike,
+  onDislike,
+  onShowToast,
+}: ProfileDetailScreenProps) {
+  const [reportOpen, setReportOpen] = useState(false);
   const commonInterests = useMemo(
     () => new Set(profile.interests.filter((interest) => CURRENT_USER_INTERESTS.includes(interest))),
     [profile],
@@ -79,10 +88,21 @@ export function ProfileDetailScreen({ profile, onBack, onLike, onDislike }: Prof
           </div>
         )}
 
-        <button type="button" className={styles.reportLink}>
-          Denunciar perfil
+        <button type="button" className={styles.reportLink} onClick={() => setReportOpen(true)}>
+          Denunciar este perfil
         </button>
       </div>
+
+      {reportOpen && (
+        <ReportSheet
+          name={profile.name}
+          onCancel={() => setReportOpen(false)}
+          onSelectReason={() => {
+            setReportOpen(false);
+            onShowToast("Denúncia enviada. Obrigado por avisar.");
+          }}
+        />
+      )}
 
       <div className={styles.actions}>
         <button

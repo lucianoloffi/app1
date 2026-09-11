@@ -87,6 +87,7 @@ export default function App() {
               discover.dislike();
               setDetailOpen(false);
             }}
+            onShowToast={showToast}
           />
         </div>
       </div>
@@ -122,6 +123,11 @@ export default function App() {
             onBack={() => setActiveChatId(null)}
             onSend={chats.sendMessage}
             onReceive={chats.receiveMessage}
+            onUndoMatch={(chatId) => {
+              chats.removeChat(chatId);
+              setActiveChatId(null);
+            }}
+            onShowToast={showToast}
           />
         </div>
       </div>
