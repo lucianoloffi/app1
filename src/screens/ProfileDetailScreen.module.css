@@ -1,0 +1,186 @@
+.screen {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-surface);
+}
+
+.photoWrap {
+  flex: none;
+  height: 230px;
+  position: relative;
+  background: #dfe3de;
+}
+
+.photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.backButton {
+  position: absolute;
+  top: 52px;
+  left: 20px;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.9);
+  border: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 22px var(--screen-padding-x) 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.name {
+  margin: 0;
+  font: 800 26px/1.2 var(--font-ui);
+  letter-spacing: -0.02em;
+}
+
+.meta {
+  margin: 2px 0 0;
+  font: 500 15px var(--font-ui);
+  color: var(--color-ink-60);
+}
+
+.bio {
+  margin: 0;
+  font: 400 15px/1.5 var(--font-ui);
+  color: #3b443e;
+}
+
+.promptCard {
+  background: var(--color-bg);
+  border-radius: var(--radius-card-lg);
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.promptLabel {
+  font: 600 12px var(--font-ui);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-ink-40);
+}
+
+.promptAnswer {
+  font: 500 15px/1.4 var(--font-ui);
+  color: var(--color-ink);
+}
+
+.sectionLabel {
+  font: 600 12px var(--font-ui);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-ink-40);
+}
+
+.chipsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  font: 600 14px var(--font-ui);
+  padding: 9px 15px;
+  border-radius: var(--radius-pill);
+  background: #fff;
+  color: var(--color-ink-60);
+  border: 1px solid var(--color-line-2);
+}
+
+.chipCommon {
+  background: var(--color-accent-soft);
+  color: var(--color-accent-2);
+  border: 1px solid var(--color-accent-line);
+}
+
+.thumbGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.thumb {
+  height: 104px;
+  border-radius: var(--radius-card-lg);
+  object-fit: cover;
+  width: 100%;
+  display: block;
+  background: #dfe3de;
+}
+
+.reportLink {
+  align-self: center;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font: 600 14px var(--font-ui);
+  color: var(--color-ink-40);
+  text-decoration: underline;
+  padding: 4px;
+}
+
+.reportLink:hover {
+  color: #c8353c;
+}
+
+.actions {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  padding: 0 0 28px;
+}
+
+.actionButton {
+  border: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 160ms var(--ease-standard);
+}
+
+.actionButton:active {
+  transform: scale(0.9);
+}
+
+.actionButton:hover {
+  transform: scale(1.08);
+}
+
+.actionClose {
+  width: var(--tap-action-sm);
+  height: var(--tap-action-sm);
+  border-radius: var(--radius-pill);
+  background: #fff;
+  border: 1px solid var(--color-line);
+  box-shadow: 0 8px 18px -10px rgba(0, 0, 0, 0.4);
+}
+
+.actionLike {
+  width: var(--tap-action-lg);
+  height: var(--tap-action-lg);
+  border-radius: var(--radius-pill);
+  background: var(--color-coral);
+  box-shadow: var(--shadow-btn-like);
+}

@@ -1,0 +1,110 @@
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(12, 20, 14, 0.82);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  padding: 0 32px;
+  text-align: center;
+  z-index: 20;
+}
+
+.heartWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.halo {
+  position: absolute;
+  width: 320px;
+  height: 320px;
+  border-radius: var(--radius-pill);
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.55), transparent 70%);
+  animation: lovi-halo-pulse 3s ease-in-out infinite;
+}
+
+.heart {
+  position: relative;
+  animation:
+    lovi-match-pop 1.1s var(--ease-standard) both,
+    lovi-match-beat 3s ease-in-out 1.1s infinite;
+  filter: drop-shadow(0 0 24px rgba(216, 168, 255, 0.75));
+}
+
+.title {
+  position: absolute;
+  bottom: -14px;
+  left: 0;
+  right: 0;
+  margin: 0;
+  font: 900 38px/1 var(--font-display);
+  color: #fff;
+  text-shadow: 0 2px 14px rgba(12, 20, 14, 0.5);
+}
+
+.avatars {
+  display: flex;
+  align-items: center;
+  animation: lovi-rise-in 500ms var(--ease-standard) 150ms both;
+}
+
+.avatar {
+  width: 76px;
+  height: 76px;
+  border-radius: var(--radius-pill);
+  border: 3px solid #fff;
+  object-fit: cover;
+  background: var(--color-accent-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatarOverlap {
+  margin-left: -18px;
+}
+
+.copy {
+  margin: 0;
+  font: 500 16px/1.5 var(--font-ui);
+  color: #fff;
+  animation: lovi-rise-in 500ms var(--ease-standard) 200ms both;
+}
+
+.copy strong {
+  font-weight: 800;
+}
+
+.footer {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: lovi-rise-in 500ms var(--ease-standard) 300ms both;
+}
+
+.primaryButton {
+  border: 0;
+  cursor: pointer;
+  font: 700 16px var(--font-ui);
+  color: #fff;
+  background: var(--color-accent);
+  padding: 17px;
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-btn-primary);
+}
+
+.secondaryLink {
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font: 600 15px var(--font-ui);
+  color: rgba(255, 255, 255, 0.85);
+  padding: 6px;
+}

@@ -1,0 +1,97 @@
+@keyframes lovi-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes lovi-match-pop {
+  0% {
+    transform: scale(0.55) rotate(-5deg);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.04) rotate(-5deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(-5deg);
+    opacity: 1;
+  }
+}
+
+@keyframes lovi-match-beat {
+  0% {
+    transform: scale(1) rotate(-5deg);
+  }
+  30% {
+    transform: scale(1.06) rotate(-5deg);
+  }
+  55% {
+    transform: scale(1.015) rotate(-5deg);
+  }
+  80% {
+    transform: scale(1.04) rotate(-5deg);
+  }
+  100% {
+    transform: scale(1) rotate(-5deg);
+  }
+}
+
+@keyframes lovi-rise-in {
+  from {
+    transform: translateY(14px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes lovi-halo-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  50% {
+    transform: scale(1.18);
+    opacity: 0.25;
+  }
+}
+
+@keyframes lovi-typing-dot {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.25);
+    opacity: 1;
+  }
+}
+
+@keyframes lovi-sheet-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes lovi-success-pop {
+  0% {
+    transform: scale(0.4) rotate(-14deg);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.08) rotate(3deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(0);
+    opacity: 1;
+  }
+}

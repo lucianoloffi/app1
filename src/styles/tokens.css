@@ -1,0 +1,69 @@
+:root {
+  /* Cor */
+  --color-accent: #8b5cf6; /* Roxo 500 */
+  --color-accent-2: #5b34c9; /* Roxo 600 */
+  --color-accent-soft: #f1eafe; /* Roxo 50 */
+  --color-accent-line: #dccbfb;
+  --color-accent-rgb: 139, 92, 246;
+  --color-bubble-sent: #ede4fd;
+  --color-bubble-sent-text: #3b2568;
+
+  --color-coral: #ff5a5f;
+
+  --color-ink: #16211a;
+  --color-ink-60: #5c6660;
+  --color-ink-40: #8a928b;
+
+  --color-line: #e3e7e3;
+  --color-line-2: #dce0d8;
+  --color-line-3: #edefea;
+
+  --color-bg: #f4f6f3;
+  --color-surface: #ffffff;
+  --color-icon-inactive: #c8cfc7;
+
+  --color-gender-man: #2f6fed;
+  --color-gender-woman: #c42b7c;
+  --color-gender-other: #5c6660;
+
+  /* Tipografia */
+  --font-ui: "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-display: "Nunito", "Plus Jakarta Sans", system-ui, sans-serif;
+
+  /* Espaçamento (escala 4px) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 28px;
+
+  /* Raios */
+  --radius-field: 12px;
+  --radius-card-sm: 18px;
+  --radius-card-lg: 22px;
+  --radius-profile-card: 28px;
+  --radius-device: 40px;
+  --radius-pill: 999px;
+
+  /* Alvo de toque */
+  --tap-min: 44px;
+  --tap-action-sm: 60px;
+  --tap-action-lg: 76px;
+
+  /* Sombras */
+  --shadow-profile-card: 0 20px 40px -22px rgba(15, 40, 25, 0.6);
+  --shadow-btn-primary: 0 10px 24px -10px rgba(139, 92, 246, 0.9);
+  --shadow-btn-like: 0 12px 26px -10px rgba(255, 90, 95, 0.9);
+
+  /* Movimento */
+  --ease-standard: cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Layout do device */
+  --status-bar-height: 44px;
+  --bottom-nav-height: 84px;
+  --bottom-nav-safe-area: 12px;
+  --screen-padding-x: 24px;
+  --onboarding-padding-x: 28px;
+}
