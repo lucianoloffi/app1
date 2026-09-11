@@ -39,6 +39,8 @@ button {
   flex-direction: column;
   position: relative;
   overflow: hidden;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 .app-shell__content {
