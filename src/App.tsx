@@ -1,0 +1,27 @@
+import { useState } from "react";
+import { BottomNav } from "./components/BottomNav";
+import { DiscoverScreen } from "./screens/DiscoverScreen";
+import { PlaceholderScreen } from "./screens/PlaceholderScreen";
+import type { Tab } from "./types";
+
+export default function App() {
+  const [tab, setTab] = useState<Tab>("discover");
+
+  return (
+    <div className="app-shell">
+      <div className="app-shell__content">
+        {tab === "discover" && <DiscoverScreen />}
+        {tab === "chats" && (
+          <PlaceholderScreen
+            title="Conversas"
+            support="Em breve: lista de matches e conversas."
+          />
+        )}
+        {tab === "profile" && (
+          <PlaceholderScreen title="Perfil" support="Em breve: seu perfil e filtros." />
+        )}
+      </div>
+      <BottomNav active={tab} onChange={setTab} unreadChats={0} />
+    </div>
+  );
+}
