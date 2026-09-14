@@ -26,6 +26,7 @@ export function BottomNav({ active, onChange, unreadChats = 0 }: BottomNavProps)
             className={styles.item}
             onClick={() => onChange(tab)}
             aria-current={isActive ? "page" : undefined}
+            aria-label={label}
           >
             <span
               className={
@@ -38,9 +39,6 @@ export function BottomNav({ active, onChange, unreadChats = 0 }: BottomNavProps)
               {tab === "chats" && unreadChats > 0 && (
                 <span className={styles.badge}>{unreadChats}</span>
               )}
-            </span>
-            <span className={isActive ? `${styles.label} ${styles.labelActive}` : styles.label}>
-              {label}
             </span>
           </button>
         );
