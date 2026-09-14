@@ -2,6 +2,9 @@ import { LoviMark } from "../components/icons/LoviMark";
 import type { Profile } from "../types";
 import styles from "./MatchOverlay.module.css";
 
+const SPARK_ANGLES = [15, 60, 105, 150, 195, 240, 285, 330];
+const SPARK_DELAYS = [0.3, 0.52, 0.74, 0.96];
+
 interface MatchOverlayProps {
   profile: Profile;
   myPhoto?: string;
@@ -14,6 +17,18 @@ export function MatchOverlay({ profile, myPhoto, onOpenChat, onContinue }: Match
     <div className={styles.overlay} role="dialog" aria-label="Deu match">
       <div className={styles.heartWrap}>
         <span className={styles.halo} />
+        {SPARK_ANGLES.map((angle, index) => (
+          <span
+            key={angle}
+            className={styles.sparkAxis}
+            style={{ transform: `rotate(${angle}deg)` }}
+          >
+            <span
+              className={styles.spark}
+              style={{ animationDelay: `${SPARK_DELAYS[index % SPARK_DELAYS.length]}s` }}
+            />
+          </span>
+        ))}
         <LoviMark size={256} className={styles.heart} />
         <p className={styles.title}>deu match!</p>
       </div>

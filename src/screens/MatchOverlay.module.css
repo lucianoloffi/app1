@@ -29,6 +29,25 @@
   animation: lovi-halo-pulse 2.6s ease-in-out infinite;
 }
 
+.sparkAxis {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+}
+
+.spark {
+  position: absolute;
+  left: -4px;
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background: #fff;
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.9);
+  animation: lovi-spark 1.5s cubic-bezier(0.2, 0.7, 0.3, 1) infinite;
+}
+
 .heart {
   position: relative;
   animation:
