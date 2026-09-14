@@ -18,11 +18,11 @@ export function SelectedInterests({ interests, onRemove, onAdd }: SelectedIntere
             onClick={() => onRemove(interest)}
             aria-label={`Remover ${interest}`}
           >
-            <svg width="8" height="8" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <svg width="7" height="7" viewBox="0 0 10 10" fill="none" aria-hidden="true">
               <path
-                d="M5 5l14 14M19 5L5 19"
+                d="M1 1l8 8M9 1L1 9"
                 stroke="currentColor"
-                strokeWidth={4}
+                strokeWidth={2}
                 strokeLinecap="round"
               />
             </svg>
