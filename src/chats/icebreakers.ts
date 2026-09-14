@@ -1,29 +1,40 @@
-const TEMPLATES: Record<string, string> = {
-  Praia: "Qual sua praia favorita?",
-  Corrida: "Corre de manhã ou à noite?",
-  Cozinhar: "Qual seu prato mais ousado na cozinha?",
-  Cinema: "Qual foi o último filme que você viu?",
-  Pets: "Manda uma foto do seu pet aí!",
-  Shows: "Qual foi o último show que você foi?",
-  Viagem: "Qual o próximo lugar que você quer conhecer?",
-  Leitura: "Está lendo algum livro bom agora?",
-  Café: "Café coado ou espresso?",
-  Yoga: "Manhã ou noite pra praticar?",
-  Música: "Qual música não sai da sua cabeça essa semana?",
-  Fotografia: "Celular ou câmera de verdade?",
-  Games: "Qual jogo você tá viciado agora?",
-  Trilhas: "Qual foi a trilha mais bonita que você já fez?",
-  Dança: "Que tipo de dança você curte?",
-  Vinho: "Tinto ou branco?",
+const ICE_BY_INTEREST: Record<string, string> = {
+  Praia: "Qual praia daqui você mais gosta?",
+  Corrida: "Você corre de manhã ou de noite?",
+  Cozinhar: "Qual prato você faz melhor?",
+  Cinema: "Qual foi o último filme que te marcou?",
+  Pets: "Me conta do seu pet?",
+  Shows: "Qual foi o melhor show que você viu?",
+  Viagem: "Qual a próxima viagem na sua lista?",
+  Leitura: "O que você está lendo agora?",
+  Café: "Qual o melhor café da cidade pra você?",
+  Academia: "Treina em qual horário?",
+  Trilha: "Tem alguma trilha aqui que valha a pena?",
+  Vinho: "Prefere vinho tinto ou branco?",
+  Gastronomia: "Qual restaurante daqui você indica?",
+  Fotografia: "Você fotografa com celular ou câmera?",
+  Séries: "Qual série você está vendo?",
+  Games: "Joga no PC ou no console?",
+  Dança: "Você dança o quê?",
 };
 
-/** Sugestões de quebra-gelo derivadas dos interesses em comum entre os dois perfis. */
-export function icebreakersFor(sharedInterests: string[]): string[] {
-  const suggestions = sharedInterests
-    .map((interest) => TEMPLATES[interest])
-    .filter((text): text is string => Boolean(text));
+const GENERIC_ICEBREAKERS = ["O que você faz no fim de semana?", "Aceita um café sábado?"];
 
-  if (suggestions.length > 0) return suggestions.slice(0, 3);
+/**
+ * Sugestões de quebra-gelo para os interesses da pessoa, priorizando os que
+ * também estão entre os meus interesses.
+ */
+export function icebreakersFor(personInterests: string[], myInterests: string[]): string[] {
+  const ordered = [
+    ...personInterests.filter((interest) => myInterests.includes(interest)),
+    ...personInterests.filter((interest) => !myInterests.includes(interest)),
+  ];
 
-  return ["Oi! adorei seu perfil, bora trocar uma ideia?"];
+  const fromInterests = ordered
+    .map((interest) => ICE_BY_INTEREST[interest])
+    .filter((text): text is string => Boolean(text))
+    .slice(0, 2);
+
+  if (fromInterests.length === 0) return GENERIC_ICEBREAKERS;
+  return [...fromInterests, ...GENERIC_ICEBREAKERS].slice(0, 3);
 }

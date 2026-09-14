@@ -16,7 +16,6 @@ export function useChats() {
         isNew: true,
         unread: 0,
         time: "agora",
-        status: "online agora",
         messages: [],
       };
       return [chat, ...prev];
@@ -52,5 +51,23 @@ export function useChats() {
     setChats((prev) => prev.filter((chat) => chat.id !== id));
   }
 
-  return { chats, addMatchChat, openChat, sendMessage, receiveMessage, removeChat };
+  /** "Finalizar conversa": arquiva — ninguém escreve até alguém reabrir. */
+  function lockChat(id: string) {
+    setChats((prev) => prev.map((chat) => (chat.id === id ? { ...chat, locked: true } : chat)));
+  }
+
+  function unlockChat(id: string) {
+    setChats((prev) => prev.map((chat) => (chat.id === id ? { ...chat, locked: false } : chat)));
+  }
+
+  return {
+    chats,
+    addMatchChat,
+    openChat,
+    sendMessage,
+    receiveMessage,
+    removeChat,
+    lockChat,
+    unlockChat,
+  };
 }

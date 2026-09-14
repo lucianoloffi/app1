@@ -2,6 +2,25 @@ export type Intention = "serio" | "conhecer" | "amizade";
 
 export type Gender = "homem" | "mulher" | "outros";
 
+export type FilterGender = "homem" | "mulher" | "todos";
+
+export type Drink = "nao-bebo" | "socialmente" | "frequentemente";
+export type Activity = "todo-dia" | "algumas-vezes" | "raramente";
+export type Kids = "tenho" | "nao-tenho" | "quero-ter" | "nao-quero";
+
+export interface Lifestyle {
+  bebida: Drink | null;
+  atividade: Activity | null;
+  filhos: Kids | null;
+}
+
+export type RelationshipStatus =
+  | "solteiro"
+  | "namorando"
+  | "divorciado"
+  | "separado"
+  | "viuvo";
+
 export interface Profile {
   id: string;
   name: string;
@@ -19,6 +38,9 @@ export interface Profile {
   };
   photos: string[];
   likesYou?: boolean;
+  lifestyle?: Lifestyle;
+  relationshipStatus?: RelationshipStatus;
+  height?: number;
 }
 
 export interface ChatMessage {
@@ -34,7 +56,7 @@ export interface Chat {
   isNew: boolean;
   unread: number;
   time: string;
-  status?: string;
+  locked?: boolean;
   messages: ChatMessage[];
 }
 
@@ -45,7 +67,9 @@ export type OnboardingStep =
   | "name-birthdate"
   | "gender-interest-city"
   | "photos"
-  | "about-intention-interests"
+  | "intention-interests"
+  | "lifestyle"
+  | "profession-height-status"
   | "success"
   | null;
 
@@ -55,13 +79,17 @@ export interface OnboardingState {
   code: string;
   name: string;
   birthdate: string;
+  bio: string;
   gender: Gender | null;
-  interestedIn: Gender | null;
+  interestedIn: FilterGender | null;
   city: string;
   photos: (string | null)[];
-  bio: string;
   intention: Intention | null;
   interests: string[];
+  lifestyle: Lifestyle;
+  profession: string;
+  height: number;
+  relationshipStatus: RelationshipStatus | null;
 }
 
 export interface MyProfile {
@@ -72,16 +100,20 @@ export interface MyProfile {
   bio: string;
   photos: string[];
   intention: Intention;
+  interestedIn: FilterGender;
   interests: string[];
+  lifestyle: Lifestyle;
+  profession: string;
+  height: number;
+  relationshipStatus: RelationshipStatus | null;
 }
 
 export interface Filters {
   intention: Intention | "todas";
   distanceKm: number;
-  city: string;
   minAge: number;
   maxAge: number;
-  interestedIn: Gender;
+  interestedIn: FilterGender;
 }
 
 export type SwipeDirection = "left" | "right" | null;
@@ -93,3 +125,34 @@ export const INTENTION_LABEL: Record<Intention, string> = {
   conhecer: "Quer conhecer pessoas",
   amizade: "Busca amizade",
 };
+
+export const DRINK_LABEL: Record<Drink, string> = {
+  "nao-bebo": "Não bebo",
+  socialmente: "Socialmente",
+  frequentemente: "Frequentemente",
+};
+
+export const ACTIVITY_LABEL: Record<Activity, string> = {
+  "todo-dia": "Todo dia",
+  "algumas-vezes": "Algumas vezes na semana",
+  raramente: "Raramente",
+};
+
+export const KIDS_LABEL: Record<Kids, string> = {
+  tenho: "Tenho",
+  "nao-tenho": "Não tenho",
+  "quero-ter": "Quero ter",
+  "nao-quero": "Não quero",
+};
+
+export const RELATIONSHIP_STATUS_LABEL: Record<RelationshipStatus, string> = {
+  solteiro: "Solteiro(a)",
+  namorando: "Namorando",
+  divorciado: "Divorciado(a)",
+  separado: "Separado(a)",
+  viuvo: "Viúvo(a)",
+};
+
+export function heightLabel(meters: number): string {
+  return `${meters.toFixed(2).replace(".", ",")} m`;
+}

@@ -1,30 +1,27 @@
-import { RangeSlider } from "../components/RangeSlider";
-import type { Filters, Gender, Intention, MyProfile } from "../types";
+import type { Filters, MyProfile } from "../types";
 import { ageFromBirthdate } from "../utils/age";
+import { computeCompleteness } from "../utils/completeness";
 import styles from "./ProfileScreen.module.css";
 
-const INTENTION_FILTER_OPTIONS: { value: Filters["intention"]; label: string }[] = [
-  { value: "todas", label: "Todas" },
-  { value: "serio", label: "Relacionamento sério" },
-  { value: "conhecer", label: "Conhecer pessoas" },
-  { value: "amizade", label: "Amizade" },
-];
+const GENDER_FILTER_LABEL: Record<Filters["interestedIn"], string> = {
+  homem: "Homens",
+  mulher: "Mulheres",
+  todos: "Todos",
+};
 
-const INTERESTED_IN_FILTER_OPTIONS: { value: Gender; label: string }[] = [
-  { value: "homem", label: "Homens" },
-  { value: "mulher", label: "Mulheres" },
-  { value: "outros", label: "Todos" },
-];
-
-const AGE_MIN = 18;
-const AGE_MAX = 70;
-const DISTANCE_MIN = 5;
-const DISTANCE_MAX = 60;
-const DISTANCE_STEP = 5;
+const INTENTION_FILTER_LABEL: Record<Filters["intention"], string> = {
+  todas: "Todos",
+  serio: "Relacionamento sério",
+  conhecer: "Conhecer pessoas",
+  amizade: "Amizade",
+};
 
 function pluralize(count: number, singular: string, plural: string) {
   return count === 1 ? singular : plural;
 }
+
+const RING_RADIUS = 41;
+const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
 
 interface ProfileScreenProps {
   myProfile: MyProfile | null;
@@ -32,11 +29,11 @@ interface ProfileScreenProps {
   conversationsCount: number;
   seenCount: number;
   filters: Filters;
-  onChangeFilters: (filters: Filters) => void;
-  onEditProfile: () => void;
-  onViewOnboardingAgain: () => void;
-  onRestartSimulation: () => void;
-  onShowToast: (message: string) => void;
+  onOpenEdit: () => void;
+  onOpenFilters: () => void;
+  onOpenSettings: () => void;
+  onVerifyProfile: () => void;
+  onLogout: () => void;
 }
 
 export function ProfileScreen({
@@ -45,43 +42,61 @@ export function ProfileScreen({
   conversationsCount,
   seenCount,
   filters,
-  onChangeFilters,
-  onEditProfile,
-  onViewOnboardingAgain,
-  onRestartSimulation,
-  onShowToast,
+  onOpenEdit,
+  onOpenFilters,
+  onOpenSettings,
+  onVerifyProfile,
+  onLogout,
 }: ProfileScreenProps) {
   const age = myProfile ? ageFromBirthdate(myProfile.birthdate) : null;
+  const photosCount = myProfile?.photos.length ?? 0;
+  const { pct, hint } = computeCompleteness(myProfile, photosCount);
+  const dashOffset = RING_CIRCUMFERENCE * (1 - pct / 100);
 
-  function updateFilters(next: Partial<Filters>) {
-    onChangeFilters({ ...filters, ...next });
-    onShowToast("Filtros atualizados");
-  }
-
-  function setFiltersSilently(next: Partial<Filters>) {
-    onChangeFilters({ ...filters, ...next });
-  }
+  const filtersSummary = `${GENDER_FILTER_LABEL[filters.interestedIn]} · ${filters.minAge}–${filters.maxAge} anos · até ${filters.distanceKm} km · ${INTENTION_FILTER_LABEL[filters.intention]}`;
 
   return (
     <div className={styles.screen}>
       <div className={styles.scroll}>
-        <div className={styles.header}>
-          <img
-            className={styles.avatar}
-            src={myProfile?.photos[0] ?? "https://i.pravatar.cc/200?img=15"}
-            alt={myProfile?.name ?? "Você"}
-          />
-          <div>
-            <p className={styles.name}>{myProfile?.name || "Você"}</p>
+        <button type="button" className={styles.header} onClick={onOpenEdit}>
+          <div className={styles.ringWrap}>
+            <svg className={styles.ring} width="88" height="88" viewBox="0 0 88 88">
+              <circle cx="44" cy="44" r={RING_RADIUS} fill="none" stroke="#EDE6FB" strokeWidth={4} />
+              <circle
+                cx="44"
+                cy="44"
+                r={RING_RADIUS}
+                fill="none"
+                stroke="#8B5CF6"
+                strokeWidth={4}
+                strokeLinecap="round"
+                strokeDasharray={RING_CIRCUMFERENCE}
+                strokeDashoffset={dashOffset}
+                transform="rotate(-90 44 44)"
+              />
+            </svg>
+            <img
+              className={styles.avatar}
+              src={myProfile?.photos[0] ?? "https://i.pravatar.cc/200?img=15"}
+              alt={myProfile?.name ?? "Você"}
+            />
+            <span className={styles.pct}>{pct}%</span>
+          </div>
+          <div className={styles.headerMain}>
+            <div className={styles.nameRow}>
+              <p className={styles.name}>{myProfile?.name || "Você"}</p>
+              <span className={styles.verifiedBadge}>✓ verificado</span>
+            </div>
             <p className={styles.meta}>
               {myProfile?.city ?? "Sua cidade"}
               {age !== null ? ` · ${age} anos` : ""}
             </p>
-            <button type="button" className={styles.editLink} onClick={onEditProfile}>
-              Editar perfil ›
-            </button>
+            <p className={styles.hint}>{hint}</p>
           </div>
-        </div>
+          <svg className={styles.chevron} width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M9 5l7 7-7 7" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" />
+          </svg>
+        </button>
 
         <div className={styles.section}>
           <div className={styles.metrics}>
@@ -105,92 +120,35 @@ export function ProfileScreen({
             </div>
           </div>
 
-          <div className={styles.card}>
-            <h2 className={styles.cardTitle}>Filtros de busca</h2>
-
-            <div>
-              <span className={styles.label}>Intenção</span>
-              <div className={styles.chipsRow}>
-                {INTENTION_FILTER_OPTIONS.map((option) => (
-                  <button
-                    key={option.value}
-                    type="button"
-                    className={
-                      filters.intention === option.value
-                        ? `${styles.chip} ${styles.chipActive}`
-                        : styles.chip
-                    }
-                    onClick={() => updateFilters({ intention: option.value as Intention | "todas" })}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <span className={styles.label}>Gênero que me interessa</span>
-              <div className={styles.chipsRow}>
-                {INTERESTED_IN_FILTER_OPTIONS.map((option) => (
-                  <button
-                    key={option.value}
-                    type="button"
-                    className={
-                      filters.interestedIn === option.value
-                        ? `${styles.chip} ${styles.chipActive}`
-                        : styles.chip
-                    }
-                    onClick={() => updateFilters({ interestedIn: option.value })}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <div className={styles.sliderHeader}>
-                <span className={styles.label}>Faixa de idade</span>
-                <span className={styles.sliderValue}>
-                  {filters.minAge} – {filters.maxAge} anos
-                </span>
-              </div>
-              <RangeSlider
-                min={AGE_MIN}
-                max={AGE_MAX}
-                values={[filters.minAge, filters.maxAge]}
-                minGap={1}
-                ariaLabels={["Idade mínima", "Idade máxima"]}
-                onChange={([minAge, maxAge]) => setFiltersSilently({ minAge, maxAge })}
-                onCommit={() => onShowToast("Filtros atualizados")}
-              />
-            </div>
-
-            <div>
-              <div className={styles.sliderHeader}>
-                <span className={styles.label}>Distância</span>
-                <span className={styles.sliderValue}>até {filters.distanceKm} km</span>
-              </div>
-              <RangeSlider
-                min={DISTANCE_MIN}
-                max={DISTANCE_MAX}
-                step={DISTANCE_STEP}
-                values={[filters.distanceKm]}
-                ariaLabels={["Distância máxima"]}
-                onChange={([distanceKm]) => setFiltersSilently({ distanceKm })}
-                onCommit={() => onShowToast("Filtros atualizados")}
-              />
-            </div>
-          </div>
+          <button type="button" className={styles.filtersCard} onClick={onOpenFilters}>
+            <span className={styles.filtersIcon}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M4 7h16M4 17h16" stroke="#5B34C9" strokeWidth={2} strokeLinecap="round" />
+                <circle cx="9" cy="7" r="2.4" fill="#fff" stroke="#5B34C9" strokeWidth={1.4} />
+                <circle cx="15" cy="17" r="2.4" fill="#fff" stroke="#5B34C9" strokeWidth={1.4} />
+              </svg>
+            </span>
+            <span className={styles.filtersMain}>
+              <p className={styles.filtersTitle}>Filtros de busca</p>
+              <p className={styles.filtersSummary}>{filtersSummary}</p>
+            </span>
+          </button>
 
           <div className={styles.accessList}>
-            <button type="button" className={styles.accessRow} onClick={onViewOnboardingAgain}>
-              Ver onboarding novamente
+            <button type="button" className={styles.accessRow} onClick={onVerifyProfile}>
+              Verificar meu perfil
               <span className={styles.chevron}>›</span>
             </button>
-            <button type="button" className={styles.accessRow} onClick={onRestartSimulation}>
-              Reiniciar simulação
+            <button type="button" className={styles.accessRow} onClick={onOpenSettings}>
+              Configurações e privacidade
               <span className={styles.chevron}>›</span>
+            </button>
+            <button
+              type="button"
+              className={`${styles.accessRow} ${styles.accessRowDestructive}`}
+              onClick={onLogout}
+            >
+              Sair da conta
             </button>
           </div>
         </div>

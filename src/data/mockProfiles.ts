@@ -1,4 +1,5 @@
 import type { Profile } from "../types";
+import { matchedProfiles } from "./matchedProfiles";
 
 export const CURRENT_USER_INTERESTS = [
   "Praia",
@@ -31,6 +32,9 @@ export const mockProfiles: Profile[] = [
       "https://i.pravatar.cc/600?img=49",
     ],
     likesYou: true,
+    lifestyle: { bebida: "socialmente", atividade: "todo-dia", filhos: "quero-ter" },
+    relationshipStatus: "solteiro",
+    height: 1.66,
   },
   {
     id: "p2",
@@ -51,6 +55,9 @@ export const mockProfiles: Profile[] = [
       "https://i.pravatar.cc/600?img=32",
       "https://i.pravatar.cc/600?img=33",
     ],
+    lifestyle: { bebida: "nao-bebo", atividade: "algumas-vezes", filhos: "nao-tenho" },
+    relationshipStatus: "solteiro",
+    height: 1.7,
   },
   {
     id: "p3",
@@ -72,6 +79,9 @@ export const mockProfiles: Profile[] = [
       "https://i.pravatar.cc/600?img=45",
       "https://i.pravatar.cc/600?img=46",
     ],
+    lifestyle: { bebida: "socialmente", atividade: "raramente", filhos: "tenho" },
+    relationshipStatus: "divorciado",
+    height: 1.68,
   },
   {
     id: "p4",
@@ -89,6 +99,9 @@ export const mockProfiles: Profile[] = [
       answer: "Uma boa playlist para correr e um livro por perto.",
     },
     photos: ["https://i.pravatar.cc/600?img=25"],
+    lifestyle: { bebida: "nao-bebo", atividade: "todo-dia", filhos: "nao-quero" },
+    relationshipStatus: "solteiro",
+    height: 1.64,
   },
   {
     id: "p5",
@@ -109,5 +122,15 @@ export const mockProfiles: Profile[] = [
       "https://i.pravatar.cc/600?img=52",
       "https://i.pravatar.cc/600?img=53",
     ],
+    lifestyle: { bebida: "socialmente", atividade: "algumas-vezes", filhos: "nao-tenho" },
+    relationshipStatus: "solteiro",
+    height: 1.78,
   },
 ];
+
+/** Fila de descoberta + pessoas com quem já existe conversa. */
+export const allProfiles: Profile[] = [...mockProfiles, ...matchedProfiles];
+
+export function findProfileById(id: string): Profile | undefined {
+  return allProfiles.find((profile) => profile.id === id);
+}

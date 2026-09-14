@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
-import type { Gender } from "../../types";
+import { PillChipRow } from "../../components/PillChip";
+import type { FilterGender, Gender } from "../../types";
 import { CITY_OPTIONS } from "../constants";
-import { GenderButtonGroup } from "../GenderButtonGroup";
 import { OnboardingLayout } from "../OnboardingLayout";
 import fieldStyles from "../fields.module.css";
 import styles from "./GenderInterestCityScreen.module.css";
@@ -12,18 +12,18 @@ const GENDER_OPTIONS: { value: Gender; label: string }[] = [
   { value: "outros", label: "Outros" },
 ];
 
-const INTERESTED_IN_OPTIONS: { value: Gender; label: string }[] = [
+const INTERESTED_IN_OPTIONS: { value: FilterGender; label: string }[] = [
   { value: "homem", label: "Homens" },
   { value: "mulher", label: "Mulheres" },
-  { value: "outros", label: "Todos" },
+  { value: "todos", label: "Todos" },
 ];
 
 interface GenderInterestCityScreenProps {
   gender: Gender | null;
-  interestedIn: Gender | null;
+  interestedIn: FilterGender | null;
   city: string;
   onChangeGender: (value: Gender) => void;
-  onChangeInterestedIn: (value: Gender) => void;
+  onChangeInterestedIn: (value: FilterGender) => void;
   onChangeCity: (value: string) => void;
   onBack: () => void;
   onNext: () => void;
@@ -53,19 +53,20 @@ export function GenderInterestCityScreen({
     <OnboardingLayout
       progress={4}
       onBack={onBack}
-      title="Sobre você e sua busca"
+      title="Sobre você e quem procura"
+      support="Isso define quais perfis entram na sua fila."
       ctaLabel="Continuar"
       ctaDisabled={!isValid}
       onCta={onNext}
     >
       <div className={fieldStyles.fieldGroup}>
         <span className={fieldStyles.label}>Sou</span>
-        <GenderButtonGroup options={GENDER_OPTIONS} selected={gender} onSelect={onChangeGender} />
+        <PillChipRow options={GENDER_OPTIONS} selected={gender} onSelect={onChangeGender} />
       </div>
 
       <div className={fieldStyles.fieldGroup}>
         <span className={fieldStyles.label}>Me interesso em</span>
-        <GenderButtonGroup
+        <PillChipRow
           options={INTERESTED_IN_OPTIONS}
           selected={interestedIn}
           onSelect={onChangeInterestedIn}

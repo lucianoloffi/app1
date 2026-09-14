@@ -6,7 +6,9 @@ export const PROGRESS_STEPS: OnboardingStep[] = [
   "name-birthdate",
   "gender-interest-city",
   "photos",
-  "about-intention-interests",
+  "intention-interests",
+  "lifestyle",
+  "profession-height-status",
 ];
 
 export const TOTAL_PROGRESS_SEGMENTS = PROGRESS_STEPS.length;
@@ -18,15 +20,19 @@ export function progressIndexFor(step: OnboardingStep): number {
 
 export const CITY_OPTIONS = [
   "Joinville, SC",
-  "São Francisco do Sul, SC",
   "Jaraguá do Sul, SC",
-  "Blumenau, SC",
-  "Florianópolis, SC",
+  "São Francisco do Sul, SC",
+  "São José, SC",
+  "São João Batista, SC",
+  "São Judas Tadeu, SC",
+  "São Bento do Sul, SC",
   "Balneário Camboriú, SC",
-  "Itajaí, SC",
+  "Florianópolis, SC",
   "Curitiba, PR",
-  "São Paulo, SP",
-  "Porto Alegre, RS",
+  "São João do Triunfo, PR",
+  "Blumenau, SC",
+  "Itajaí, SC",
+  "Araquari, SC",
 ];
 
 export const INTEREST_OPTIONS = [
@@ -39,14 +45,41 @@ export const INTEREST_OPTIONS = [
   "Viagem",
   "Leitura",
   "Café",
+  "Academia",
+  "Futebol",
+  "Vôlei",
+  "Surf",
+  "Trilha",
+  "Camping",
+  "Ciclismo",
   "Yoga",
-  "Música",
-  "Fotografia",
-  "Games",
-  "Trilhas",
   "Dança",
+  "Música ao vivo",
   "Vinho",
+  "Cerveja artesanal",
+  "Gastronomia",
+  "Fotografia",
+  "Arte",
+  "Teatro",
+  "Séries",
+  "Games",
+  "Tecnologia",
+  "Voluntariado",
+  "Religião",
+  "Estudar",
+  "Empreender",
+  "Moda",
+  "Carros",
+  "Pescaria",
+  "Jardinagem",
 ];
 
+export const MIN_INTERESTS = 3;
 export const MAX_INTERESTS = 6;
-export const MAX_PHOTOS = 4;
+export const MAX_ONBOARDING_PHOTOS = 4;
+export const MIN_ONBOARDING_PHOTOS = 3;
+export const MAX_PROFILE_PHOTOS = 6;
+
+export function selectedInterestsLabel(count: number): string {
+  return count < MIN_INTERESTS ? `Interesses · mínimo ${MIN_INTERESTS}` : "Interesses";
+}

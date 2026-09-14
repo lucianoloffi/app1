@@ -8,29 +8,37 @@ import styles from "./DiscoverScreen.module.css";
 
 interface DiscoverScreenProps {
   current: Profile | null;
+  hasAnyMatch: boolean;
+  offline: boolean;
   photoIndex: number;
   swipeDirection: SwipeDirection;
   onNextPhoto: () => void;
   onLike: () => void;
   onDislike: () => void;
   onOpenProfile: (profile: Profile) => void;
-  onIncreaseDistance: () => void;
-  onReviewFilters: () => void;
+  onOpenFilters: () => void;
+  onWidenFilters: () => void;
   onRestoreProfiles: () => void;
+  onRetryConnection: () => void;
+  onBlock: (profile: Profile) => void;
   onShowToast: (message: string) => void;
 }
 
 export function DiscoverScreen({
   current,
+  hasAnyMatch,
+  offline,
   photoIndex,
   swipeDirection,
   onNextPhoto,
   onLike,
   onDislike,
   onOpenProfile,
-  onIncreaseDistance,
-  onReviewFilters,
+  onOpenFilters,
+  onWidenFilters,
   onRestoreProfiles,
+  onRetryConnection,
+  onBlock,
   onShowToast,
 }: DiscoverScreenProps) {
   const [cardMenuOpen, setCardMenuOpen] = useState(false);
@@ -41,13 +49,21 @@ export function DiscoverScreen({
     return current.interests.filter((interest) => CURRENT_USER_INTERESTS.includes(interest));
   }, [current]);
 
+  const otherInterests = useMemo(() => {
+    if (!current) return [];
+    return current.interests.filter((interest) => !commonInterests.includes(interest));
+  }, [current, commonInterests]);
+
+  const emptyByFilter = !current && !hasAnyMatch;
+
   return (
     <div className={styles.screen}>
+      {offline && <div className={styles.offlineBanner}>Sem conexão</div>}
       <header className={styles.header}>
         <Logo heartSize={34} textSize={36} />
       </header>
 
-      {current ? (
+      {current && !offline ? (
         <div className={styles.cardArea}>
           <div
             key={current.id}
@@ -78,8 +94,6 @@ export function DiscoverScreen({
                 />
               ))}
             </div>
-
-            <span className={styles.intentionBadge}>{INTENTION_LABEL[current.intention]}</span>
 
             <div className={styles.cardMenuWrap}>
               <button
@@ -128,6 +142,7 @@ export function DiscoverScreen({
                       className={`${styles.cardMenuItem} ${styles.cardMenuItemDestructive}`}
                       onClick={() => {
                         setCardMenuOpen(false);
+                        onBlock(current);
                         onDislike();
                         onShowToast("Perfil bloqueado.");
                       }}
@@ -138,6 +153,21 @@ export function DiscoverScreen({
                 </>
               )}
             </div>
+
+            <span className={styles.intentionBadge}>{INTENTION_LABEL[current.intention]}</span>
+
+            <button
+              type="button"
+              className={styles.filterButton}
+              aria-label="Filtros de busca"
+              onClick={onOpenFilters}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M4 7h16M4 17h16" stroke="#fff" strokeWidth={2} strokeLinecap="round" />
+                <circle cx="9" cy="7" r="2.4" fill="#16211A" stroke="#fff" strokeWidth={1.4} />
+                <circle cx="15" cy="17" r="2.4" fill="#16211A" stroke="#fff" strokeWidth={1.4} />
+              </svg>
+            </button>
 
             <div className={styles.gradientOverlay}>
               <div>
@@ -150,28 +180,82 @@ export function DiscoverScreen({
                 </p>
               </div>
 
-              {commonInterests.length > 0 && (
-                <div className={styles.chipsRow}>
-                  <span className={styles.chipCommon}>
-                    {commonInterests.length}{" "}
-                    {commonInterests.length === 1 ? "interesse em comum" : "interesses em comum"}
+              <div className={styles.chipsRow}>
+                {commonInterests.slice(0, 3).map((interest) => (
+                  <span key={interest} className={styles.chipCommon}>
+                    {interest}
                   </span>
-                  {commonInterests.slice(0, 3).map((interest) => (
-                    <span key={interest} className={styles.chipInterest}>
-                      {interest}
-                    </span>
-                  ))}
-                </div>
-              )}
-
-              <button
-                type="button"
-                className={styles.viewProfileLink}
-                onClick={() => onOpenProfile(current)}
-              >
-                Saber mais ›
-              </button>
+                ))}
+                {otherInterests.slice(0, 3).map((interest) => (
+                  <span key={interest} className={styles.chipInterest}>
+                    {interest}
+                  </span>
+                ))}
+                <button
+                  type="button"
+                  className={styles.viewProfileLink}
+                  onClick={() => onOpenProfile(current)}
+                  style={{ marginLeft: "auto" }}
+                  aria-label="Ver perfil completo"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path
+                      d="M6 9l6 6 6-6"
+                      stroke="#fff"
+                      strokeWidth={2.4}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </button>
+              </div>
             </div>
+          </div>
+        </div>
+      ) : offline ? (
+        <div className={styles.offlineWrap}>
+          <div className={styles.offlineIcon}>
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path
+                d="M3 3l18 18M8.5 8.8a10 10 0 0 1 11 1.7M5.3 12a10 10 0 0 1 2.4-1.8M12 18.5h.01"
+                stroke="#C8353C"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </div>
+          <p className={styles.emptyTitle}>Não deu para carregar</p>
+          <p className={styles.emptySupport}>
+            Verifique sua conexão com a internet e tente novamente.
+          </p>
+          <button type="button" className={styles.primaryButton} onClick={onRetryConnection}>
+            Tentar de novo
+          </button>
+        </div>
+      ) : emptyByFilter ? (
+        <div className={styles.emptyWrap}>
+          <div className={styles.emptyFilterIcon}>
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path
+                d="M4 5h16l-6 8v5l-4 2v-7L4 5z"
+                stroke="#8B5CF6"
+                strokeWidth={2}
+                strokeLinejoin="round"
+              />
+            </svg>
+          </div>
+          <p className={styles.emptyTitle}>Poucos perfis por aqui</p>
+          <p className={styles.emptySupport}>
+            Nenhum perfil combina com os filtros atuais. Tente ampliar a busca.
+          </p>
+          <div className={styles.emptyActions}>
+            <button type="button" className={styles.primaryButton} onClick={onWidenFilters}>
+              Ampliar filtros
+            </button>
+            <button type="button" className={styles.secondaryLink} onClick={onOpenFilters}>
+              Ajustar manualmente
+            </button>
           </div>
         </div>
       ) : (
@@ -183,20 +267,17 @@ export function DiscoverScreen({
             busca.
           </p>
           <div className={styles.emptyActions}>
-            <button type="button" className={styles.primaryButton} onClick={onIncreaseDistance}>
-              Aumentar a distância para 50 km
-            </button>
-            <button type="button" className={styles.secondaryLink} onClick={onReviewFilters}>
-              Rever filtros
+            <button type="button" className={styles.primaryButton} onClick={onWidenFilters}>
+              Ampliar filtros
             </button>
             <button type="button" className={styles.secondaryLink} onClick={onRestoreProfiles}>
-              Restaurar perfis
+              Rever os perfis
             </button>
           </div>
         </div>
       )}
 
-      {current && (
+      {current && !offline && (
         <div className={styles.actions}>
           <button
             type="button"

@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { OnboardingLayout } from "../OnboardingLayout";
-import { MAX_PHOTOS } from "../constants";
+import { MAX_ONBOARDING_PHOTOS, MIN_ONBOARDING_PHOTOS } from "../constants";
 import styles from "./PhotosScreen.module.css";
 
 interface PhotosScreenProps {
@@ -12,6 +12,7 @@ interface PhotosScreenProps {
 
 export function PhotosScreen({ photos, onChangePhotos, onBack, onNext }: PhotosScreenProps) {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const isValid = photos.filter(Boolean).length >= MIN_ONBOARDING_PHOTOS;
 
   function handleFile(index: number, file: File | null) {
     if (!file) return;
@@ -37,17 +38,13 @@ export function PhotosScreen({ photos, onChangePhotos, onBack, onNext }: PhotosS
       progress={5}
       onBack={onBack}
       title="Suas fotos"
-      support="A primeira é a principal. Você pode adicionar mais depois."
+      support="Escolha de 3 a 4. Perfis com 3 fotos recebem mais matches."
       ctaLabel="Continuar"
+      ctaDisabled={!isValid}
       onCta={onNext}
-      secondary={
-        <button type="button" className={styles.skipLink} onClick={onNext}>
-          Pular
-        </button>
-      }
     >
       <div className={styles.grid}>
-        {Array.from({ length: MAX_PHOTOS }, (_, index) => {
+        {Array.from({ length: MAX_ONBOARDING_PHOTOS }, (_, index) => {
           const photo = photos[index];
           return (
             <div

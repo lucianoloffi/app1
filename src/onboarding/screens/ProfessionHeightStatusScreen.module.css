@@ -1,0 +1,39 @@
+.groups {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.heightRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.heightTrack {
+  flex: 1;
+}
+
+.heightInput {
+  flex: none;
+  width: 88px;
+  text-align: center;
+  font: 800 20px var(--font-ui);
+  color: var(--color-accent);
+  background: #fff;
+  border: 1.5px solid var(--color-line-2);
+  border-radius: var(--radius-field);
+  padding: 12px 4px;
+}
+
+.skipLink {
+  align-self: center;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font: 600 14px var(--font-ui);
+  color: var(--color-ink-40);
+  text-decoration: underline;
+  padding: 4px;
+  margin-top: 18px;
+}

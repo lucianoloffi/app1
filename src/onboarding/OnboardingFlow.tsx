@@ -1,12 +1,22 @@
 import { useState } from "react";
-import type { Gender, Intention, OnboardingState, OnboardingStep } from "../types";
+import type {
+  FilterGender,
+  Gender,
+  Intention,
+  Lifestyle,
+  OnboardingState,
+  OnboardingStep,
+  RelationshipStatus,
+} from "../types";
 import { MAX_INTERESTS } from "./constants";
-import { AboutIntentionInterestsScreen } from "./screens/AboutIntentionInterestsScreen";
 import { CodeScreen } from "./screens/CodeScreen";
 import { GenderInterestCityScreen } from "./screens/GenderInterestCityScreen";
+import { IntentionInterestsScreen } from "./screens/IntentionInterestsScreen";
+import { LifestyleScreen } from "./screens/LifestyleScreen";
 import { NameBirthdateScreen } from "./screens/NameBirthdateScreen";
 import { PhoneScreen } from "./screens/PhoneScreen";
 import { PhotosScreen } from "./screens/PhotosScreen";
+import { ProfessionHeightStatusScreen } from "./screens/ProfessionHeightStatusScreen";
 import { SuccessScreen } from "./screens/SuccessScreen";
 import { WelcomeScreen } from "./screens/WelcomeScreen";
 
@@ -16,20 +26,25 @@ const INITIAL_STATE: OnboardingState = {
   code: "",
   name: "",
   birthdate: "",
+  bio: "",
   gender: null,
   interestedIn: null,
   city: "",
   photos: [null, null, null, null],
-  bio: "",
   intention: null,
   interests: [],
+  lifestyle: { bebida: null, atividade: null, filhos: null },
+  profession: "",
+  height: 1.7,
+  relationshipStatus: null,
 };
 
 interface OnboardingFlowProps {
   onComplete: (state: OnboardingState) => void;
+  onShowToast: (message: string) => void;
 }
 
-export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
+export function OnboardingFlow({ onComplete, onShowToast }: OnboardingFlowProps) {
   const [state, setState] = useState<OnboardingState>(INITIAL_STATE);
 
   function goTo(step: OnboardingStep) {
@@ -67,8 +82,10 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
         <NameBirthdateScreen
           name={state.name}
           birthdate={state.birthdate}
+          bio={state.bio}
           onChangeName={(name) => setState((prev) => ({ ...prev, name }))}
           onChangeBirthdate={(birthdate) => setState((prev) => ({ ...prev, birthdate }))}
+          onChangeBio={(bio) => setState((prev) => ({ ...prev, bio }))}
           onBack={() => goTo("code")}
           onNext={() => goTo("gender-interest-city")}
         />
@@ -81,7 +98,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
           interestedIn={state.interestedIn}
           city={state.city}
           onChangeGender={(gender: Gender) => setState((prev) => ({ ...prev, gender }))}
-          onChangeInterestedIn={(interestedIn: Gender) =>
+          onChangeInterestedIn={(interestedIn: FilterGender) =>
             setState((prev) => ({ ...prev, interestedIn }))
           }
           onChangeCity={(city) => setState((prev) => ({ ...prev, city }))}
@@ -96,17 +113,15 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
           photos={state.photos}
           onChangePhotos={(photos) => setState((prev) => ({ ...prev, photos }))}
           onBack={() => goTo("gender-interest-city")}
-          onNext={() => goTo("about-intention-interests")}
+          onNext={() => goTo("intention-interests")}
         />
       );
 
-    case "about-intention-interests":
+    case "intention-interests":
       return (
-        <AboutIntentionInterestsScreen
-          bio={state.bio}
+        <IntentionInterestsScreen
           intention={state.intention}
           interests={state.interests}
-          onChangeBio={(bio) => setState((prev) => ({ ...prev, bio }))}
           onChangeIntention={(intention: Intention) =>
             setState((prev) => ({ ...prev, intention }))
           }
@@ -120,7 +135,34 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
                   : [...prev.interests, interest],
             }))
           }
+          onOverMax={() => onShowToast("Máximo de 6 interesses")}
           onBack={() => goTo("photos")}
+          onFinish={() => goTo("lifestyle")}
+        />
+      );
+
+    case "lifestyle":
+      return (
+        <LifestyleScreen
+          lifestyle={state.lifestyle}
+          onChange={(lifestyle: Lifestyle) => setState((prev) => ({ ...prev, lifestyle }))}
+          onBack={() => goTo("intention-interests")}
+          onNext={() => goTo("profession-height-status")}
+        />
+      );
+
+    case "profession-height-status":
+      return (
+        <ProfessionHeightStatusScreen
+          profession={state.profession}
+          height={state.height}
+          relationshipStatus={state.relationshipStatus}
+          onChangeProfession={(profession) => setState((prev) => ({ ...prev, profession }))}
+          onChangeHeight={(height) => setState((prev) => ({ ...prev, height }))}
+          onChangeStatus={(relationshipStatus: RelationshipStatus) =>
+            setState((prev) => ({ ...prev, relationshipStatus }))
+          }
+          onBack={() => goTo("lifestyle")}
           onFinish={() => goTo("success")}
         />
       );

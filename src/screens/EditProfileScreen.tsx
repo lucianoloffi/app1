@@ -1,9 +1,15 @@
-import { useRef, useState } from "react";
-import type { Gender, MyProfile } from "../types";
+import { useState } from "react";
+import { HeightSheet } from "../components/HeightSheet";
+import { InterestBottomSheet } from "../components/InterestBottomSheet";
+import { RowBottomSheet } from "../components/RowBottomSheet";
+import { SelectedInterests } from "../components/SelectedInterests";
+import { LIFE_GROUPS, STATUS_SHEET_OPTIONS } from "../data/lifestyle";
+import { MAX_PROFILE_PHOTOS, selectedInterestsLabel } from "../onboarding/constants";
 import { formatBirthdate, onlyDigits } from "../onboarding/phoneFormat";
+import type { Gender, Lifestyle, MyProfile, RelationshipStatus } from "../types";
+import { heightLabel } from "../types";
+import { PhotosManageScreen } from "./PhotosManageScreen";
 import styles from "./EditProfileScreen.module.css";
-
-const MAX_PHOTOS = 5;
 
 const GENDER_OPTIONS: { value: Gender; label: string }[] = [
   { value: "homem", label: "Homem" },
@@ -11,33 +17,45 @@ const GENDER_OPTIONS: { value: Gender; label: string }[] = [
   { value: "outros", label: "Outros" },
 ];
 
+function photosHint(count: number): string {
+  if (count < 3) return "Perfis com pelo menos 3 fotos recebem mais matches.";
+  if (count < 6)
+    return `Quanto mais fotos, mais atrativo fica seu perfil. Você ainda pode adicionar ${6 - count} ${
+      6 - count === 1 ? "foto" : "fotos"
+    }.`;
+  return "Perfil completo de fotos. Você pode reordenar tornando outra a capa.";
+}
+
 interface EditProfileScreenProps {
   profile: MyProfile;
   onCancel: () => void;
   onSave: (profile: MyProfile) => void;
+  onShowToast: (message: string) => void;
 }
 
-export function EditProfileScreen({ profile, onCancel, onSave }: EditProfileScreenProps) {
+export function EditProfileScreen({ profile, onCancel, onSave, onShowToast }: EditProfileScreenProps) {
   const [name, setName] = useState(profile.name);
   const [city, setCity] = useState(profile.city);
   const [birthdate, setBirthdate] = useState(profile.birthdate);
   const [gender, setGender] = useState<Gender>(profile.gender);
+  const [profession, setProfession] = useState(profile.profession);
+  const [height, setHeight] = useState(profile.height);
   const [bio, setBio] = useState(profile.bio);
-  const [photos, setPhotos] = useState<(string | null)[]>(() => {
-    const padded: (string | null)[] = [...profile.photos];
-    while (padded.length < MAX_PHOTOS) padded.push(null);
-    return padded.slice(0, MAX_PHOTOS);
-  });
+  const [photos, setPhotos] = useState<string[]>(profile.photos);
+  const [interests, setInterests] = useState<string[]>(profile.interests);
+  const [lifestyle, setLifestyle] = useState<Lifestyle>(profile.lifestyle);
+  const [relationshipStatus, setRelationshipStatus] = useState<RelationshipStatus | null>(
+    profile.relationshipStatus,
+  );
 
-  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const [photosManageOpen, setPhotosManageOpen] = useState(false);
+  const [heightSheetOpen, setHeightSheetOpen] = useState(false);
+  const [interestSheetOpen, setInterestSheetOpen] = useState(false);
 
-  function handleFile(index: number, file: File | null) {
-    if (!file) return;
-    const url = URL.createObjectURL(file);
-    const previous = photos[index];
-    setPhotos((prev) => prev.map((photo, i) => (i === index ? url : photo)));
-    if (previous) URL.revokeObjectURL(previous);
-  }
+  const displaySlots = [...photos, ...Array(MAX_PROFILE_PHOTOS).fill(null)].slice(
+    0,
+    MAX_PROFILE_PHOTOS,
+  );
 
   function handleSave() {
     onSave({
@@ -46,9 +64,14 @@ export function EditProfileScreen({ profile, onCancel, onSave }: EditProfileScre
       birthdate,
       gender,
       bio,
-      photos: photos.filter((photo): photo is string => Boolean(photo)),
+      photos,
       intention: profile.intention,
-      interests: profile.interests,
+      interestedIn: profile.interestedIn,
+      interests,
+      lifestyle,
+      profession,
+      height,
+      relationshipStatus,
     });
   }
 
@@ -69,90 +92,180 @@ export function EditProfileScreen({ profile, onCancel, onSave }: EditProfileScre
       </div>
 
       <div className={styles.body}>
-        <div className={styles.photoGrid}>
-          {photos.map((photo, index) => (
+        <div className={styles.photosCard}>
+          <div className={styles.photosCardHeader}>
+            <h2 className={styles.photosCardTitle}>Minhas fotos</h2>
+            <span className={styles.photosCount}>{photos.length}/6</span>
             <button
-              key={index}
               type="button"
-              className={
-                photo
-                  ? `${styles.slot} ${styles.slotFilled} ${index === 0 ? styles.mainSlot : ""}`
-                  : `${styles.slot} ${styles.slotEmpty} ${index === 0 ? styles.mainSlot : ""}`
-              }
-              onClick={() => inputRefs.current[index]?.click()}
+              className={styles.manageLink}
+              onClick={() => setPhotosManageOpen(true)}
             >
-              {photo ? (
-                <img className={styles.photo} src={photo} alt={`Foto ${index + 1}`} />
-              ) : (
-                <svg width={index === 0 ? 32 : 22} height={index === 0 ? 32 : 22} viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                  <path
-                    d="M4 8.5A1.5 1.5 0 0 1 5.5 7h2l1-2h7l1 2h2A1.5 1.5 0 0 1 20 8.5v9A1.5 1.5 0 0 1 18.5 19h-13A1.5 1.5 0 0 1 4 17.5z"
-                    stroke="#5B34C9"
-                    strokeWidth={1.6}
-                    strokeLinejoin="round"
-                  />
-                  <circle cx="12" cy="13" r="3.2" stroke="#5B34C9" strokeWidth={1.6} />
-                </svg>
-              )}
-              <input
-                ref={(el) => {
-                  inputRefs.current[index] = el;
-                }}
-                className={styles.hiddenInput}
-                type="file"
-                accept="image/*"
-                onChange={(e) => handleFile(index, e.target.files?.[0] ?? null)}
-              />
+              Gerenciar ›
             </button>
+          </div>
+          <div className={styles.photosGrid}>
+            {displaySlots.map((photo, index) => (
+              <div
+                key={index}
+                className={
+                  index === 0
+                    ? `${styles.photoTile} ${styles.photoTileCover}`
+                    : styles.photoTile
+                }
+              >
+                {photo && (
+                  <>
+                    <img className={styles.photoTileImg} src={photo} alt={`Foto ${index + 1}`} />
+                    {index === 0 && <span className={styles.coverBadge}>Capa</span>}
+                  </>
+                )}
+              </div>
+            ))}
+          </div>
+          <p className={styles.photosHint}>{photosHint(photos.length)}</p>
+        </div>
+
+        <div className={styles.fieldsCard}>
+          <div className={styles.fieldGroup}>
+            <span className={styles.label}>Nome</span>
+            <input className={styles.input} value={name} onChange={(e) => setName(e.target.value)} />
+          </div>
+
+          <div className={styles.fieldGroup}>
+            <span className={styles.label}>Localidade</span>
+            <input className={styles.input} value={city} onChange={(e) => setCity(e.target.value)} />
+          </div>
+
+          <div className={styles.fieldRow}>
+            <div className={styles.fieldGroup}>
+              <span className={styles.label}>Nascimento</span>
+              <input
+                className={styles.input}
+                type="text"
+                inputMode="numeric"
+                maxLength={10}
+                value={formatBirthdate(birthdate)}
+                onChange={(e) => setBirthdate(onlyDigits(e.target.value))}
+              />
+            </div>
+            <div className={styles.fieldGroup}>
+              <span className={styles.label}>Gênero</span>
+              <select
+                className={styles.input}
+                value={gender}
+                onChange={(e) => setGender(e.target.value as Gender)}
+              >
+                {GENDER_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className={styles.fieldRow}>
+            <div className={styles.fieldGroup}>
+              <span className={styles.label}>Profissão</span>
+              <input
+                className={styles.input}
+                value={profession}
+                onChange={(e) => setProfession(e.target.value)}
+              />
+            </div>
+            <div className={styles.fieldGroup}>
+              <span className={styles.label}>Altura</span>
+              <button
+                type="button"
+                className={`${styles.input} ${styles.heightButton}`}
+                onClick={() => setHeightSheetOpen(true)}
+              >
+                {heightLabel(height)}
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path
+                    d="M9 5l7 7-7 7"
+                    stroke="#8A928B"
+                    strokeWidth={2.2}
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div className={styles.fieldGroup}>
+            <span className={styles.label}>Sobre você</span>
+            <textarea
+              className={`${styles.input} ${styles.textarea}`}
+              value={bio}
+              onChange={(e) => setBio(e.target.value)}
+            />
+          </div>
+        </div>
+
+        <div className={styles.interestsCard}>
+          <span className={styles.label}>{selectedInterestsLabel(interests.length)}</span>
+          <SelectedInterests
+            interests={interests}
+            onRemove={(interest) =>
+              setInterests((prev) => prev.filter((item) => item !== interest))
+            }
+            onAdd={() => setInterestSheetOpen(true)}
+          />
+        </div>
+
+        <div className={styles.lifeCard}>
+          <RowBottomSheet
+            label="Status de relacionamento"
+            iconPath="M12 21s-8-4.5-8-10a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 11c0 5.5-8 10-8 10z"
+            value={relationshipStatus}
+            options={STATUS_SHEET_OPTIONS}
+            onChange={(value) => setRelationshipStatus(value as RelationshipStatus | null)}
+          />
+          {LIFE_GROUPS.map((group) => (
+            <RowBottomSheet
+              key={group.key}
+              label={group.title}
+              iconPath={group.icon}
+              value={lifestyle[group.key]}
+              options={group.options}
+              onChange={(value) =>
+                setLifestyle((prev) => ({ ...prev, [group.key]: value }) as Lifestyle)
+              }
+            />
           ))}
         </div>
-
-        <div className={styles.fieldGroup}>
-          <span className={styles.label}>Nome</span>
-          <input className={styles.input} value={name} onChange={(e) => setName(e.target.value)} />
-        </div>
-
-        <div className={styles.fieldGroup}>
-          <span className={styles.label}>Localidade</span>
-          <input className={styles.input} value={city} onChange={(e) => setCity(e.target.value)} />
-        </div>
-
-        <div className={styles.fieldGroup}>
-          <span className={styles.label}>Nascimento</span>
-          <input
-            className={styles.input}
-            type="text"
-            inputMode="numeric"
-            maxLength={10}
-            value={formatBirthdate(birthdate)}
-            onChange={(e) => setBirthdate(onlyDigits(e.target.value))}
-          />
-        </div>
-
-        <div className={styles.fieldGroup}>
-          <span className={styles.label}>Gênero</span>
-          <select
-            className={styles.input}
-            value={gender}
-            onChange={(e) => setGender(e.target.value as Gender)}
-          >
-            {GENDER_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className={styles.fieldGroup}>
-          <span className={styles.label}>Sobre você</span>
-          <textarea
-            className={`${styles.input} ${styles.textarea}`}
-            value={bio}
-            onChange={(e) => setBio(e.target.value)}
-          />
-        </div>
       </div>
+
+      {interestSheetOpen && (
+        <InterestBottomSheet
+          interests={interests}
+          onToggle={(interest) =>
+            setInterests((prev) =>
+              prev.includes(interest) ? prev.filter((item) => item !== interest) : [...prev, interest],
+            )
+          }
+          onOverMax={() => onShowToast("Máximo de 6 interesses")}
+          onClose={() => setInterestSheetOpen(false)}
+        />
+      )}
+
+      {heightSheetOpen && (
+        <HeightSheet
+          height={height}
+          onChange={setHeight}
+          onClose={() => setHeightSheetOpen(false)}
+        />
+      )}
+
+      {photosManageOpen && (
+        <PhotosManageScreen
+          photos={photos}
+          onChange={setPhotos}
+          onBack={() => setPhotosManageOpen(false)}
+        />
+      )}
     </div>
   );
 }

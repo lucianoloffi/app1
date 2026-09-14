@@ -1,0 +1,135 @@
+.screen {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+}
+
+.header {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px var(--screen-padding-x);
+  border-bottom: 1px solid var(--color-line-3);
+}
+
+.backButton {
+  appearance: none;
+  border: 1px solid var(--color-line-2);
+  background: #fff;
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--color-ink);
+  flex: none;
+}
+
+.headerTitle {
+  margin: 0;
+  font: 800 20px var(--font-ui);
+}
+
+.body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 20px var(--screen-padding-x) 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.tile {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+.tileFilled {
+  border: 2px solid var(--color-accent);
+}
+
+.tileEmpty {
+  background: #f8f4ff;
+  border: 2px dashed #c4a6f3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.coverBadge {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  background: var(--color-accent);
+  color: #fff;
+  font: 700 9px var(--font-ui);
+  text-transform: uppercase;
+  padding: 3px 7px;
+  border-radius: 999px;
+}
+
+.removeButton {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  border: 0;
+  background: rgba(22, 33, 26, 0.62);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.makeCoverButton {
+  position: absolute;
+  bottom: 6px;
+  left: 6px;
+  right: 6px;
+  text-align: center;
+  border: 0;
+  cursor: pointer;
+  font: 700 9px var(--font-ui);
+  color: #fff;
+  background: rgba(22, 33, 26, 0.62);
+  padding: 4px 6px;
+  border-radius: 999px;
+}
+
+.hiddenInput {
+  display: none;
+}
+
+.hint {
+  margin: 0;
+  font: 400 12px/1.5 var(--font-ui);
+  color: var(--color-ink-40);
+}

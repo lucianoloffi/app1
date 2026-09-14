@@ -1,0 +1,102 @@
+.screen {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+}
+
+.header {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px var(--screen-padding-x);
+  border-bottom: 1px solid var(--color-line-3);
+}
+
+.backButton {
+  appearance: none;
+  border: 1px solid var(--color-line-2);
+  background: #fff;
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--color-ink);
+  flex: none;
+}
+
+.headerTitle {
+  margin: 0;
+  font: 800 20px var(--font-ui);
+}
+
+.body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  background: var(--color-bg);
+  padding: 18px 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.groupLabel {
+  font: 600 12px var(--font-ui);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-ink-40);
+  padding: 0 4px;
+}
+
+.card {
+  background: #fff;
+  border-radius: var(--radius-card-sm);
+  overflow: hidden;
+}
+
+.accessRow {
+  width: 100%;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 18px;
+  font: 600 14px var(--font-ui);
+  color: var(--color-ink);
+  text-align: left;
+}
+
+.accessRow:not(:last-child) {
+  border-bottom: 1px solid var(--color-line-3);
+}
+
+.accessValue {
+  font: 400 13px var(--font-ui);
+  color: var(--color-ink-40);
+}
+
+.accessRowDestructive {
+  color: #c8353c;
+}
+
+.footerNote {
+  text-align: center;
+  font: 400 12px var(--font-ui);
+  color: var(--color-ink-40);
+  margin: 4px 0 0;
+}

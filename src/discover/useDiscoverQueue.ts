@@ -15,7 +15,7 @@ function applyFilters(profiles: Profile[], filters?: Filters): Profile[] {
     if (filters.intention !== "todas" && profile.intention !== filters.intention) return false;
     if (profile.distanceKm > filters.distanceKm) return false;
     if (profile.age < filters.minAge || profile.age > filters.maxAge) return false;
-    if (filters.interestedIn !== "outros" && profile.gender !== filters.interestedIn) return false;
+    if (filters.interestedIn !== "todos" && profile.gender !== filters.interestedIn) return false;
     return true;
   });
 }
@@ -76,6 +76,7 @@ export function useDiscoverQueue({ onMatch, filters }: UseDiscoverQueueOptions =
     swipeDirection,
     matchProfile,
     seenCount,
+    hasAnyMatch: filteredProfiles.length > 0,
     nextPhoto,
     like: () => advance("right"),
     dislike: () => advance("left"),

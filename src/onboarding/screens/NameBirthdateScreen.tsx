@@ -6,8 +6,10 @@ import fieldStyles from "../fields.module.css";
 interface NameBirthdateScreenProps {
   name: string;
   birthdate: string;
+  bio: string;
   onChangeName: (value: string) => void;
   onChangeBirthdate: (digits: string) => void;
+  onChangeBio: (value: string) => void;
   onBack: () => void;
   onNext: () => void;
 }
@@ -15,8 +17,10 @@ interface NameBirthdateScreenProps {
 export function NameBirthdateScreen({
   name,
   birthdate,
+  bio,
   onChangeName,
   onChangeBirthdate,
+  onChangeBio,
   onBack,
   onNext,
 }: NameBirthdateScreenProps) {
@@ -26,13 +30,15 @@ export function NameBirthdateScreen({
     nameRef.current?.focus();
   }, []);
 
-  const isValid = name.trim().length > 1 && onlyDigits(birthdate).length >= 8;
+  const isValid =
+    name.trim().length > 1 && onlyDigits(birthdate).length >= 8 && bio.trim().length > 4;
 
   return (
     <OnboardingLayout
       progress={3}
       onBack={onBack}
-      title="Como você se chama?"
+      title="Como podemos te chamar?"
+      support="Esse é o nome que aparece no seu perfil."
       ctaLabel="Continuar"
       ctaDisabled={!isValid}
       onCta={onNext}
@@ -60,6 +66,15 @@ export function NameBirthdateScreen({
           onChange={(e) => onChangeBirthdate(onlyDigits(e.target.value))}
         />
         <p className={fieldStyles.note}>Mostramos só a idade, nunca a data completa.</p>
+      </div>
+      <div className={fieldStyles.fieldGroup}>
+        <span className={fieldStyles.label}>Sobre você</span>
+        <textarea
+          className={fieldStyles.textarea}
+          placeholder="Uma frase sobre o que você procura"
+          value={bio}
+          onChange={(e) => onChangeBio(e.target.value)}
+        />
       </div>
     </OnboardingLayout>
   );
