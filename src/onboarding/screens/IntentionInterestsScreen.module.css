@@ -5,6 +5,7 @@
   border: 1.5px solid var(--color-line-2);
   border-radius: 16px;
   background: #fff;
+  color: var(--color-ink);
   padding: 14px 16px;
   cursor: pointer;
   display: flex;
@@ -13,8 +14,9 @@
 }
 
 .intentionCardSelected {
-  background: var(--color-ink);
-  border-color: var(--color-ink);
+  background: var(--color-accent-soft);
+  border-color: var(--color-accent);
+  color: var(--color-accent-2);
 }
 
 .intentionTitle {
