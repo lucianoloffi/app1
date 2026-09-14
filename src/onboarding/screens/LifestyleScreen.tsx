@@ -20,11 +20,6 @@ export function LifestyleScreen({ lifestyle, onChange, onBack, onNext }: Lifesty
       support="Opcional. Ajuda quem vê seu perfil a entender sua rotina."
       ctaLabel="Continuar"
       onCta={onNext}
-      secondary={
-        <button type="button" className={styles.skipLink} onClick={onNext}>
-          Preencher depois
-        </button>
-      }
     >
       <div className={styles.groups}>
         {LIFE_GROUPS.map((group) => (
@@ -46,6 +41,9 @@ export function LifestyleScreen({ lifestyle, onChange, onBack, onNext }: Lifesty
           </div>
         ))}
       </div>
+      <button type="button" className={styles.skipLink} onClick={onNext}>
+        Preencher depois
+      </button>
     </OnboardingLayout>
   );
 }

@@ -24,8 +24,8 @@ export function PhoneScreen({ phone, onChangePhone, onBack, onNext }: PhoneScree
     <OnboardingLayout
       progress={1}
       onBack={onBack}
-      title="Qual é o seu número?"
-      support="Vamos te enviar um código por SMS para confirmar."
+      title="Qual seu telefone?"
+      support="Usamos o número só para confirmar que você é uma pessoa real."
       ctaLabel="Enviar código"
       ctaDisabled={!isValid}
       onCta={onNext}
@@ -39,7 +39,7 @@ export function PhoneScreen({ phone, onChangePhone, onBack, onNext }: PhoneScree
             className={`${fieldStyles.input} ${styles.phoneInput}`}
             type="tel"
             inputMode="numeric"
-            placeholder="(47) 99988-7766"
+            placeholder="(47) 90000-0000"
             value={formatPhone(phone)}
             onChange={(e) => onChangePhone(onlyDigits(e.target.value))}
           />

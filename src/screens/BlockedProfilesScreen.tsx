@@ -1,3 +1,4 @@
+import { ScreenHeader } from "../components/ScreenHeader";
 import styles from "./BlockedProfilesScreen.module.css";
 
 export interface BlockedProfile {
@@ -16,20 +17,7 @@ interface BlockedProfilesScreenProps {
 export function BlockedProfilesScreen({ blocked, onUnblock, onBack }: BlockedProfilesScreenProps) {
   return (
     <div className={styles.screen}>
-      <div className={styles.header}>
-        <button type="button" className={styles.backButton} onClick={onBack} aria-label="Voltar">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path
-              d="M15 4l-8 8 8 8"
-              stroke="currentColor"
-              strokeWidth={3}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
-        <h1 className={styles.headerTitle}>Perfis bloqueados</h1>
-      </div>
+      <ScreenHeader title="Perfis bloqueados" onBack={onBack} />
 
       {blocked.length === 0 ? (
         <div className={styles.emptyWrap}>

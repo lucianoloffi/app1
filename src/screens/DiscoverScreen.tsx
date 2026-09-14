@@ -163,9 +163,9 @@ export function DiscoverScreen({
               onClick={onOpenFilters}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path d="M4 7h16M4 17h16" stroke="#fff" strokeWidth={2} strokeLinecap="round" />
-                <circle cx="9" cy="7" r="2.4" fill="#16211A" stroke="#fff" strokeWidth={1.4} />
-                <circle cx="15" cy="17" r="2.4" fill="#16211A" stroke="#fff" strokeWidth={1.4} />
+                <path d="M4 8h16M4 16h16" stroke="#fff" strokeWidth={1.9} strokeLinecap="round" />
+                <circle cx="15" cy="8" r="3" fill="none" stroke="#fff" strokeWidth={1.9} />
+                <circle cx="9" cy="16" r="3" fill="none" stroke="#fff" strokeWidth={1.9} />
               </svg>
             </button>
 
@@ -198,11 +198,11 @@ export function DiscoverScreen({
                   style={{ marginLeft: "auto" }}
                   aria-label="Ver perfil completo"
                 >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <svg width="16" height="10" viewBox="0 0 18 11" fill="none" aria-hidden="true" style={{ opacity: 0.95 }}>
                     <path
-                      d="M6 9l6 6 6-6"
+                      d="M2 2.5l7 6 7-6"
                       stroke="#fff"
-                      strokeWidth={2.4}
+                      strokeWidth={2.6}
                       strokeLinecap="round"
                       strokeLinejoin="round"
                     />
@@ -215,19 +215,20 @@ export function DiscoverScreen({
       ) : offline ? (
         <div className={styles.offlineWrap}>
           <div className={styles.offlineIcon}>
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M3 3l18 18" stroke="#C8353C" strokeWidth={2.4} strokeLinecap="round" />
               <path
-                d="M3 3l18 18M8.5 8.8a10 10 0 0 1 11 1.7M5.3 12a10 10 0 0 1 2.4-1.8M12 18.5h.01"
+                d="M5 12.5a10 10 0 0 1 5-2.6M14 10a10 10 0 0 1 5 2.5M8.5 16a5.5 5.5 0 0 1 7 0"
                 stroke="#C8353C"
-                strokeWidth={2}
+                strokeWidth={2.2}
                 strokeLinecap="round"
-                strokeLinejoin="round"
               />
+              <circle cx="12" cy="19.4" r="1.4" fill="#C8353C" />
             </svg>
           </div>
           <p className={styles.emptyTitle}>Não deu para carregar</p>
           <p className={styles.emptySupport}>
-            Verifique sua conexão com a internet e tente novamente.
+            Verifique sua conexão e tente de novo. Nada do que você curtiu foi perdido.
           </p>
           <button type="button" className={styles.primaryButton} onClick={onRetryConnection}>
             Tentar de novo
@@ -236,44 +237,37 @@ export function DiscoverScreen({
       ) : emptyByFilter ? (
         <div className={styles.emptyWrap}>
           <div className={styles.emptyFilterIcon}>
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path
-                d="M4 5h16l-6 8v5l-4 2v-7L4 5z"
+                d="M4 6h16M7 12h10M10 18h4"
                 stroke="#8B5CF6"
-                strokeWidth={2}
-                strokeLinejoin="round"
+                strokeWidth={2.4}
+                strokeLinecap="round"
               />
             </svg>
           </div>
           <p className={styles.emptyTitle}>Poucos perfis por aqui</p>
           <p className={styles.emptySupport}>
-            Nenhum perfil combina com os filtros atuais. Tente ampliar a busca.
+            Seus filtros estão bem estreitos. Ampliar a distância ou a faixa de idade traz mais
+            gente.
           </p>
-          <div className={styles.emptyActions}>
-            <button type="button" className={styles.primaryButton} onClick={onWidenFilters}>
-              Ampliar filtros
-            </button>
-            <button type="button" className={styles.secondaryLink} onClick={onOpenFilters}>
-              Ajustar manualmente
-            </button>
-          </div>
+          <button type="button" className={styles.primaryButton} onClick={onWidenFilters}>
+            Ampliar filtros
+          </button>
+          <button type="button" className={styles.secondaryLink} onClick={onOpenFilters}>
+            Ajustar manualmente
+          </button>
         </div>
       ) : (
         <div className={styles.emptyWrap}>
           <div className={styles.spinner} />
           <p className={styles.emptyTitle}>Por hoje é isso</p>
           <p className={styles.emptySupport}>
-            Você viu todos os perfis compatíveis na sua região. Volte mais tarde ou amplie sua
-            busca.
+            Você viu todos os perfis de Joinville que combinam com o que busca.
           </p>
-          <div className={styles.emptyActions}>
-            <button type="button" className={styles.primaryButton} onClick={onWidenFilters}>
-              Ampliar filtros
-            </button>
-            <button type="button" className={styles.secondaryLink} onClick={onRestoreProfiles}>
-              Rever os perfis
-            </button>
-          </div>
+          <button type="button" className={styles.primaryButton} onClick={onRestoreProfiles}>
+            Rever os perfis
+          </button>
         </div>
       )}
 
@@ -293,7 +287,7 @@ export function DiscoverScreen({
             onClick={onLike}
             aria-label="Curtir perfil"
           >
-            <HeartIcon size={34} />
+            <HeartIcon size={55} />
           </button>
         </div>
       )}

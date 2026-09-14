@@ -3,7 +3,7 @@ import { TOTAL_PROGRESS_SEGMENTS } from "./constants";
 import styles from "./OnboardingLayout.module.css";
 
 interface OnboardingLayoutProps {
-  /** 0 esconde a barra; 1–6 preenche os segmentos correspondentes. */
+  /** 0 esconde a barra; 1–8 preenche os segmentos correspondentes. */
   progress?: number;
   onBack?: () => void;
   title: string;
@@ -12,7 +12,6 @@ interface OnboardingLayoutProps {
   ctaLabel: string;
   ctaDisabled?: boolean;
   onCta: () => void;
-  secondary?: ReactNode;
 }
 
 export function OnboardingLayout({
@@ -24,27 +23,11 @@ export function OnboardingLayout({
   ctaLabel,
   ctaDisabled,
   onCta,
-  secondary,
 }: OnboardingLayoutProps) {
   return (
     <div className={styles.screen}>
-      <div className={styles.topBar}>
-        {onBack ? (
-          <button type="button" className={styles.backButton} onClick={onBack} aria-label="Voltar">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path
-                d="M15 4l-8 8 8 8"
-                stroke="currentColor"
-                strokeWidth={3}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
-        ) : (
-          <span className={styles.backSpacer} />
-        )}
-        {progress > 0 && (
+      {progress > 0 && (
+        <div className={styles.topBar}>
           <div className={styles.progressRow}>
             {Array.from({ length: TOTAL_PROGRESS_SEGMENTS }, (_, index) => (
               <span
@@ -55,8 +38,8 @@ export function OnboardingLayout({
               />
             ))}
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       <div className={styles.body}>
         <div className={styles.heading}>
@@ -67,15 +50,34 @@ export function OnboardingLayout({
       </div>
 
       <div className={styles.footer}>
-        <button
-          type="button"
-          className={styles.ctaButton}
-          disabled={ctaDisabled}
-          onClick={onCta}
-        >
-          {ctaLabel}
-        </button>
-        {secondary}
+        <div className={styles.footerRow}>
+          {onBack && (
+            <button
+              type="button"
+              className={styles.backButton}
+              onClick={onBack}
+              aria-label="Voltar"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path
+                  d="M15 4l-8 8 8 8"
+                  stroke="currentColor"
+                  strokeWidth={3}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+          )}
+          <button
+            type="button"
+            className={styles.ctaButton}
+            disabled={ctaDisabled}
+            onClick={onCta}
+          >
+            {ctaLabel}
+          </button>
+        </div>
       </div>
     </div>
   );

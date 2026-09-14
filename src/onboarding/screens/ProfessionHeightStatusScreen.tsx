@@ -35,11 +35,6 @@ export function ProfessionHeightStatusScreen({
       support="Opcional. Aparece no seu perfil completo."
       ctaLabel="Concluir cadastro"
       onCta={onFinish}
-      secondary={
-        <button type="button" className={styles.skipLink} onClick={onFinish}>
-          Preencher depois
-        </button>
-      }
     >
       <div className={styles.groups}>
         <div className={fieldStyles.fieldGroup}>
@@ -93,6 +88,9 @@ export function ProfessionHeightStatusScreen({
           />
         </div>
       </div>
+      <button type="button" className={styles.skipLink} onClick={onFinish}>
+        Preencher depois
+      </button>
     </OnboardingLayout>
   );
 }

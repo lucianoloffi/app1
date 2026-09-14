@@ -102,15 +102,11 @@ export function ProfileScreen({
           <div className={styles.metrics}>
             <div className={styles.metricCard}>
               <div className={styles.metricValue}>{matchesCount}</div>
-              <div className={styles.metricLabel}>
-                {pluralize(matchesCount, "match", "matches")}
-              </div>
+              <div className={styles.metricLabel}>matches</div>
             </div>
             <div className={styles.metricCard}>
               <div className={styles.metricValue}>{conversationsCount}</div>
-              <div className={styles.metricLabel}>
-                {pluralize(conversationsCount, "conversa ativa", "conversas ativas")}
-              </div>
+              <div className={styles.metricLabel}>conversas</div>
             </div>
             <div className={styles.metricCard}>
               <div className={styles.metricValue}>{seenCount}</div>

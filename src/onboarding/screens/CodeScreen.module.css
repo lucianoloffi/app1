@@ -21,7 +21,7 @@
   border: 0;
   background: none;
   cursor: pointer;
-  font: 600 14px var(--font-ui);
+  font: 700 14px var(--font-ui);
   color: var(--color-accent-2);
-  text-decoration: underline;
+  text-align: center;
 }

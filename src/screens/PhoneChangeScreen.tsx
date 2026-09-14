@@ -1,7 +1,7 @@
 import { useState } from "react";
+import { ScreenHeader } from "../components/ScreenHeader";
 import { onlyDigits, formatPhone } from "../onboarding/phoneFormat";
-import styles from "../screens/FiltersScreen.module.css";
-import fieldStyles from "../onboarding/fields.module.css";
+import styles from "./PhoneChangeScreen.module.css";
 
 interface PhoneChangeScreenProps {
   currentPhone: string;
@@ -17,6 +17,7 @@ export function PhoneChangeScreen({
   onShowToast,
 }: PhoneChangeScreenProps) {
   const [step, setStep] = useState<1 | 2>(1);
+  const [dial, setDial] = useState("+55");
   const [phone, setPhone] = useState("");
   const [code, setCode] = useState("");
   const [error, setError] = useState(false);
@@ -25,86 +26,106 @@ export function PhoneChangeScreen({
 
   return (
     <div className={styles.screen}>
-      <div className={styles.header}>
-        <button type="button" className={styles.backButton} onClick={onBack} aria-label="Voltar">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path
-              d="M15 4l-8 8 8 8"
-              stroke="currentColor"
-              strokeWidth={3}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
-        <h1 className={styles.headerTitle}>Trocar número</h1>
-      </div>
+      <ScreenHeader title="Trocar número" onBack={onBack} />
 
       <div className={styles.body}>
-        <div className={fieldStyles.fieldGroup}>
-          <span className={fieldStyles.label}>Número atual</span>
-          <div className={fieldStyles.input} style={{ background: "#F4F6F3" }}>
-            {currentPhone}
-          </div>
+        <div className={styles.currentCard}>
+          <span className={styles.currentLabel}>Número atual</span>
+          <span className={styles.currentValue}>{currentPhone}</span>
         </div>
 
         {step === 1 ? (
-          <div className={fieldStyles.fieldGroup}>
-            <span className={fieldStyles.label}>Novo número</span>
-            <input
-              className={fieldStyles.input}
-              type="tel"
-              inputMode="numeric"
-              placeholder="+55 (47) 99988-7766"
-              value={formatPhone(phone)}
-              onChange={(e) => setPhone(onlyDigits(e.target.value))}
-            />
+          <div className={styles.step}>
+            <div className={styles.fieldGroup}>
+              <span className={styles.label}>Novo número</span>
+              <div className={styles.phoneRow}>
+                <input
+                  className={styles.ddiInput}
+                  type="tel"
+                  inputMode="tel"
+                  maxLength={4}
+                  value={dial}
+                  onChange={(e) => setDial(e.target.value.replace(/[^\d+]/g, ""))}
+                />
+                <input
+                  className={styles.input}
+                  type="tel"
+                  inputMode="numeric"
+                  placeholder="(47) 90000-0000"
+                  value={formatPhone(phone)}
+                  onChange={(e) => setPhone(onlyDigits(e.target.value))}
+                />
+              </div>
+            </div>
+            <p className={styles.note}>
+              Seus matches e conversas continuam os mesmos. O número não aparece no perfil.
+            </p>
+            <button
+              type="button"
+              className={
+                phoneValid ? styles.actionButton : `${styles.actionButton} ${styles.actionButtonDisabled}`
+              }
+              disabled={!phoneValid}
+              onClick={() => {
+                setStep(2);
+                onShowToast("Código enviado por SMS");
+              }}
+            >
+              Enviar código
+            </button>
           </div>
         ) : (
-          <div className={fieldStyles.fieldGroup}>
-            <span className={fieldStyles.label}>Código enviado por SMS</span>
-            <input
-              className={fieldStyles.input}
-              type="text"
-              inputMode="numeric"
-              maxLength={4}
-              placeholder="0000"
-              value={code}
-              onChange={(e) => {
-                setCode(onlyDigits(e.target.value).slice(0, 4));
+          <div className={styles.step}>
+            <div className={styles.fieldGroup}>
+              <span className={styles.label}>
+                Código enviado para {dial} {formatPhone(phone)}
+              </span>
+              <input
+                className={error ? `${styles.codeInput} ${styles.codeInputError}` : styles.codeInput}
+                type="text"
+                inputMode="numeric"
+                maxLength={4}
+                placeholder="0000"
+                value={code}
+                onChange={(e) => {
+                  setCode(onlyDigits(e.target.value).slice(0, 4));
+                  setError(false);
+                }}
+              />
+              {error && <p className={styles.errorText}>Código incorreto. Use 1234 no protótipo.</p>}
+            </div>
+            <button
+              type="button"
+              className={
+                code.length === 4
+                  ? styles.actionButton
+                  : `${styles.actionButton} ${styles.actionButtonDisabled}`
+              }
+              disabled={code.length !== 4}
+              onClick={() => {
+                if (code !== "1234") {
+                  setError(true);
+                  return;
+                }
+                onConfirm(`${dial} ${formatPhone(phone)}`);
+                onShowToast("Número atualizado");
+              }}
+            >
+              Confirmar troca
+            </button>
+            <button
+              type="button"
+              className={styles.backLink}
+              onClick={() => {
+                setStep(1);
+                setCode("");
                 setError(false);
               }}
-            />
-            {error && (
-              <p className={fieldStyles.note} style={{ color: "#C8353C" }}>
-                Código incorreto. Tente novamente.
-              </p>
-            )}
+            >
+              Corrigir número
+            </button>
           </div>
         )}
-      </div>
-
-      <div className={styles.footer} style={{ justifyContent: "flex-end" }}>
-        <button
-          type="button"
-          className={styles.applyButton}
-          disabled={step === 1 ? !phoneValid : code.length < 4}
-          onClick={() => {
-            if (step === 1) {
-              setStep(2);
-              onShowToast("Código enviado por SMS");
-              return;
-            }
-            if (code !== "1234") {
-              setError(true);
-              return;
-            }
-            onConfirm(`+55 ${formatPhone(phone)}`);
-            onShowToast("Número atualizado");
-          }}
-        >
-          {step === 1 ? "Enviar código" : "Confirmar"}
-        </button>
       </div>
     </div>
   );

@@ -20,7 +20,7 @@
   padding: 8px var(--screen-padding-x) 22px;
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 18px;
   cursor: pointer;
   text-align: left;
 }
@@ -54,9 +54,9 @@
   left: 50%;
   transform: translateX(-50%);
   background: #fff;
-  border: 1px solid var(--color-accent-line);
+  border: 1px solid #ede6fb;
   border-radius: var(--radius-pill);
-  padding: 2px 8px;
+  padding: 2px 9px;
   font: 800 11px var(--font-ui);
   color: var(--color-accent-2);
   white-space: nowrap;
@@ -70,7 +70,7 @@
 .nameRow {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
 }
 
 .name {
@@ -116,7 +116,7 @@
 .metricCard {
   flex: 1;
   background: #fff;
-  border-radius: var(--radius-card-lg);
+  border-radius: 16px;
   padding: 16px;
   text-align: center;
 }
@@ -136,7 +136,7 @@
   width: 100%;
   border: 0;
   background: #fff;
-  border-radius: var(--radius-card-lg);
+  border-radius: 16px;
   padding: 16px;
   display: flex;
   align-items: center;
@@ -169,12 +169,12 @@
 .filtersSummary {
   margin: 2px 0 0;
   font: 400 13px var(--font-ui);
-  color: var(--color-ink-60);
+  color: var(--color-ink-40);
 }
 
 .accessList {
   background: #fff;
-  border-radius: var(--radius-card-lg);
+  border-radius: 16px;
   overflow: hidden;
 }
 
@@ -186,7 +186,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 20px;
+  padding: 17px 18px;
   font: 600 15px var(--font-ui);
   color: var(--color-ink);
   text-align: left;

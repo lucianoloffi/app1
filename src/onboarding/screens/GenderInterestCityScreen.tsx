@@ -60,12 +60,12 @@ export function GenderInterestCityScreen({
       onCta={onNext}
     >
       <div className={fieldStyles.fieldGroup}>
-        <span className={fieldStyles.label}>Sou</span>
+        <span className={styles.sectionLabel}>Sou</span>
         <PillChipRow options={GENDER_OPTIONS} selected={gender} onSelect={onChangeGender} />
       </div>
 
       <div className={fieldStyles.fieldGroup}>
-        <span className={fieldStyles.label}>Me interesso em</span>
+        <span className={styles.sectionLabel}>Me interesso em</span>
         <PillChipRow
           options={INTERESTED_IN_OPTIONS}
           selected={interestedIn}
@@ -74,7 +74,7 @@ export function GenderInterestCityScreen({
       </div>
 
       <div className={`${fieldStyles.fieldGroup} ${styles.cityWrap}`}>
-        <span className={fieldStyles.label}>Cidade</span>
+        <span className={styles.sectionLabel}>Cidade</span>
         <input
           className={fieldStyles.input}
           type="text"

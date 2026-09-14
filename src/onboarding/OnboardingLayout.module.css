@@ -11,34 +11,13 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 16px var(--onboarding-padding-x) 0;
-}
-
-.backButton {
-  appearance: none;
-  border: 0;
-  background: none;
-  width: var(--tap-min);
-  height: var(--tap-min);
-  margin-left: calc(var(--onboarding-padding-x) * -1 + 4px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: var(--color-ink);
-  flex: none;
-}
-
-.backSpacer {
-  width: var(--tap-min);
-  height: var(--tap-min);
-  flex: none;
+  padding: 52px 24px 12px;
 }
 
 .progressRow {
   flex: 1;
   display: flex;
-  gap: 6px;
+  gap: 5px;
 }
 
 .segment {
@@ -56,7 +35,8 @@
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding: 20px var(--onboarding-padding-x) 24px;
+  overflow-x: hidden;
+  padding: 8px var(--onboarding-padding-x) 4px;
   display: flex;
   flex-direction: column;
   gap: 22px;
@@ -70,27 +50,47 @@
 
 .title {
   margin: 0;
-  font: 800 26px/1.2 var(--font-ui);
-  letter-spacing: -0.02em;
+  font: 800 28px/1.15 var(--font-ui);
+  letter-spacing: -0.025em;
 }
 
 .support {
   margin: 0;
-  font: 400 15px/1.4 var(--font-ui);
+  font: 400 15px/1.45 var(--font-ui);
   color: var(--color-ink-60);
 }
 
 .footer {
   flex: none;
-  padding: 0 var(--onboarding-padding-x) 28px;
+  padding: 16px var(--onboarding-padding-x) 30px;
   display: flex;
   flex-direction: column;
+  gap: 22px;
+}
+
+.footerRow {
+  display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
+}
+
+.backButton {
+  appearance: none;
+  border: 1.5px solid var(--color-line-2);
+  background: #fff;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-pill);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #5c6660;
+  flex: none;
 }
 
 .ctaButton {
-  width: 100%;
+  flex: 1;
   border: 0;
   cursor: pointer;
   font: 700 16px var(--font-ui);
@@ -106,13 +106,4 @@
   color: #a9b0a9;
   background: #edefea;
   box-shadow: none;
-}
-
-.secondaryLink {
-  border: 0;
-  background: none;
-  cursor: pointer;
-  font: 700 15px var(--font-ui);
-  color: var(--color-accent-2);
-  padding: 4px;
 }

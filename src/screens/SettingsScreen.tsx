@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ScreenHeader } from "../components/ScreenHeader";
 import { ToggleRow } from "../components/ToggleRow";
 import { DeleteAccountSheet } from "./DeleteAccountSheet";
 import styles from "./SettingsScreen.module.css";
@@ -37,20 +38,7 @@ export function SettingsScreen({
 
   return (
     <div className={styles.screen}>
-      <div className={styles.header}>
-        <button type="button" className={styles.backButton} onClick={onBack} aria-label="Voltar">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path
-              d="M15 4l-8 8 8 8"
-              stroke="currentColor"
-              strokeWidth={3}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
-        <h1 className={styles.headerTitle}>Configurações e privacidade</h1>
-      </div>
+      <ScreenHeader title="Configurações e privacidade" onBack={onBack} size="lg" />
 
       <div className={styles.body}>
         <div className={styles.group}>

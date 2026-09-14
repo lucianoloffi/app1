@@ -56,22 +56,25 @@ export function ProfileDetailScreen({
     lifeRows.push({ label: "Altura", value: heightLabel(profile.height) });
   }
 
+  const thumbnails = profile.photos.slice(1, 3);
+
   return (
     <div className={styles.screen}>
+      <button type="button" className={styles.backButton} onClick={onBack} aria-label="Voltar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path
+            d="M15 4l-8 8 8 8"
+            stroke="#16211A"
+            strokeWidth={3}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </button>
+
       <div className={styles.scroll}>
         <div className={styles.photoWrap}>
           <img className={styles.photo} src={profile.photos[0]} alt={`Foto de ${profile.name}`} />
-          <button type="button" className={styles.backButton} onClick={onBack} aria-label="Voltar">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path
-                d="M15 4l-8 8 8 8"
-                stroke="#16211A"
-                strokeWidth={3}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
           <span className={styles.intentionBadge}>{INTENTION_LABEL[profile.intention]}</span>
         </div>
 
@@ -123,6 +126,20 @@ export function ProfileDetailScreen({
             </div>
           )}
 
+          {thumbnails.length > 0 && (
+            <div className={styles.thumbGrid}>
+              {thumbnails.map((photo, index) => (
+                <img
+                  key={photo}
+                  className={styles.thumb}
+                  src={photo}
+                  alt={`Mais uma foto de ${profile.name}`}
+                  style={{ objectPosition: index === 0 ? "center 55%" : "center 80%" }}
+                />
+              ))}
+            </div>
+          )}
+
           <button type="button" className={styles.reportLink} onClick={() => setReportOpen(true)}>
             Denunciar {profile.name}
           </button>
@@ -161,7 +178,7 @@ export function ProfileDetailScreen({
               onClick={onLike}
               aria-label="Curtir perfil"
             >
-              <HeartIcon size={34} />
+              <HeartIcon size={48} />
             </button>
           </>
         )}

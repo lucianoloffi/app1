@@ -1,4 +1,5 @@
 import { useRef } from "react";
+import { ScreenHeader } from "../components/ScreenHeader";
 import { MAX_PROFILE_PHOTOS } from "../onboarding/constants";
 import styles from "./PhotosManageScreen.module.css";
 
@@ -14,7 +15,7 @@ function photoHint(count: number): string {
     return `Quanto mais fotos, mais atrativo fica seu perfil. Você ainda pode adicionar ${6 - count} ${
       6 - count === 1 ? "foto" : "fotos"
     }.`;
-  return "Perfil completo de fotos. Você pode reordenar tornando outra a capa.";
+  return "Perfil completo de fotos. Você pode reordenar tornando outra a principal.";
 }
 
 export function PhotosManageScreen({ photos, onChange, onBack }: PhotosManageScreenProps) {
@@ -33,7 +34,7 @@ export function PhotosManageScreen({ photos, onChange, onBack }: PhotosManageScr
     onChange(photos.filter((_, i) => i !== index));
   }
 
-  function handleMakeCover(index: number) {
+  function handleMakeMain(index: number) {
     const next = [...photos];
     const [chosen] = next.splice(index, 1);
     next.unshift(chosen);
@@ -42,43 +43,31 @@ export function PhotosManageScreen({ photos, onChange, onBack }: PhotosManageScr
 
   return (
     <div className={styles.screen}>
-      <div className={styles.header}>
-        <button type="button" className={styles.backButton} onClick={onBack} aria-label="Voltar">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path
-              d="M15 4l-8 8 8 8"
-              stroke="currentColor"
-              strokeWidth={3}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
-        <h1 className={styles.headerTitle}>Gerenciar fotos</h1>
-      </div>
+      <ScreenHeader title="Fotos" onBack={onBack} />
 
       <div className={styles.body}>
+        <p className={styles.intro}>
+          A primeira foto é a principal e aparece no card de descoberta. Use os botões sobre cada
+          foto para reordenar ou remover.
+        </p>
         <div className={styles.grid}>
           {slots.map((photo, index) => (
-            <div
-              key={index}
-              className={photo ? `${styles.tile} ${styles.tileFilled}` : `${styles.tile} ${styles.tileEmpty}`}
-            >
+            <div key={index} className={photo ? styles.tile : `${styles.tile} ${styles.tileEmpty}`}>
               {photo ? (
                 <>
                   <img className={styles.photo} src={photo} alt={`Foto ${index + 1}`} />
-                  {index === 0 && <span className={styles.coverBadge}>Capa</span>}
+                  {index === 0 && <span className={styles.mainBadge}>Principal</span>}
                   <button
                     type="button"
                     className={styles.removeButton}
                     onClick={() => handleRemove(index)}
                     aria-label="Remover foto"
                   >
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                       <path
                         d="M5 5l14 14M19 5L5 19"
                         stroke="#fff"
-                        strokeWidth={3}
+                        strokeWidth={3.8}
                         strokeLinecap="round"
                       />
                     </svg>
@@ -86,30 +75,29 @@ export function PhotosManageScreen({ photos, onChange, onBack }: PhotosManageScr
                   {index > 0 && (
                     <button
                       type="button"
-                      className={styles.makeCoverButton}
-                      onClick={() => handleMakeCover(index)}
+                      className={styles.makeMainButton}
+                      onClick={() => handleMakeMain(index)}
                     >
-                      Tornar capa
+                      Tornar principal
                     </button>
                   )}
                 </>
               ) : (
                 <button
                   type="button"
-                  className={styles.tileEmpty}
+                  className={styles.tile}
                   style={{ position: "absolute", inset: 0, border: 0 }}
                   onClick={() => inputRefs.current[index]?.click()}
-                  aria-label="Adicionar foto"
                 >
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                     <path
-                      d="M4 8.5A1.5 1.5 0 0 1 5.5 7h2l1-2h7l1 2h2A1.5 1.5 0 0 1 20 8.5v9A1.5 1.5 0 0 1 18.5 19h-13A1.5 1.5 0 0 1 4 17.5z"
-                      stroke="#5B34C9"
-                      strokeWidth={1.6}
-                      strokeLinejoin="round"
+                      d="M12 5v14M5 12h14"
+                      stroke="#8B5CF6"
+                      strokeWidth={2.8}
+                      strokeLinecap="round"
                     />
-                    <circle cx="12" cy="13" r="3.2" stroke="#5B34C9" strokeWidth={1.6} />
                   </svg>
+                  <span className={styles.addLabel}>Adicionar</span>
                 </button>
               )}
               <input

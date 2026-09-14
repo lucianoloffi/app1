@@ -103,7 +103,7 @@
   background: rgba(22, 33, 26, 0.72);
   color: #fff;
   font: 700 11px var(--font-ui);
-  padding: 0 12px;
+  padding: 0 14px;
   border-radius: var(--radius-pill);
 }
 
@@ -141,8 +141,8 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 20px;
-  padding: 0 40px;
+  gap: 24px;
+  padding: 0 24px;
   text-align: center;
 }
 
@@ -292,28 +292,27 @@
 }
 
 .viewProfileLink {
-  align-self: center;
-  font: 700 13px var(--font-ui);
-  color: #fff;
-  background: rgba(255, 255, 255, 0.18);
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  border: 0;
+  width: 34px;
+  height: 34px;
   border-radius: var(--radius-pill);
-  padding: 9px 15px;
+  background: rgba(255, 255, 255, 0.01);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
   pointer-events: auto;
-  transition:
-    background 160ms var(--ease-standard),
-    transform 160ms var(--ease-standard);
+  transition: background 160ms var(--ease-standard);
 }
 
 .viewProfileLink:hover {
-  background: rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.18);
 }
 
 .viewProfileLink:active {
-  transform: scale(0.96);
+  transform: scale(0.92);
 }
 
 .actions {
@@ -366,8 +365,8 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 20px;
-  padding: 0 40px;
+  gap: 24px;
+  padding: 0 24px;
   text-align: center;
 }
 
@@ -382,11 +381,12 @@
 
 .emptyTitle {
   margin: 0;
-  font: 700 20px var(--font-ui);
+  font: 800 24px/1.25 var(--font-ui);
+  letter-spacing: -0.02em;
 }
 
 .emptySupport {
-  margin: 0;
+  margin: 8px 0 0;
   font: 400 15px/1.5 var(--font-ui);
   color: var(--color-ink-60);
 }
@@ -402,12 +402,11 @@
 .primaryButton {
   border: 0;
   cursor: pointer;
-  font: 700 15px var(--font-ui);
+  font: 700 16px var(--font-ui);
   color: #fff;
   background: var(--color-accent);
-  padding: 15px 24px;
+  padding: 16px 28px;
   border-radius: var(--radius-pill);
-  box-shadow: var(--shadow-btn-primary);
 }
 
 .secondaryLink {

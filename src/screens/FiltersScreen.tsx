@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { ScreenHeader } from "../components/ScreenHeader";
 import { PillChipRow } from "../components/PillChip";
 import { RangeSlider } from "../components/RangeSlider";
 import type { Filters, FilterGender, Intention } from "../types";
@@ -45,20 +46,7 @@ export function FiltersScreen({ filters, onApply, onClose }: FiltersScreenProps)
 
   return (
     <div className={styles.screen}>
-      <div className={styles.header}>
-        <button type="button" className={styles.backButton} onClick={onClose} aria-label="Voltar">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path
-              d="M15 4l-8 8 8 8"
-              stroke="currentColor"
-              strokeWidth={3}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </button>
-        <h1 className={styles.headerTitle}>Filtros de busca</h1>
-      </div>
+      <ScreenHeader title="Filtros de busca" onBack={onClose} size="lg" />
 
       <div className={styles.body}>
         <p className={styles.note}>As mudanças valem para a próxima fila de perfis.</p>
@@ -73,7 +61,7 @@ export function FiltersScreen({ filters, onApply, onClose }: FiltersScreenProps)
             />
           </div>
 
-          <div className={styles.fieldGroup}>
+          <div className={styles.fieldGroup} style={{ marginTop: 26 }}>
             <div className={styles.sliderHeader}>
               <span className={styles.label}>Faixa de idade</span>
               <span className={styles.sliderValue}>
@@ -90,7 +78,7 @@ export function FiltersScreen({ filters, onApply, onClose }: FiltersScreenProps)
             />
           </div>
 
-          <div className={styles.fieldGroup}>
+          <div className={styles.fieldGroup} style={{ marginTop: 26 }}>
             <div className={styles.sliderHeader}>
               <span className={styles.label}>Distância</span>
               <span className={styles.sliderValue}>até {draft.distanceKm} km</span>

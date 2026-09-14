@@ -7,35 +7,6 @@
   background: #fff;
 }
 
-.header {
-  flex: none;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 16px var(--screen-padding-x);
-  border-bottom: 1px solid var(--color-line-3);
-}
-
-.backButton {
-  appearance: none;
-  border: 1px solid var(--color-line-2);
-  background: #fff;
-  width: 38px;
-  height: 38px;
-  border-radius: 999px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: var(--color-ink);
-  flex: none;
-}
-
-.headerTitle {
-  margin: 0;
-  font: 800 20px var(--font-ui);
-}
-
 .headerSummary {
   margin-left: auto;
   font: 600 13px var(--font-ui);
@@ -47,33 +18,32 @@
   min-height: 0;
   overflow-y: auto;
   background: var(--color-bg);
-  padding: 18px 20px 24px;
+  padding: 20px 24px 26px;
   display: flex;
   flex-direction: column;
   gap: 14px;
+}
+
+.intro {
+  margin: 0;
+  font: 400 14px/1.5 var(--font-ui);
+  color: var(--color-ink-60);
 }
 
 .card {
   background: #fff;
-  border-radius: var(--radius-card-sm);
-  padding: 16px;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.cardMain {
-  flex: 1;
-  min-width: 0;
+  border-radius: 16px;
+  padding: 18px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 10px;
 }
 
 .cardTop {
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 .cardTitle {
@@ -103,17 +73,17 @@
 
 .cardSub {
   margin: 0;
-  font: 400 13px/1.4 var(--font-ui);
+  font: 400 13px/1.5 var(--font-ui);
   color: var(--color-ink-40);
 }
 
 .actionButton {
-  flex: none;
   text-align: center;
   cursor: pointer;
   padding: 12px;
   border-radius: 12px;
-  font: 700 13px var(--font-ui);
+  font: 700 14px var(--font-ui);
+  border: 0;
 }
 
 .actionButtonGranted {
@@ -142,14 +112,24 @@
 .dialog {
   width: 100%;
   background: #fff;
-  border-radius: 20px;
-  padding: 26px 22px;
+  border-radius: 22px;
+  padding: 26px 22px 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
   text-align: center;
   animation: lovi-success-pop 250ms var(--ease-standard) both;
+}
+
+.dialogIcon {
+  width: 76px;
+  height: 76px;
+  border-radius: 999px;
+  background: var(--color-accent-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .dialogTitle {

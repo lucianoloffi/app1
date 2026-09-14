@@ -24,19 +24,10 @@ export function CodeScreen({ code, onChangeCode, onBack, onNext }: CodeScreenPro
       progress={2}
       onBack={onBack}
       title="Digite o código"
-      support="Enviamos 4 dígitos por SMS para o seu telefone."
-      ctaLabel="Confirmar código"
+      support="Enviamos um SMS de 4 dígitos para o número informado."
+      ctaLabel="Confirmar"
       ctaDisabled={!isValid}
       onCta={onNext}
-      secondary={
-        <button
-          type="button"
-          className={styles.testLink}
-          onClick={() => onChangeCode("1234")}
-        >
-          Preencher código de teste (1234)
-        </button>
-      }
     >
       <input
         ref={inputRef}
@@ -48,6 +39,9 @@ export function CodeScreen({ code, onChangeCode, onBack, onNext }: CodeScreenPro
         value={code}
         onChange={(e) => onChangeCode(onlyDigits(e.target.value).slice(0, 4))}
       />
+      <button type="button" className={styles.testLink} onClick={() => onChangeCode("1234")}>
+        Preencher código de teste (1234)
+      </button>
     </OnboardingLayout>
   );
 }
