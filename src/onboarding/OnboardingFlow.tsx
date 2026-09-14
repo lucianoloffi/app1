@@ -9,6 +9,7 @@ import type {
   RelationshipStatus,
 } from "../types";
 import { MAX_INTERESTS } from "./constants";
+import { LoginFlow } from "./LoginFlow";
 import { CodeScreen } from "./screens/CodeScreen";
 import { GenderInterestCityScreen } from "./screens/GenderInterestCityScreen";
 import { IntentionInterestsScreen } from "./screens/IntentionInterestsScreen";
@@ -39,6 +40,25 @@ const INITIAL_STATE: OnboardingState = {
   relationshipStatus: null,
 };
 
+const DEMO_LOGIN_STATE: OnboardingState = {
+  step: null,
+  phone: "47988124470",
+  code: "1234",
+  name: "Mariana Silva",
+  birthdate: "12/05/1996",
+  bio: "Voltei a usar o app depois de um tempo.",
+  gender: "mulher",
+  interestedIn: "homem",
+  city: "Joinville, SC",
+  photos: ["https://i.pravatar.cc/600?img=48", null, null, null],
+  intention: "serio",
+  interests: ["Praia", "Viagem", "Café"],
+  lifestyle: { bebida: "socialmente", atividade: "algumas-vezes", filhos: "nao-tenho" },
+  profession: "Fisioterapeuta",
+  height: 1.68,
+  relationshipStatus: "solteiro",
+};
+
 interface OnboardingFlowProps {
   onComplete: (state: OnboardingState) => void;
   onShowToast: (message: string) => void;
@@ -46,15 +66,26 @@ interface OnboardingFlowProps {
 
 export function OnboardingFlow({ onComplete, onShowToast }: OnboardingFlowProps) {
   const [state, setState] = useState<OnboardingState>(INITIAL_STATE);
+  const [mode, setMode] = useState<"signup" | "login">("signup");
 
   function goTo(step: OnboardingStep) {
     setState((prev) => ({ ...prev, step }));
   }
 
+  if (mode === "login") {
+    return (
+      <LoginFlow
+        onGoSignup={() => setMode("signup")}
+        onLoginSuccess={() => onComplete(DEMO_LOGIN_STATE)}
+        onShowToast={onShowToast}
+      />
+    );
+  }
+
   switch (state.step) {
     case "welcome":
       return (
-        <WelcomeScreen onCreateAccount={() => goTo("phone")} onHaveAccount={() => goTo("phone")} />
+        <WelcomeScreen onCreateAccount={() => goTo("phone")} onHaveAccount={() => setMode("login")} />
       );
 
     case "phone":
