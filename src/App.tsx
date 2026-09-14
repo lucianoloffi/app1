@@ -299,6 +299,7 @@ export default function App() {
             current={discover.current}
             hasAnyMatch={discover.hasAnyMatch}
             offline={offlineSim}
+            filters={filters}
             photoIndex={discover.photoIndex}
             swipeDirection={discover.swipeDirection}
             onNextPhoto={discover.nextPhoto}

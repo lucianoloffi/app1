@@ -3,13 +3,14 @@ import { Logo } from "../components/Logo";
 import { CloseIcon, HeartIcon } from "../components/icons/ActionIcons";
 import { ReportSheet } from "../components/ReportSheet";
 import { CURRENT_USER_INTERESTS } from "../data/mockProfiles";
-import { INTENTION_LABEL, type Profile, type SwipeDirection } from "../types";
+import { INTENTION_LABEL, type Filters, type Profile, type SwipeDirection } from "../types";
 import styles from "./DiscoverScreen.module.css";
 
 interface DiscoverScreenProps {
   current: Profile | null;
   hasAnyMatch: boolean;
   offline: boolean;
+  filters: Filters;
   photoIndex: number;
   swipeDirection: SwipeDirection;
   onNextPhoto: () => void;
@@ -28,6 +29,7 @@ export function DiscoverScreen({
   current,
   hasAnyMatch,
   offline,
+  filters,
   photoIndex,
   swipeDirection,
   onNextPhoto,
@@ -262,8 +264,8 @@ export function DiscoverScreen({
           </div>
           <p className={styles.emptyTitle}>Poucos perfis por aqui</p>
           <p className={styles.emptySupport}>
-            Seus filtros estão bem estreitos. Ampliar a distância ou a faixa de idade traz mais
-            gente.
+            Seus filtros estão bem estreitos: até {filters.distanceKm} km e {filters.minAge}–
+            {filters.maxAge} anos. Ampliar a distância ou a faixa de idade traz mais gente.
           </p>
           <button type="button" className={styles.primaryButton} onClick={onWidenFilters}>
             Ampliar filtros
