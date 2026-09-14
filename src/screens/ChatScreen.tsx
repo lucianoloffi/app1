@@ -23,7 +23,6 @@ interface ChatScreenProps {
   onLockChat: (chatId: string) => void;
   onUnlockChat: (chatId: string) => void;
   onOpenProfile: (profileId: string) => void;
-  onBlock: (chatId: string) => void;
   onShowToast: (message: string) => void;
 }
 
@@ -36,7 +35,6 @@ export function ChatScreen({
   onLockChat,
   onUnlockChat,
   onOpenProfile,
-  onBlock,
   onShowToast,
 }: ChatScreenProps) {
   const [draft, setDraft] = useState("");
@@ -110,12 +108,15 @@ export function ChatScreen({
                 <button
                   type="button"
                   className={styles.menuItem}
+                  disabled={chat.locked}
                   onClick={() => {
                     setMenuOpen(false);
-                    onOpenProfile(chat.profileId);
+                    onLockChat(chat.id);
+                    onShowToast("Conversa finalizada e arquivada");
+                    onBack();
                   }}
                 >
-                  Ver perfil
+                  Finalizar a conversa
                 </button>
                 <button
                   type="button"
@@ -125,18 +126,7 @@ export function ChatScreen({
                     setReportOpen(true);
                   }}
                 >
-                  Denunciar
-                </button>
-                <button
-                  type="button"
-                  className={`${styles.menuItem} ${styles.menuItemDestructive}`}
-                  onClick={() => {
-                    setMenuOpen(false);
-                    onBlock(chat.id);
-                    onShowToast("Perfil bloqueado.");
-                  }}
-                >
-                  Bloquear
+                  Denunciar perfil
                 </button>
                 <button
                   type="button"
@@ -147,19 +137,6 @@ export function ChatScreen({
                   }}
                 >
                   Desfazer match
-                </button>
-                <button
-                  type="button"
-                  className={styles.menuItem}
-                  disabled={chat.locked}
-                  onClick={() => {
-                    setMenuOpen(false);
-                    onLockChat(chat.id);
-                    onShowToast("Conversa finalizada e arquivada");
-                    onBack();
-                  }}
-                >
-                  Finalizar conversa
                 </button>
               </div>
             </>

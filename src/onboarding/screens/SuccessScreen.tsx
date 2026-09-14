@@ -15,7 +15,7 @@ export function SuccessScreen({ name, onDone }: SuccessScreenProps) {
   return (
     <div className={styles.screen}>
       <div className={styles.check}>
-        <svg width="52" height="52" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <svg width="58" height="58" viewBox="0 0 24 24" fill="none" aria-hidden="true">
           <path
             d="M4 12.5l5 5L20 6.5"
             stroke="#fff"
@@ -25,11 +25,13 @@ export function SuccessScreen({ name, onDone }: SuccessScreenProps) {
           />
         </svg>
       </div>
-      <p className={styles.title}>Conta criada!</p>
-      <p className={styles.support}>
-        {name ? `Bem-vindo(a), ${name.split(" ")[0]}. ` : ""}Já estamos preparando perfis
-        compatíveis com você.
-      </p>
+      <div className={styles.textBlock}>
+        <p className={styles.title}>Conta criada!</p>
+        <p className={styles.support}>
+          Tudo pronto{name ? `, ${name.split(" ")[0]}` : ""}. Vamos encontrar quem combina com
+          você.
+        </p>
+      </div>
       <div className={styles.dots}>
         <span className={styles.dot} style={{ animationDelay: "0ms" }} />
         <span className={styles.dot} style={{ animationDelay: "150ms" }} />

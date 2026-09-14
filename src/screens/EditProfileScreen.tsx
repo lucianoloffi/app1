@@ -117,7 +117,7 @@ export function EditProfileScreen({ profile, onCancel, onSave, onShowToast }: Ed
                 {photo && (
                   <>
                     <img className={styles.photoTileImg} src={photo} alt={`Foto ${index + 1}`} />
-                    {index === 0 && <span className={styles.coverBadge}>Capa</span>}
+                    {index === 0 && <span className={styles.coverBadge}>capa</span>}
                   </>
                 )}
               </div>
@@ -126,85 +126,76 @@ export function EditProfileScreen({ profile, onCancel, onSave, onShowToast }: Ed
           <p className={styles.photosHint}>{photosHint(photos.length)}</p>
         </div>
 
-        <div className={styles.fieldsCard}>
+        <div className={styles.fieldGroup}>
+          <span className={styles.label}>Nome</span>
+          <input className={styles.input} value={name} onChange={(e) => setName(e.target.value)} />
+        </div>
+
+        <div className={styles.fieldGroup}>
+          <span className={styles.label}>Localidade</span>
+          <input className={styles.input} value={city} onChange={(e) => setCity(e.target.value)} />
+        </div>
+
+        <div className={styles.fieldRow}>
           <div className={styles.fieldGroup}>
-            <span className={styles.label}>Nome</span>
-            <input className={styles.input} value={name} onChange={(e) => setName(e.target.value)} />
-          </div>
-
-          <div className={styles.fieldGroup}>
-            <span className={styles.label}>Localidade</span>
-            <input className={styles.input} value={city} onChange={(e) => setCity(e.target.value)} />
-          </div>
-
-          <div className={styles.fieldRow}>
-            <div className={styles.fieldGroup}>
-              <span className={styles.label}>Nascimento</span>
-              <input
-                className={styles.input}
-                type="text"
-                inputMode="numeric"
-                maxLength={10}
-                value={formatBirthdate(birthdate)}
-                onChange={(e) => setBirthdate(onlyDigits(e.target.value))}
-              />
-            </div>
-            <div className={styles.fieldGroup}>
-              <span className={styles.label}>Gênero</span>
-              <select
-                className={styles.input}
-                value={gender}
-                onChange={(e) => setGender(e.target.value as Gender)}
-              >
-                {GENDER_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div className={styles.fieldRow}>
-            <div className={styles.fieldGroup}>
-              <span className={styles.label}>Profissão</span>
-              <input
-                className={styles.input}
-                value={profession}
-                onChange={(e) => setProfession(e.target.value)}
-              />
-            </div>
-            <div className={styles.fieldGroup}>
-              <span className={styles.label}>Altura</span>
-              <button
-                type="button"
-                className={`${styles.input} ${styles.heightButton}`}
-                onClick={() => setHeightSheetOpen(true)}
-              >
-                {heightLabel(height)}
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                  <path
-                    d="M9 5l7 7-7 7"
-                    stroke="#8A928B"
-                    strokeWidth={2.2}
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </button>
-            </div>
-          </div>
-
-          <div className={styles.fieldGroup}>
-            <span className={styles.label}>Sobre você</span>
-            <textarea
-              className={`${styles.input} ${styles.textarea}`}
-              value={bio}
-              onChange={(e) => setBio(e.target.value)}
+            <span className={styles.label}>Nascimento</span>
+            <input
+              className={styles.input}
+              type="text"
+              inputMode="numeric"
+              maxLength={10}
+              value={formatBirthdate(birthdate)}
+              onChange={(e) => setBirthdate(onlyDigits(e.target.value))}
             />
+          </div>
+          <div className={styles.fieldGroup}>
+            <span className={styles.label}>Gênero</span>
+            <select
+              className={styles.input}
+              value={gender}
+              onChange={(e) => setGender(e.target.value as Gender)}
+            >
+              {GENDER_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 
-        <div className={styles.interestsCard}>
+        <div className={styles.fieldRow}>
+          <div className={styles.fieldGroup}>
+            <span className={styles.label}>Profissão</span>
+            <input
+              className={styles.input}
+              placeholder="ex: engenheiro"
+              value={profession}
+              onChange={(e) => setProfession(e.target.value)}
+            />
+          </div>
+          <div className={`${styles.fieldGroup} ${styles.fieldRowHeight}`}>
+            <span className={styles.label}>Altura</span>
+            <button
+              type="button"
+              className={`${styles.input} ${styles.heightButton}`}
+              onClick={() => setHeightSheetOpen(true)}
+            >
+              {heightLabel(height)}
+            </button>
+          </div>
+        </div>
+
+        <div className={styles.fieldGroup}>
+          <span className={styles.label}>Sobre você</span>
+          <textarea
+            className={`${styles.input} ${styles.textarea}`}
+            value={bio}
+            onChange={(e) => setBio(e.target.value)}
+          />
+        </div>
+
+        <div className={styles.interestsGroup}>
           <span className={styles.label}>{selectedInterestsLabel(interests.length)}</span>
           <SelectedInterests
             interests={interests}
@@ -215,27 +206,25 @@ export function EditProfileScreen({ profile, onCancel, onSave, onShowToast }: Ed
           />
         </div>
 
-        <div className={styles.lifeCard}>
+        <RowBottomSheet
+          label="Status de relacionamento"
+          iconPath="M9.6 14.8a4.2 4.2 0 110-8.4 4.2 4.2 0 010 8.4zm0-1.8a2.4 2.4 0 100-4.8 2.4 2.4 0 000 4.8zm4.8 4.8a4.2 4.2 0 110-8.4 4.2 4.2 0 010 8.4zm0-1.8a2.4 2.4 0 100-4.8 2.4 2.4 0 000 4.8z"
+          value={relationshipStatus}
+          options={STATUS_SHEET_OPTIONS}
+          onChange={(value) => setRelationshipStatus(value as RelationshipStatus | null)}
+        />
+        {LIFE_GROUPS.map((group) => (
           <RowBottomSheet
-            label="Status de relacionamento"
-            iconPath="M12 21s-8-4.5-8-10a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 11c0 5.5-8 10-8 10z"
-            value={relationshipStatus}
-            options={STATUS_SHEET_OPTIONS}
-            onChange={(value) => setRelationshipStatus(value as RelationshipStatus | null)}
+            key={group.key}
+            label={group.title}
+            iconPath={group.icon}
+            value={lifestyle[group.key]}
+            options={group.options}
+            onChange={(value) =>
+              setLifestyle((prev) => ({ ...prev, [group.key]: value }) as Lifestyle)
+            }
           />
-          {LIFE_GROUPS.map((group) => (
-            <RowBottomSheet
-              key={group.key}
-              label={group.title}
-              iconPath={group.icon}
-              value={lifestyle[group.key]}
-              options={group.options}
-              onChange={(value) =>
-                setLifestyle((prev) => ({ ...prev, [group.key]: value }) as Lifestyle)
-              }
-            />
-          ))}
-        </div>
+        ))}
       </div>
 
       {interestSheetOpen && (

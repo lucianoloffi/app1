@@ -58,7 +58,21 @@ export function DiscoverScreen({
 
   return (
     <div className={styles.screen}>
-      {offline && <div className={styles.offlineBanner}>Sem conexão</div>}
+      {offline && (
+        <div className={styles.offlineBanner}>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M3 3l18 18" stroke="#fff" strokeWidth={2.4} strokeLinecap="round" />
+            <path
+              d="M5 12.5a10 10 0 0 1 5-2.6M14 10a10 10 0 0 1 5 2.5M8.5 16a5.5 5.5 0 0 1 7 0"
+              stroke="#fff"
+              strokeWidth={2.2}
+              strokeLinecap="round"
+            />
+            <circle cx="12" cy="19.4" r="1.4" fill="#fff" />
+          </svg>
+          <span>Sem conexão. Algumas ações não vão funcionar.</span>
+        </div>
+      )}
       <header className={styles.header}>
         <Logo heartSize={34} textSize={36} />
       </header>

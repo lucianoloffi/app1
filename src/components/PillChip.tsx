@@ -5,7 +5,7 @@ interface PillChipProps {
   active: boolean;
   onClick: () => void;
   children: ReactNode;
-  size?: "sm" | "md";
+  size?: "xs" | "sm" | "md";
   disabled?: boolean;
 }
 
@@ -13,7 +13,9 @@ export function PillChip({ active, onClick, children, size = "sm", disabled }: P
   const className = [
     styles.chip,
     size === "md" ? styles.sizeMd : "",
+    size === "xs" ? styles.sizeXs : "",
     active ? styles.chipActive : "",
+    active && size === "xs" ? styles.chipActiveStrong : "",
   ]
     .filter(Boolean)
     .join(" ");
@@ -29,7 +31,7 @@ interface PillChipRowProps<T extends string> {
   options: { value: T; label: string }[];
   selected: T | null;
   onSelect: (value: T) => void;
-  size?: "sm" | "md";
+  size?: "xs" | "sm" | "md";
 }
 
 export function PillChipRow<T extends string>({

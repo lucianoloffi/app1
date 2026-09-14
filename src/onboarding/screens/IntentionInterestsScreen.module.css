@@ -3,9 +3,9 @@
   width: 100%;
   text-align: left;
   border: 1.5px solid var(--color-line-2);
-  border-radius: var(--radius-card-sm);
+  border-radius: 16px;
   background: #fff;
-  padding: 16px 18px;
+  padding: 14px 16px;
   cursor: pointer;
   display: flex;
   flex-direction: column;
@@ -18,12 +18,7 @@
 }
 
 .intentionTitle {
-  font: 700 16px var(--font-ui);
-  color: var(--color-ink);
-}
-
-.intentionCardSelected .intentionTitle {
-  color: #fff;
+  font: 700 15px var(--font-ui);
 }
 
 .intentionSubtitle {
@@ -32,7 +27,7 @@
 }
 
 .intentionCardSelected .intentionSubtitle {
-  color: #b8c0b8;
+  color: #7a5bb8;
 }
 
 .cardStack {

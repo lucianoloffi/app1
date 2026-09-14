@@ -140,6 +140,10 @@
   background: #faf7ff;
 }
 
+.rowLocked {
+  opacity: 0.6;
+}
+
 .avatar {
   width: 58px;
   height: 58px;
@@ -200,18 +204,20 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 8px;
   padding: 0 40px;
   text-align: center;
 }
 
 .emptyTitle {
   margin: 0;
-  font: 700 18px var(--font-ui);
+  font: 700 16px var(--font-ui);
+  color: var(--color-ink-60);
 }
 
 .emptySupport {
   margin: 0;
-  font: 400 15px/1.5 var(--font-ui);
-  color: var(--color-ink-60);
+  font: 400 14px/1.5 var(--font-ui);
+  color: var(--color-ink-40);
+  max-width: 250px;
 }

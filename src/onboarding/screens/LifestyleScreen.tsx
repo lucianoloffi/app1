@@ -36,7 +36,7 @@ export function LifestyleScreen({ lifestyle, onChange, onBack, onNext }: Lifesty
               options={group.options}
               selected={lifestyle[group.key]}
               onSelect={(value) => onChange({ ...lifestyle, [group.key]: value })}
-              size="sm"
+              size="xs"
             />
           </div>
         ))}

@@ -48,7 +48,7 @@ export function InterestBottomSheet({
         </div>
         <div className={styles.footer}>
           <button type="button" className={styles.doneButton} onClick={onClose}>
-            Concluído
+            Concluir
           </button>
         </div>
       </div>

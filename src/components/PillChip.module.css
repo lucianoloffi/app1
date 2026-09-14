@@ -26,6 +26,15 @@
   padding: 10px 16px;
 }
 
+.sizeXs {
+  font: 600 13px var(--font-ui);
+  padding: 7px 12px;
+}
+
+.chipActiveStrong {
+  border-color: #8b5cf6;
+}
+
 .row {
   display: flex;
   flex-wrap: wrap;

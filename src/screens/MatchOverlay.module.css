@@ -22,11 +22,11 @@
 
 .halo {
   position: absolute;
-  width: 320px;
-  height: 320px;
+  width: 300px;
+  height: 300px;
   border-radius: var(--radius-pill);
-  background: radial-gradient(circle, rgba(139, 92, 246, 0.55), transparent 70%);
-  animation: lovi-halo-pulse 3s ease-in-out infinite;
+  background: radial-gradient(circle, rgba(192, 123, 255, 0.9) 0%, rgba(139, 92, 246, 0) 68%);
+  animation: lovi-halo-pulse 2.6s ease-in-out infinite;
 }
 
 .heart {
@@ -75,10 +75,6 @@
   font: 500 16px/1.5 var(--font-ui);
   color: #fff;
   animation: lovi-rise-in 500ms var(--ease-standard) 200ms both;
-}
-
-.copy strong {
-  font-weight: 800;
 }
 
 .footer {

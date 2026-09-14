@@ -24,13 +24,16 @@ export function PhotosScreen({ photos, onChangePhotos, onBack, onNext }: PhotosS
     if (previous) URL.revokeObjectURL(previous);
   }
 
-  function handleRemove(index: number, e: React.MouseEvent) {
-    e.stopPropagation();
-    const next = [...photos];
-    const previous = next[index];
-    next[index] = null;
-    onChangePhotos(next);
-    if (previous) URL.revokeObjectURL(previous);
+  function handleTap(index: number) {
+    const current = photos[index];
+    if (current) {
+      const next = [...photos];
+      next[index] = null;
+      onChangePhotos(next);
+      URL.revokeObjectURL(current);
+      return;
+    }
+    inputRefs.current[index]?.click();
   }
 
   return (
@@ -52,41 +55,19 @@ export function PhotosScreen({ photos, onChangePhotos, onBack, onNext }: PhotosS
               role="button"
               tabIndex={0}
               className={photo ? `${styles.slot} ${styles.slotFilled}` : `${styles.slot} ${styles.slotEmpty}`}
-              onClick={() => inputRefs.current[index]?.click()}
+              onClick={() => handleTap(index)}
               onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") inputRefs.current[index]?.click();
+                if (e.key === "Enter" || e.key === " ") handleTap(index);
               }}
             >
               {photo ? (
-                <>
-                  <img className={styles.photo} src={photo} alt={`Foto ${index + 1}`} />
-                  {index === 0 && <span className={styles.badge}>Principal</span>}
-                  <button
-                    type="button"
-                    className={styles.removeButton}
-                    onClick={(e) => handleRemove(index, e)}
-                    aria-label="Remover foto"
-                  >
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                      <path
-                        d="M5 5l14 14M19 5L5 19"
-                        stroke="#fff"
-                        strokeWidth={3}
-                        strokeLinecap="round"
-                      />
-                    </svg>
-                  </button>
-                </>
+                <img className={styles.photo} src={photo} alt={`Foto ${index + 1}`} />
               ) : (
                 <>
-                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                    <path
-                      d="M4 8.5A1.5 1.5 0 0 1 5.5 7h2l1-2h7l1 2h2A1.5 1.5 0 0 1 20 8.5v9A1.5 1.5 0 0 1 18.5 19h-13A1.5 1.5 0 0 1 4 17.5z"
-                      stroke="#5B34C9"
-                      strokeWidth={1.6}
-                      strokeLinejoin="round"
-                    />
-                    <circle cx="12" cy="13" r="3.2" stroke="#5B34C9" strokeWidth={1.6} />
+                  <svg width="30" height="30" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <rect x="2.5" y="6" width="19" height="14" rx="4" fill="#8B5CF6" opacity={0.18} />
+                    <circle cx="12" cy="13" r="4" fill="#8B5CF6" />
+                    <rect x="8.5" y="3.5" width="7" height="3.5" rx="1.6" fill="#8B5CF6" opacity={0.55} />
                   </svg>
                   <span className={styles.slotLabel}>
                     {index === 0 ? "Foto principal" : "Adicionar foto"}
@@ -106,6 +87,7 @@ export function PhotosScreen({ photos, onChangePhotos, onBack, onNext }: PhotosS
           );
         })}
       </div>
+      <p className={styles.note}>Toque para simular o envio. A primeira foto é a principal.</p>
     </OnboardingLayout>
   );
 }

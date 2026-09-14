@@ -1,7 +1,7 @@
 .overlay {
   position: absolute;
   inset: 0;
-  background: rgba(14, 18, 15, 0.42);
+  background: rgba(12, 20, 14, 0.45);
   z-index: 40;
   display: flex;
   align-items: flex-end;
@@ -10,43 +10,35 @@
 .sheet {
   width: 100%;
   background: #fff;
-  border-radius: 24px 24px 0 0;
-  padding: 22px;
+  border-radius: 22px 22px 0 0;
+  padding: 24px 22px 26px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 18px;
   animation: lovi-sheet-up 200ms var(--ease-standard) both;
 }
 
 .header {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: space-between;
 }
 
 .title {
   margin: 0;
-  font: 800 17px var(--font-ui);
-}
-
-.closeButton {
-  appearance: none;
-  border: 0;
-  background: var(--color-bg);
-  width: 30px;
-  height: 30px;
-  border-radius: 999px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: var(--color-ink);
+  font: 700 18px var(--font-ui);
 }
 
 .value {
-  text-align: center;
   font: 800 22px var(--font-ui);
-  color: var(--color-accent);
+  color: var(--color-accent-2);
+}
+
+.range {
+  display: flex;
+  justify-content: space-between;
+  font: 500 12px var(--font-ui);
+  color: var(--color-ink-40);
 }
 
 .doneButton {

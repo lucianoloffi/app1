@@ -39,7 +39,7 @@ export function ChatsScreen({ chats, onOpenChat, onOpenProfile }: ChatsScreenPro
         <div className={styles.emptyWrap}>
           <p className={styles.emptyTitle}>Nenhuma conversa ainda</p>
           <p className={styles.emptySupport}>
-            Curta perfis em Descobrir para começar a conversar por aqui.
+            Curta perfis na aba Descobrir. Quando houver match, a conversa aparece aqui.
           </p>
         </div>
       </div>
@@ -115,13 +115,15 @@ export function ChatsScreen({ chats, onOpenChat, onOpenProfile }: ChatsScreenPro
         {conversations.map((chat) => {
           const lastMessage = chat.messages[chat.messages.length - 1];
           const isUnread = chat.unread > 0;
+          const rowClass = [
+            styles.row,
+            isUnread ? styles.rowUnread : "",
+            chat.locked ? styles.rowLocked : "",
+          ]
+            .filter(Boolean)
+            .join(" ");
           return (
-            <button
-              key={chat.id}
-              type="button"
-              className={isUnread ? `${styles.row} ${styles.rowUnread}` : styles.row}
-              onClick={() => onOpenChat(chat.id)}
-            >
+            <button key={chat.id} type="button" className={rowClass} onClick={() => onOpenChat(chat.id)}>
               <img
                 className={styles.avatar}
                 src={chat.photo}

@@ -162,7 +162,10 @@
   color: #fff;
   font: 600 12px var(--font-ui);
   padding: 8px 16px;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .emptyFilterIcon {

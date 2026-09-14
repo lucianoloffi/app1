@@ -22,10 +22,6 @@
   --color-surface: #ffffff;
   --color-icon-inactive: #c8cfc7;
 
-  --color-gender-man: #2f6fed;
-  --color-gender-woman: #c42b7c;
-  --color-gender-other: #5c6660;
-
   /* Tipografia */
   --font-ui: "Plus Jakarta Sans", system-ui, sans-serif;
   --font-display: "Nunito", "Plus Jakarta Sans", system-ui, sans-serif;

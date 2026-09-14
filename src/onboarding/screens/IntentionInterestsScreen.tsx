@@ -46,7 +46,7 @@ export function IntentionInterestsScreen({
       onCta={onFinish}
     >
       <div className={fieldStyles.fieldGroup}>
-        <span className={fieldStyles.label}>O que você busca?</span>
+        <span className={fieldStyles.label}>O que você busca</span>
         <div className={styles.cardStack}>
           {INTENTION_OPTIONS.map((option) => {
             const isSelected = intention === option.value;

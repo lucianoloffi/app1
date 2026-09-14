@@ -84,7 +84,7 @@ export function ProfessionHeightStatusScreen({
             options={ONBOARDING_STATUS_OPTIONS}
             selected={relationshipStatus}
             onSelect={onChangeStatus}
-            size="sm"
+            size="xs"
           />
         </div>
       </div>

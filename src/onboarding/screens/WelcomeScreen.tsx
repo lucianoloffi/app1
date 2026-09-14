@@ -13,7 +13,7 @@ export function WelcomeScreen({ onCreateAccount, onHaveAccount }: WelcomeScreenP
         <AppIcon size={144} />
         <h1 className={styles.title}>Para quem procura algo sério, perto de você</h1>
         <p className={styles.support}>
-          Perfis reais, intenção declarada e interesses em comum antes do like.
+          Combinamos pessoas pela intenção e pelos interesses em comum, não só pela foto.
         </p>
       </div>
       <div className={styles.footer}>

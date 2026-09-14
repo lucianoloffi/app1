@@ -4,11 +4,12 @@ import styles from "./MatchOverlay.module.css";
 
 interface MatchOverlayProps {
   profile: Profile;
+  myPhoto?: string;
   onOpenChat: () => void;
   onContinue: () => void;
 }
 
-export function MatchOverlay({ profile, onOpenChat, onContinue }: MatchOverlayProps) {
+export function MatchOverlay({ profile, myPhoto, onOpenChat, onContinue }: MatchOverlayProps) {
   return (
     <div className={styles.overlay} role="dialog" aria-label="Deu match">
       <div className={styles.heartWrap}>
@@ -18,9 +19,13 @@ export function MatchOverlay({ profile, onOpenChat, onContinue }: MatchOverlayPr
       </div>
 
       <div className={styles.avatars}>
-        <span className={styles.avatar}>
-          <LoviMark size={32} variant="purple" />
-        </span>
+        {myPhoto ? (
+          <img className={styles.avatar} src={myPhoto} alt="Você" />
+        ) : (
+          <span className={styles.avatar}>
+            <LoviMark size={32} variant="purple" />
+          </span>
+        )}
         <img
           className={`${styles.avatar} ${styles.avatarOverlap}`}
           src={profile.photos[0]}
@@ -28,9 +33,7 @@ export function MatchOverlay({ profile, onOpenChat, onContinue }: MatchOverlayPr
         />
       </div>
 
-      <p className={styles.copy}>
-        Você e <strong>{profile.name}</strong> se curtiram.
-      </p>
+      <p className={styles.copy}>Você e {profile.name.split(" ")[0]} se curtiram.</p>
 
       <div className={styles.footer}>
         <button type="button" className={styles.primaryButton} onClick={onOpenChat}>

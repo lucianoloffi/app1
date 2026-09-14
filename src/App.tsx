@@ -161,11 +161,6 @@ export default function App() {
               onLockChat={chats.lockChat}
               onUnlockChat={chats.unlockChat}
               onOpenProfile={(profileId) => openProfileById(profileId, activeChatId)}
-              onBlock={(chatId) => {
-                blockProfile(activeChat.profileId, activeChat.name, activeChat.photo);
-                chats.removeChat(chatId);
-                setActiveChatId(null);
-              }}
               onShowToast={showToast}
             />
           </div>
@@ -355,6 +350,7 @@ export default function App() {
         {discover.matchProfile && (
           <MatchOverlay
             profile={discover.matchProfile}
+            myPhoto={myProfile?.photos[0]}
             onOpenChat={() => {
               discover.dismissMatch();
               setTab("chats");

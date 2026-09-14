@@ -10,22 +10,12 @@ interface HeightSheetProps {
 
 export function HeightSheet({ height, onChange, onClose }: HeightSheetProps) {
   return (
-    <div className={styles.overlay} role="dialog" aria-label="Altura">
+    <div className={styles.overlay} role="dialog" aria-label="Sua altura">
       <div className={styles.sheet}>
         <div className={styles.header}>
-          <h2 className={styles.title}>Altura</h2>
-          <button type="button" className={styles.closeButton} onClick={onClose} aria-label="Fechar">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path
-                d="M5 5l14 14M19 5L5 19"
-                stroke="currentColor"
-                strokeWidth={2.4}
-                strokeLinecap="round"
-              />
-            </svg>
-          </button>
+          <h2 className={styles.title}>Sua altura</h2>
+          <span className={styles.value}>{heightLabel(height)}</span>
         </div>
-        <p className={styles.value}>{heightLabel(height)}</p>
         <RangeSlider
           min={100}
           max={220}
@@ -33,6 +23,10 @@ export function HeightSheet({ height, onChange, onClose }: HeightSheetProps) {
           ariaLabels={["Altura"]}
           onChange={([cm]) => onChange(cm / 100)}
         />
+        <div className={styles.range}>
+          <span>1,00 m</span>
+          <span>2,20 m</span>
+        </div>
         <button type="button" className={styles.doneButton} onClick={onClose}>
           Concluído
         </button>
