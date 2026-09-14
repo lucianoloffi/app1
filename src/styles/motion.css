@@ -4,36 +4,47 @@
   }
 }
 
-@keyframes lovi-match-pop {
+@keyframes lovi-heart-enter {
   0% {
-    transform: scale(0.55) rotate(-5deg);
+    transform: scale(0.3) rotate(-10deg);
     opacity: 0;
   }
-  70% {
-    transform: scale(1.04) rotate(-5deg);
+  55% {
+    transform: scale(1.12) rotate(3deg);
     opacity: 1;
   }
   100% {
-    transform: scale(1) rotate(-5deg);
+    transform: scale(1) rotate(0);
     opacity: 1;
   }
 }
 
-@keyframes lovi-match-beat {
-  0% {
-    transform: scale(1) rotate(-5deg);
-  }
-  30% {
-    transform: scale(1.06) rotate(-5deg);
-  }
-  55% {
-    transform: scale(1.015) rotate(-5deg);
-  }
-  80% {
-    transform: scale(1.04) rotate(-5deg);
-  }
+@keyframes lovi-heart-beat {
+  0%,
   100% {
-    transform: scale(1) rotate(-5deg);
+    transform: scale(1);
+  }
+  14% {
+    transform: scale(1.11);
+  }
+  28% {
+    transform: scale(1.02);
+  }
+  42% {
+    transform: scale(1.07);
+  }
+  60% {
+    transform: scale(1);
+  }
+}
+
+@keyframes lovi-heart-glow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 18px rgba(192, 123, 255, 0.45));
+  }
+  50% {
+    filter: drop-shadow(0 0 44px rgba(246, 206, 255, 0.85));
   }
 }
 

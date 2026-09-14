@@ -40,7 +40,9 @@ export function MatchOverlay({ profile, myPhoto, onOpenChat, onContinue }: Match
             />
           </span>
         ))}
-        <LoviMark size={256} className={styles.heart} />
+        <span className={styles.heartEnter}>
+          <LoviMark size={256} className={styles.heart} />
+        </span>
         <p className={styles.title}>deu match!</p>
       </div>
 
