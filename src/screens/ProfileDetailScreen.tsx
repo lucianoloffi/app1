@@ -90,11 +90,6 @@ export function ProfileDetailScreen({
 
           <p className={styles.bio}>{profile.bio}</p>
 
-          <div className={styles.promptCard}>
-            <span className={styles.promptLabel}>{profile.prompt.label}</span>
-            <span className={styles.promptAnswer}>{profile.prompt.answer}</span>
-          </div>
-
           <div>
             <span className={styles.sectionLabel}>Interesses</span>
             <div className={styles.chipsRow} style={{ marginTop: 10 }}>
