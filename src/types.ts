@@ -28,16 +28,12 @@ export interface Profile {
   gender: Gender;
   profession: string;
   city: string;
-  distanceKm: number;
+  /** null quando a distância está oculta, é aproximada ou falta GPS meu. */
+  distanceKm: number | null;
   intention: Intention;
   interests: string[];
   bio: string;
-  prompt: {
-    label: string;
-    answer: string;
-  };
   photos: string[];
-  likesYou?: boolean;
   lifestyle?: Lifestyle;
   relationshipStatus?: RelationshipStatus;
   height?: number;
@@ -47,6 +43,9 @@ export interface ChatMessage {
   mine: boolean;
   text: string;
   failed?: boolean;
+  /** Ausente enquanto a mensagem ainda não foi gravada no servidor. */
+  id?: string;
+  createdAt?: string;
 }
 
 export interface Chat {
@@ -63,8 +62,7 @@ export interface Chat {
 
 export type OnboardingStep =
   | "welcome"
-  | "phone"
-  | "code"
+  | "account"
   | "name-birthdate"
   | "gender-interest-city"
   | "photos"
@@ -76,8 +74,11 @@ export type OnboardingStep =
 
 export interface OnboardingState {
   step: OnboardingStep;
+  email: string;
+  password: string;
   phone: string;
-  code: string;
+  acceptedTerms: boolean;
+  acceptedSensitiveData: boolean;
   name: string;
   birthdate: string;
   bio: string;
@@ -93,6 +94,8 @@ export interface OnboardingState {
   relationshipStatus: RelationshipStatus | null;
 }
 
+export type VerificationStatus = "nao_solicitada" | "pendente" | "aprovada" | "rejeitada";
+
 export interface MyProfile {
   name: string;
   city: string;
@@ -107,6 +110,12 @@ export interface MyProfile {
   profession: string;
   height: number;
   relationshipStatus: RelationshipStatus | null;
+  email?: string;
+  phone?: string;
+  visible?: boolean;
+  showDistance?: boolean;
+  verificationStatus?: VerificationStatus;
+  approximateLocation?: boolean;
 }
 
 export interface Filters {

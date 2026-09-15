@@ -25,3 +25,8 @@ dist-ssr
 
 # Pacote local do projeto
 lovi.zip
+
+# Variáveis de ambiente
+.env
+.env.*
+!.env.example
