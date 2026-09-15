@@ -371,27 +371,29 @@ export default function App() {
                 onLogout={logout}
               />
             )}
-
-            {discover.matchProfile && (
-              <MatchOverlay
-                profile={discover.matchProfile}
-                myPhoto={myProfile?.photos[0]}
-                onOpenChat={() => {
-                  const chatId = `chat-${discover.matchProfile!.id}`;
-                  discover.dismissMatch();
-                  chats.openChat(chatId);
-                  setTab("chats");
-                  setActiveChatId(chatId);
-                }}
-                onContinue={discover.dismissMatch}
-              />
-            )}
           </>
         )}
       </div>
       {!overlayScreen && (
         <BottomNav active={tab} onChange={setTab} unreadChats={totalUnread} />
       )}
+
+      {/* Acima da barra de navegação: durante o match nada mais é clicável. */}
+      {discover.matchProfile && (
+        <MatchOverlay
+          profile={discover.matchProfile}
+          myPhoto={myProfile?.photos[0]}
+          onOpenChat={() => {
+            const chatId = `chat-${discover.matchProfile!.id}`;
+            discover.dismissMatch();
+            chats.openChat(chatId);
+            setTab("chats");
+            setActiveChatId(chatId);
+          }}
+          onContinue={discover.dismissMatch}
+        />
+      )}
+
       <Toast message={toastMessage} />
     </div>
   );
