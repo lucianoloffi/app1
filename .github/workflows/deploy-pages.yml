@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - claude/stoic-faraday-twwgpu
-      - claude/nice-faraday-9fswlx
   workflow_dispatch:
 
 permissions:
