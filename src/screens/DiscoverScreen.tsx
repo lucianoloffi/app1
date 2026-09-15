@@ -19,7 +19,6 @@ interface DiscoverScreenProps {
   onOpenProfile: (profile: Profile) => void;
   onOpenFilters: () => void;
   onWidenFilters: () => void;
-  onRestoreProfiles: () => void;
   onRetryConnection: () => void;
   onBlock: (profile: Profile) => void;
   onShowToast: (message: string) => void;
@@ -38,7 +37,6 @@ export function DiscoverScreen({
   onOpenProfile,
   onOpenFilters,
   onWidenFilters,
-  onRestoreProfiles,
   onRetryConnection,
   onBlock,
   onShowToast,
@@ -281,11 +279,8 @@ export function DiscoverScreen({
           <p className={styles.emptySupport}>
             Você viu todos os perfis de Joinville que combinam com o que busca.
           </p>
-          <button type="button" className={styles.primaryButton} onClick={onRestoreProfiles}>
+          <button type="button" className={styles.primaryButton} onClick={onOpenFilters}>
             Rever os perfis
-          </button>
-          <button type="button" className={styles.secondaryLink} onClick={onOpenFilters}>
-            Ajustar filtros
           </button>
         </div>
       )}

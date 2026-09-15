@@ -85,9 +85,5 @@ export function useDiscoverQueue({ onMatch, filters }: UseDiscoverQueueOptions =
       setMatchProfile(null);
       completeAdvance();
     },
-    resetQueue: () => {
-      setQueue(filteredProfiles);
-      setPhotoIndex(0);
-    },
   };
 }

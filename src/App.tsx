@@ -330,7 +330,6 @@ export default function App() {
               setFilters((prev) => ({ ...prev, distanceKm: 60, minAge: 18, maxAge: 70 }));
               showToast("Filtros ampliados: até 60 km e 18–70 anos");
             }}
-            onRestoreProfiles={discover.resetQueue}
             onRetryConnection={() => {
               setOfflineSim(false);
               showToast("Conexão restabelecida");
