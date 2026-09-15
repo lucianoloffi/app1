@@ -18,6 +18,7 @@ import { PhoneChangeScreen } from "./screens/PhoneChangeScreen";
 import { ProfileDetailScreen } from "./screens/ProfileDetailScreen";
 import { ProfileScreen } from "./screens/ProfileScreen";
 import { SettingsScreen } from "./screens/SettingsScreen";
+import { VerifyProfileScreen } from "./screens/VerifyProfileScreen";
 import type { Filters, MyProfile, OnboardingState, Profile, Tab } from "./types";
 
 type Stage = "onboarding" | "main";
@@ -68,6 +69,8 @@ export default function App() {
   const [myPhone, setMyPhone] = useState("+55 (47) 98812-4470");
   const [blockedProfiles, setBlockedProfiles] = useState<BlockedProfile[]>([]);
   const [offlineSim, setOfflineSim] = useState(false);
+  const [verifyOpen, setVerifyOpen] = useState(false);
+  const [verified, setVerified] = useState(false);
 
   const { message: toastMessage, showToast } = useToast();
   const chats = useChats();
@@ -262,6 +265,22 @@ export default function App() {
     );
   }
 
+  if (verifyOpen) {
+    return (
+      <div className="app-shell">
+        <div className="app-shell__content">
+          <VerifyProfileScreen
+            photo={myProfile?.photos[0]}
+            verified={verified}
+            onClose={() => setVerifyOpen(false)}
+            onVerified={() => setVerified(true)}
+            onShowToast={showToast}
+          />
+        </div>
+      </div>
+    );
+  }
+
   if (settingsOpen) {
     return (
       <div className="app-shell">
@@ -337,10 +356,11 @@ export default function App() {
             conversationsCount={conversationsCount}
             seenCount={discover.seenCount}
             filters={filters}
+            verified={verified}
             onOpenEdit={() => setEditingProfile(true)}
             onOpenFilters={() => setFiltersOpen(true)}
             onOpenSettings={() => setSettingsOpen(true)}
-            onVerifyProfile={() => showToast("Em breve")}
+            onVerifyProfile={() => setVerifyOpen(true)}
             onLogout={() => {
               setStage("onboarding");
               setMyProfile(null);

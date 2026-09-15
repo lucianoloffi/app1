@@ -82,6 +82,11 @@
 .verifiedBadge {
   font: 700 11px var(--font-ui);
   color: var(--color-accent-2);
+  background: var(--color-accent-soft);
+  border: 1px solid var(--color-accent-line);
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
 }
 
 .meta {
@@ -198,4 +203,14 @@
 
 .accessRowDestructive {
   color: #c8353c;
+}
+
+.verifyHint {
+  font: 600 13px var(--font-ui);
+  color: var(--color-ink-40);
+}
+
+.verifyHintDone {
+  font: 600 13px var(--font-ui);
+  color: var(--color-accent-2);
 }

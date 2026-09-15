@@ -29,6 +29,7 @@ interface ProfileScreenProps {
   conversationsCount: number;
   seenCount: number;
   filters: Filters;
+  verified: boolean;
   onOpenEdit: () => void;
   onOpenFilters: () => void;
   onOpenSettings: () => void;
@@ -42,6 +43,7 @@ export function ProfileScreen({
   conversationsCount,
   seenCount,
   filters,
+  verified,
   onOpenEdit,
   onOpenFilters,
   onOpenSettings,
@@ -85,7 +87,7 @@ export function ProfileScreen({
           <div className={styles.headerMain}>
             <div className={styles.nameRow}>
               <p className={styles.name}>{myProfile?.name || "Você"}</p>
-              <span className={styles.verifiedBadge}>✓ verificado</span>
+              {verified && <span className={styles.verifiedBadge}>✓ verificado</span>}
             </div>
             <p className={styles.meta}>
               {myProfile?.city ?? "Sua cidade"}
@@ -133,7 +135,9 @@ export function ProfileScreen({
           <div className={styles.accessList}>
             <button type="button" className={styles.accessRow} onClick={onVerifyProfile}>
               Verificar meu perfil
-              <span className={styles.chevron}>›</span>
+              <span className={verified ? styles.verifyHintDone : styles.verifyHint}>
+                {verified ? "verificado" : "pendente"}
+              </span>
             </button>
             <button type="button" className={styles.accessRow} onClick={onOpenSettings}>
               Configurações e privacidade
