@@ -41,7 +41,7 @@ export function useChats({ ativo, onError }: UseChatsOptions) {
   const [carregando, setCarregando] = useState(true);
   const chatAberto = useRef<string | null>(null);
 
-  const recarregar = useCallback(async () => {
+  const recarregar = useCallback(async (): Promise<ResumoDeMatch[]> => {
     try {
       const resumos = await listarMatches();
       setChats((anteriores) =>
@@ -58,8 +58,10 @@ export function useChats({ ativo, onError }: UseChatsOptions) {
           return paraChat(resumo, mensagens);
         }),
       );
+      return resumos;
     } catch (problema) {
       onError?.(mensagemDeErro(problema));
+      return [];
     } finally {
       setCarregando(false);
     }

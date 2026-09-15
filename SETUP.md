@@ -94,3 +94,24 @@ Crie uma conta de teste e confira no painel:
   Para aprovar, mude `verificacoes.status` e `profiles.verificacao_status`
   para `'aprovada'`. O selo só aparece depois disso.
 - **Denúncias**: `reports`, com `status` `aberta` → `em_analise` → `resolvida`.
+
+## 8. O que já foi testado
+
+As cinco migrations foram aplicadas em um PostgreSQL 16 local (com stubs no
+lugar do PostGIS e do schema `auth`) antes da entrega. Confirmado:
+
+- os três registros (perfil, preferências, ajustes) nascem junto com o usuário
+- o gate de 18 anos e a imutabilidade da data de nascimento barram o update
+- "cadastro completo" só passa com nome, nascimento, gênero, cidade, intenção,
+  3 interesses e 3 fotos
+- curtida unilateral não cria match; curtida mútua cria com `user_a < user_b`
+- bloquear desativa o match
+- desfazer match apaga os dois swipes e o perfil volta para a fila
+- a distância vem nula com `mostrar_distancia = false`, com localização
+  aproximada e quando falta o GPS de quem está olhando
+- a fila exclui perfil invisível, cadastro incompleto, quem bloqueou e quem já
+  recebeu swipe, e aplica gênero, intenção e faixa etária
+- com RLS ligado, um terceiro lê só o próprio perfil e nenhuma mensagem, match,
+  swipe ou preferência de outra pessoa
+- não dá para escrever em conversa finalizada nem em match desfeito
+- a exportação de dados traz o perfil e não traz a coordenada

@@ -6,6 +6,7 @@ import { useDiscoverQueue } from "./discover/useDiscoverQueue";
 import { useToast } from "./hooks/useToast";
 import { sair } from "./lib/api/auth";
 import { carregarPerfilDoMatch } from "./lib/api/matches";
+import { tempoRelativo } from "./chats/tempo";
 import {
   atualizarTelefone,
   carregarMeuPerfil,
@@ -163,7 +164,12 @@ export default function App() {
     try {
       const lista = await listarBloqueados();
       setBlockedProfiles(
-        lista.map((item) => ({ id: item.id, name: item.nome, photo: item.foto, when: "" })),
+        lista.map((item) => ({
+          id: item.id,
+          name: item.nome,
+          photo: item.foto,
+          when: tempoRelativo(item.criadoEm),
+        })),
       );
     } catch (problema) {
       showToast(mensagemDeErro(problema));
@@ -648,11 +654,11 @@ export default function App() {
           onOpenChat={() => {
             const profileId = discover.matchProfile!.id;
             discover.dismissMatch();
-            void chats.recarregar().then(() => {
-              const chat = chats.chats.find((item) => item.profileId === profileId);
-              if (chat) {
-                chats.openChat(chat.id);
-                setActiveChatId(chat.id);
+            void chats.recarregar().then((lista) => {
+              const encontrado = lista.find((item) => item.outroId === profileId);
+              if (encontrado) {
+                chats.openChat(encontrado.matchId);
+                setActiveChatId(encontrado.matchId);
               }
               setTab("chats");
             });
