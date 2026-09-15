@@ -1,0 +1,87 @@
+.screen {
+  position: absolute;
+  inset: 0;
+  z-index: 25;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+}
+
+.body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  background: var(--color-bg);
+  padding: 18px 24px 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.row {
+  background: #fff;
+  border-radius: 16px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  object-fit: cover;
+  flex: none;
+  background: var(--color-accent-soft);
+}
+
+.main {
+  flex: 1;
+  min-width: 0;
+}
+
+.name {
+  font: 600 15px var(--font-ui);
+  color: var(--color-ink);
+}
+
+.when {
+  font: 400 13px var(--font-ui);
+  color: var(--color-ink-40);
+}
+
+.unblockButton {
+  flex: none;
+  border: 1px solid var(--color-accent-line);
+  background: var(--color-accent-soft);
+  cursor: pointer;
+  font: 700 13px var(--font-ui);
+  color: var(--color-accent-2);
+  padding: 9px 14px;
+  border-radius: 999px;
+}
+
+.emptyWrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 40px 0;
+  text-align: center;
+}
+
+.emptyTitle {
+  margin: 0;
+  font: 700 16px var(--font-ui);
+  color: var(--color-ink-60);
+}
+
+.emptySupport {
+  margin: 0;
+  font: 400 14px/1.5 var(--font-ui);
+  color: var(--color-ink-40);
+  max-width: 250px;
+}

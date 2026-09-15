@@ -1,0 +1,64 @@
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(12, 20, 14, 0.45);
+  z-index: 30;
+  display: flex;
+  align-items: flex-end;
+}
+
+.sheet {
+  width: 100%;
+  background: #fff;
+  border-radius: 22px 22px 0 0;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  composes: lovi-anim-sheet-up from global;
+}
+
+.heading {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.title {
+  margin: 0;
+  font: 700 18px var(--font-ui);
+}
+
+.support {
+  margin: 0;
+  font: 400 14px/1.5 var(--font-ui);
+  color: var(--color-ink-60);
+}
+
+.reasons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.reasonButton {
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--color-line-2);
+  border-radius: var(--radius-field);
+  background: #fff;
+  padding: 14px 16px;
+  font: 600 15px var(--font-ui);
+  color: var(--color-ink);
+  cursor: pointer;
+}
+
+.cancelLink {
+  align-self: center;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font: 600 15px var(--font-ui);
+  color: var(--color-ink-60);
+  padding: 4px;
+}

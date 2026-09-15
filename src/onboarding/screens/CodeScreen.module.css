@@ -1,0 +1,27 @@
+.codeInput {
+  width: 100%;
+  border: 1.5px solid var(--color-line-2);
+  border-radius: var(--radius-field);
+  background: #fff;
+  padding: 18px 12px;
+  text-align: center;
+  font: 800 30px var(--font-ui);
+  letter-spacing: 0.5em;
+  color: var(--color-ink);
+  outline: none;
+}
+
+.codeInput:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 4px rgba(var(--color-accent-rgb), 0.14);
+}
+
+.testLink {
+  align-self: center;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font: 700 14px var(--font-ui);
+  color: var(--color-accent-2);
+  text-align: center;
+}

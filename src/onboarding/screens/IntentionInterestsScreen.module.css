@@ -1,0 +1,39 @@
+.intentionCard {
+  box-sizing: border-box;
+  width: 100%;
+  text-align: left;
+  border: 1.5px solid var(--color-line-2);
+  border-radius: 16px;
+  background: #fff;
+  color: var(--color-ink);
+  padding: 14px 16px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.intentionCardSelected {
+  background: var(--color-accent-soft);
+  border-color: var(--color-accent);
+  color: var(--color-accent-2);
+}
+
+.intentionTitle {
+  font: 700 15px var(--font-ui);
+}
+
+.intentionSubtitle {
+  font: 400 13px var(--font-ui);
+  color: var(--color-ink-40);
+}
+
+.intentionCardSelected .intentionSubtitle {
+  color: #7a5bb8;
+}
+
+.cardStack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}

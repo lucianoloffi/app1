@@ -1,0 +1,54 @@
+.screen {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 26px;
+  background: #fff;
+  padding: 0 40px;
+  text-align: center;
+}
+
+.check {
+  width: 118px;
+  height: 118px;
+  border-radius: var(--radius-pill);
+  background: var(--color-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  composes: lovi-anim-success-pop from global;
+}
+
+.textBlock {
+  display: flex;
+  flex-direction: column;
+}
+
+.title {
+  margin: 0;
+  font: 800 26px/1.2 var(--font-ui);
+  letter-spacing: -0.02em;
+}
+
+.support {
+  margin: 8px 0 0;
+  font: 400 15px/1.5 var(--font-ui);
+  color: var(--color-ink-60);
+}
+
+.dots {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background: var(--color-accent);
+  composes: lovi-anim-typing-dot from global;
+}

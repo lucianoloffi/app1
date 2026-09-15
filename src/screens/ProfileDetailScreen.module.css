@@ -1,0 +1,228 @@
+.screen {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-surface);
+  position: relative;
+}
+
+.scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.photoWrap {
+  flex: none;
+  height: 230px;
+  position: relative;
+  background: #dfe3de;
+}
+
+.photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.backButton {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 2;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.92);
+  border: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 10px -4px rgba(0, 0, 0, 0.4);
+}
+
+.intentionBadge {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  height: 34px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  background: rgba(22, 33, 26, 0.72);
+  color: #fff;
+  font: 700 11px var(--font-ui);
+  padding: 0 14px;
+  border-radius: var(--radius-pill);
+}
+
+.body {
+  flex: none;
+  padding: 24px 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.lifeList {
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-radius: 14px;
+  padding: 4px 16px;
+}
+
+.lifeRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--color-line-3);
+}
+
+.lifeLabel {
+  font: 500 14px var(--font-ui);
+  color: var(--color-ink-60);
+}
+
+.lifeValue {
+  font: 600 15px var(--font-ui);
+  color: var(--color-ink);
+}
+
+.backToChatButton {
+  flex: 1;
+  border: 0;
+  cursor: pointer;
+  font: 700 16px var(--font-ui);
+  color: #fff;
+  background: var(--color-accent);
+  padding: 17px;
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-btn-primary);
+}
+
+.name {
+  margin: 0;
+  font: 800 26px/1.15 var(--font-ui);
+  letter-spacing: -0.02em;
+}
+
+.meta {
+  margin: 6px 0 0;
+  font: 500 15px var(--font-ui);
+  color: var(--color-ink-60);
+}
+
+.bio {
+  margin: 0;
+  font: 400 15px/1.5 var(--font-ui);
+  color: #3b443e;
+}
+
+.chipsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  font: 600 14px var(--font-ui);
+  padding: 9px 15px;
+  border-radius: var(--radius-pill);
+  background: #f7f4fd;
+  color: #655291;
+  border: 1px solid #ece6f8;
+}
+
+.chipCommon {
+  background: #e4d6fe;
+  color: #4a25a8;
+  border: 1px solid #c9aef9;
+}
+
+.thumbGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.thumb {
+  height: 104px;
+  border-radius: 16px;
+  object-fit: cover;
+  width: 100%;
+  display: block;
+  background: #dfe3de;
+}
+
+.reportLink {
+  align-self: center;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font: 600 14px var(--font-ui);
+  color: var(--color-ink-40);
+  text-decoration: underline;
+  padding: 10px 4px;
+}
+
+.reportLink:hover {
+  color: #c8353c;
+}
+
+.backToChatBar {
+  flex: none;
+  padding: 12px 22px 26px;
+  background: #fff;
+  border-top: 1px solid var(--color-line-3);
+  display: flex;
+}
+
+.actions {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  padding: 14px 0 24px;
+}
+
+.actionButton {
+  border: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 160ms var(--ease-standard);
+}
+
+.actionButton:active {
+  transform: scale(0.9);
+}
+
+.actionButton:hover {
+  transform: scale(1.08);
+}
+
+.actionClose {
+  width: var(--tap-action-sm);
+  height: var(--tap-action-sm);
+  border-radius: var(--radius-pill);
+  background: #fff;
+  border: 1px solid var(--color-line);
+  box-shadow: 0 8px 18px -10px rgba(0, 0, 0, 0.4);
+}
+
+.actionLike {
+  width: var(--tap-action-lg);
+  height: var(--tap-action-lg);
+  border-radius: var(--radius-pill);
+  background: var(--color-coral);
+  box-shadow: var(--shadow-btn-like);
+}

@@ -1,0 +1,43 @@
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font: 600 13px var(--font-ui);
+  padding: 7px 9px 7px 13px;
+  border-radius: var(--radius-pill);
+  background: #f8f5fe;
+  color: var(--color-accent-2);
+  border: 1px solid #ede6fb;
+}
+
+.removeButton {
+  appearance: none;
+  border: 0;
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: #e7dcfc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-accent-2);
+  flex: none;
+}
+
+.addChip {
+  appearance: none;
+  cursor: pointer;
+  border-radius: var(--radius-pill);
+  background: #fff;
+  color: var(--color-accent-2);
+  border: 1px solid var(--color-accent-line);
+  font: 700 13px var(--font-ui);
+  padding: 7px 13px;
+}

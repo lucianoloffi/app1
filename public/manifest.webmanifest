@@ -1,0 +1,24 @@
+{
+  "name": "lovi",
+  "short_name": "lovi",
+  "description": "Relacionamento sério, por intenção e interesses.",
+  "start_url": "/app1/",
+  "scope": "/app1/",
+  "display": "standalone",
+  "background_color": "#F4F6F3",
+  "theme_color": "#8B5CF6",
+  "icons": [
+    {
+      "src": "/app1/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/app1/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

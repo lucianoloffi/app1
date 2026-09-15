@@ -1,0 +1,119 @@
+.screen {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+}
+
+.body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  background: var(--color-bg);
+  padding: 20px 24px 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.intro {
+  margin: 0;
+  font: 400 14px/1.5 var(--font-ui);
+  color: var(--color-ink-60);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.tile {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid transparent;
+  padding: 0;
+  cursor: pointer;
+}
+
+.tileCover {
+  border-color: var(--color-accent);
+}
+
+.tileEmpty {
+  background: #f8f4ff;
+  border: 2px dashed #c4a6f3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.mainBadge {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  background: var(--color-accent);
+  color: #fff;
+  font: 700 9px var(--font-ui);
+  padding: 3px 7px;
+  border-radius: 999px;
+}
+
+.removeButton {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  border: 0;
+  background: rgba(22, 33, 26, 0.62);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.makeMainButton {
+  position: absolute;
+  bottom: 6px;
+  left: 6px;
+  right: 6px;
+  text-align: center;
+  border: 0;
+  cursor: pointer;
+  font: 700 9px var(--font-ui);
+  color: #fff;
+  background: rgba(22, 33, 26, 0.62);
+  padding: 4px 6px;
+  border-radius: 999px;
+}
+
+.addLabel {
+  font: 700 9px var(--font-ui);
+  color: var(--color-accent-2);
+}
+
+.hiddenInput {
+  display: none;
+}
+
+.hint {
+  margin: 0;
+  font: 400 13px/1.5 var(--font-ui);
+  color: var(--color-ink-40);
+}

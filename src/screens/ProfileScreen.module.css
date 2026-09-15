@@ -1,0 +1,224 @@
+.screen {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg);
+  position: relative;
+}
+
+.section {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  background: var(--color-bg);
+  padding: 18px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.header {
+  width: 100%;
+  border: 0;
+  background: #fff;
+  padding: 8px var(--screen-padding-x) 22px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.ringWrap {
+  position: relative;
+  width: 88px;
+  height: 88px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ring {
+  position: absolute;
+  inset: 0;
+}
+
+.avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius-pill);
+  object-fit: cover;
+  background: var(--color-accent-soft);
+}
+
+.pct {
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fff;
+  border: 1px solid #ede6fb;
+  border-radius: var(--radius-pill);
+  padding: 2px 9px;
+  font: 800 11px var(--font-ui);
+  color: var(--color-accent-2);
+  white-space: nowrap;
+}
+
+.headerMain {
+  flex: 1;
+  min-width: 0;
+}
+
+.nameRow {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.name {
+  margin: 0;
+  font: 800 22px var(--font-ui);
+  letter-spacing: -0.02em;
+}
+
+.verifiedBadge {
+  font: 700 11px var(--font-ui);
+  color: var(--color-accent-2);
+  background: var(--color-accent-soft);
+  border: 1px solid var(--color-accent-line);
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+}
+
+.meta {
+  margin: 2px 0 0;
+  font: 400 14px var(--font-ui);
+  color: var(--color-ink-60);
+}
+
+.hint {
+  margin: 4px 0 0;
+  font: 500 12px var(--font-ui);
+  color: var(--color-ink-40);
+}
+
+.chevron {
+  color: var(--color-ink-40);
+  flex: none;
+}
+
+.metrics {
+  display: flex;
+  gap: 10px;
+}
+
+.metricCard {
+  flex: 1;
+  background: #fff;
+  border-radius: 16px;
+  padding: 16px;
+  text-align: center;
+}
+
+.metricValue {
+  font: 800 22px var(--font-ui);
+  color: var(--color-accent-2);
+}
+
+.metricLabel {
+  margin-top: 2px;
+  font: 500 12px var(--font-ui);
+  color: var(--color-ink-40);
+}
+
+.filtersCard {
+  width: 100%;
+  border: 0;
+  background: #fff;
+  border-radius: 16px;
+  padding: 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.filtersIcon {
+  flex: none;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: var(--color-accent-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.filtersMain {
+  flex: 1;
+  min-width: 0;
+}
+
+.filtersTitle {
+  margin: 0;
+  font: 600 15px var(--font-ui);
+}
+
+.filtersSummary {
+  margin: 2px 0 0;
+  font: 400 13px var(--font-ui);
+  color: var(--color-ink-40);
+}
+
+.accessList {
+  background: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.accessRow {
+  width: 100%;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 17px 18px;
+  font: 600 15px var(--font-ui);
+  color: var(--color-ink);
+  text-align: left;
+}
+
+.accessRow:not(:last-child) {
+  border-bottom: 1px solid var(--color-line-3);
+}
+
+.accessRowDestructive {
+  color: #c8353c;
+}
+
+.verifyHint {
+  font: 600 13px var(--font-ui);
+  color: var(--color-ink-40);
+}
+
+.verifyHintDone {
+  font: 600 13px var(--font-ui);
+  color: var(--color-accent-2);
+}
+
+.rowChevron {
+  font: 500 14px var(--font-ui);
+  color: var(--color-ink-40);
+}
+
+.rowChevronDestructive {
+  font: 500 14px var(--font-ui);
+  color: #c8353c;
+}

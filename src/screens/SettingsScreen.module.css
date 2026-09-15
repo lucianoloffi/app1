@@ -1,0 +1,76 @@
+.screen {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+}
+
+.body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  background: var(--color-bg);
+  padding: 18px 20px 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.groupLabel {
+  font: 600 12px var(--font-ui);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-ink-40);
+}
+
+.card {
+  background: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.accessRow {
+  width: 100%;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 17px 18px;
+  font: 600 15px var(--font-ui);
+  color: var(--color-ink);
+  text-align: left;
+}
+
+.accessRow:not(:last-child) {
+  border-bottom: 1px solid var(--color-line-3);
+}
+
+.accessValue {
+  font: 500 14px var(--font-ui);
+  color: var(--color-ink-40);
+}
+
+.accessValueDestructive {
+  font: 500 14px var(--font-ui);
+  color: #c8353c;
+}
+
+.accessRowDestructive {
+  color: #c8353c;
+}
+
+.footerNote {
+  text-align: center;
+  font: 400 13px/1.5 var(--font-ui);
+  color: var(--color-ink-40);
+}

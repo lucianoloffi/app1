@@ -1,0 +1,26 @@
+@keyframes toast-in {
+  from {
+    transform: translateY(8px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.toast {
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  bottom: 110px;
+  z-index: 40;
+  background: var(--color-ink);
+  color: #fff;
+  font: 600 14px var(--font-ui);
+  border-radius: 14px;
+  padding: 13px 18px;
+  text-align: center;
+  animation: toast-in 200ms var(--ease-standard) both;
+  pointer-events: none;
+}

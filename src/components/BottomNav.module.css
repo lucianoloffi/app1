@@ -1,0 +1,53 @@
+.nav {
+  flex: none;
+  height: var(--bottom-nav-height);
+  border-top: 1px solid var(--color-line-3);
+  background: var(--color-surface);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding-bottom: var(--bottom-nav-safe-area);
+}
+
+.item {
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: 8px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--tap-min);
+  min-height: var(--tap-min);
+  cursor: pointer;
+  position: relative;
+}
+
+.iconWrap {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.iconWrapLarge {
+  width: 52px;
+  height: 52px;
+}
+
+.badge {
+  position: absolute;
+  top: -2px;
+  right: 2px;
+  background: var(--color-coral);
+  color: #fff;
+  font: 700 10px var(--font-ui);
+  border-radius: var(--radius-pill);
+  padding: 2px 6px;
+  min-width: 16px;
+  text-align: center;
+  line-height: 1.3;
+}
+
