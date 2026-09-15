@@ -284,6 +284,9 @@ export function DiscoverScreen({
           <button type="button" className={styles.primaryButton} onClick={onRestoreProfiles}>
             Rever os perfis
           </button>
+          <button type="button" className={styles.secondaryLink} onClick={onOpenFilters}>
+            Ajustar filtros
+          </button>
         </div>
       )}
 
