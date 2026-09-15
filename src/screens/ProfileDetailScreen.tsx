@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 import { CloseIcon, HeartIcon } from "../components/icons/ActionIcons";
 import { ReportSheet } from "../components/ReportSheet";
-import { CURRENT_USER_INTERESTS } from "../data/mockProfiles";
 import {
   ACTIVITY_LABEL,
   DRINK_LABEL,
@@ -15,25 +14,28 @@ import styles from "./ProfileDetailScreen.module.css";
 
 interface ProfileDetailScreenProps {
   profile: Profile;
+  /** Interesses do usuário logado, para destacar os que são comuns. */
+  myInterests: string[];
   onBack: () => void;
   onLike: () => void;
   onDislike: () => void;
-  onShowToast: (message: string) => void;
+  onReport: (profile: Profile, motivo: string) => void;
   fromChat?: boolean;
 }
 
 export function ProfileDetailScreen({
   profile,
+  myInterests,
   onBack,
   onLike,
   onDislike,
-  onShowToast,
+  onReport,
   fromChat = false,
 }: ProfileDetailScreenProps) {
   const [reportOpen, setReportOpen] = useState(false);
   const commonInterests = useMemo(
-    () => new Set(profile.interests.filter((interest) => CURRENT_USER_INTERESTS.includes(interest))),
-    [profile],
+    () => new Set(profile.interests.filter((interest) => myInterests.includes(interest))),
+    [profile, myInterests],
   );
 
   const lifeRows: { label: string; value: string }[] = [];
@@ -89,8 +91,12 @@ export function ProfileDetailScreen({
               {profile.name}, {profile.age}
             </p>
             <p className={styles.meta}>
-              {profile.profession} · {profile.city.replace(", ", "/")} · a {profile.distanceKm} km
-              daqui
+              {profile.profession} · {profile.city.replace(", ", "/")}
+              {profile.distanceKm === null
+                ? ""
+                : profile.distanceKm < 1
+                  ? " · a menos de 1 km daqui"
+                  : ` · a ${profile.distanceKm} km daqui`}
             </p>
           </div>
 
@@ -143,9 +149,9 @@ export function ProfileDetailScreen({
         <ReportSheet
           name={profile.name}
           onCancel={() => setReportOpen(false)}
-          onSelectReason={() => {
+          onSelectReason={(motivo) => {
             setReportOpen(false);
-            onShowToast("Denúncia enviada. Obrigado por avisar.");
+            onReport(profile, motivo);
           }}
         />
       )}

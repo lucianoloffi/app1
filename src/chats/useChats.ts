@@ -1,95 +1,210 @@
-import { useState } from "react";
-import { seedChats } from "../data/mockChats";
-import type { Chat, Profile } from "../types";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  definirConversaFinalizada,
+  desfazerMatch,
+  listarMatches,
+  type ResumoDeMatch,
+} from "../lib/api/matches";
+import {
+  enviarMensagem,
+  listarMensagens,
+  marcarMensagensLidas,
+  ouvirMatches,
+  ouvirMensagens,
+} from "../lib/api/messages";
+import { mensagemDeErro } from "../lib/errors";
+import type { Chat, ChatMessage } from "../types";
+import { tempoRelativo } from "./tempo";
 
-export function useChats() {
-  const [chats, setChats] = useState<Chat[]>(seedChats);
+interface UseChatsOptions {
+  ativo: boolean;
+  onError?: (mensagem: string) => void;
+}
 
-  function addMatchChat(profile: Profile) {
-    setChats((prev) => {
-      if (prev.some((chat) => chat.profileId === profile.id)) return prev;
-      const chat: Chat = {
-        id: `chat-${profile.id}`,
-        profileId: profile.id,
-        name: profile.name,
-        photo: profile.photos[0],
-        isNew: true,
-        unread: 1,
-        time: "agora",
-        messages: [{ mine: false, text: "Oi! Vi que temos bastante coisa em comum." }],
-      };
-      return [chat, ...prev];
+function paraChat(resumo: ResumoDeMatch, mensagens: ChatMessage[]): Chat {
+  return {
+    id: resumo.matchId,
+    profileId: resumo.outroId,
+    name: resumo.nome,
+    photo: resumo.foto,
+    // "Novo match" enquanto ninguém escreveu nada além da primeira mensagem dela.
+    isNew: !resumo.euJaEnviei && resumo.naoLidas > 0,
+    unread: resumo.naoLidas,
+    time: tempoRelativo(resumo.ultimaEm ?? resumo.criadoEm),
+    locked: resumo.finalizada,
+    messages: mensagens,
+  };
+}
+
+export function useChats({ ativo, onError }: UseChatsOptions) {
+  const [chats, setChats] = useState<Chat[]>([]);
+  const [carregando, setCarregando] = useState(true);
+  const chatAberto = useRef<string | null>(null);
+
+  const recarregar = useCallback(async () => {
+    try {
+      const resumos = await listarMatches();
+      setChats((anteriores) =>
+        resumos.map((resumo) => {
+          const anterior = anteriores.find((chat) => chat.id === resumo.matchId);
+          // A lista mostra só a última mensagem; o histórico completo vem
+          // quando a conversa é aberta.
+          const mensagens =
+            anterior && chatAberto.current === resumo.matchId
+              ? anterior.messages
+              : resumo.ultimaMensagem
+                ? [{ mine: false, text: resumo.ultimaMensagem }]
+                : [];
+          return paraChat(resumo, mensagens);
+        }),
+      );
+    } catch (problema) {
+      onError?.(mensagemDeErro(problema));
+    } finally {
+      setCarregando(false);
+    }
+  }, [onError]);
+
+  useEffect(() => {
+    if (!ativo) return;
+    void recarregar();
+    const parar = ouvirMatches(() => void recarregar());
+    return parar;
+  }, [ativo, recarregar]);
+
+  // Mensagens novas da conversa aberta chegam por realtime.
+  useEffect(() => {
+    if (!ativo) return;
+    const id = chatAberto.current;
+    if (!id) return;
+    return ouvirMensagens(id, (mensagem) => {
+      setChats((prev) =>
+        prev.map((chat) =>
+          chat.id === id && !chat.messages.some((item) => item.id === mensagem.id)
+            ? {
+                ...chat,
+                time: "agora",
+                messages: [...chat.messages, mensagem],
+                unread: mensagem.mine ? chat.unread : 0,
+              }
+            : chat,
+        ),
+      );
+      if (!mensagem.mine) void marcarMensagensLidas(id);
     });
-  }
+  }, [ativo, chats.length]);
 
-  function openChat(id: string) {
+  async function openChat(id: string) {
+    chatAberto.current = id;
     setChats((prev) =>
       prev.map((chat) => (chat.id === id ? { ...chat, isNew: false, unread: 0 } : chat)),
     );
+    try {
+      const [mensagens] = await Promise.all([listarMensagens(id), marcarMensagensLidas(id)]);
+      setChats((prev) =>
+        prev.map((chat) => (chat.id === id ? { ...chat, messages: mensagens } : chat)),
+      );
+    } catch (problema) {
+      onError?.(mensagemDeErro(problema));
+    }
   }
 
-  function sendMessage(id: string, text: string, failed = false) {
-    setChats((prev) =>
-      prev.map((chat) =>
-        chat.id === id
-          ? {
-              ...chat,
-              isNew: false,
-              time: "agora",
-              messages: [...chat.messages, { mine: true, text, failed }],
-            }
-          : chat,
-      ),
-    );
+  function fecharChat() {
+    chatAberto.current = null;
   }
 
-  function retryMessage(id: string, index: number) {
-    setChats((prev) =>
-      prev.map((chat) =>
-        chat.id === id
-          ? {
-              ...chat,
-              messages: chat.messages.map((message, i) =>
-                i === index ? { ...message, failed: false } : message,
-              ),
-            }
-          : chat,
-      ),
-    );
+  async function sendMessage(id: string, text: string, failed = false) {
+    // Sem conexão: a mensagem aparece marcada como não enviada e fica
+    // disponível para "Tentar de novo".
+    if (failed) {
+      setChats((prev) =>
+        prev.map((chat) =>
+          chat.id === id
+            ? { ...chat, time: "agora", messages: [...chat.messages, { mine: true, text, failed: true }] }
+            : chat,
+        ),
+      );
+      return;
+    }
+
+    try {
+      const mensagem = await enviarMensagem(id, text);
+      setChats((prev) =>
+        prev.map((chat) =>
+          chat.id === id && !chat.messages.some((item) => item.id === mensagem.id)
+            ? { ...chat, isNew: false, time: "agora", messages: [...chat.messages, mensagem] }
+            : chat,
+        ),
+      );
+    } catch (problema) {
+      setChats((prev) =>
+        prev.map((chat) =>
+          chat.id === id
+            ? { ...chat, time: "agora", messages: [...chat.messages, { mine: true, text, failed: true }] }
+            : chat,
+        ),
+      );
+      onError?.(mensagemDeErro(problema));
+    }
   }
 
-  function receiveMessage(id: string, text: string) {
-    setChats((prev) =>
-      prev.map((chat) =>
-        chat.id === id ? { ...chat, messages: [...chat.messages, { mine: false, text }] } : chat,
-      ),
-    );
+  async function retryMessage(id: string, index: number) {
+    const chat = chats.find((item) => item.id === id);
+    const mensagem = chat?.messages[index];
+    if (!mensagem) return;
+
+    try {
+      const enviada = await enviarMensagem(id, mensagem.text);
+      setChats((prev) =>
+        prev.map((item) =>
+          item.id === id
+            ? {
+                ...item,
+                messages: item.messages.map((atual, i) => (i === index ? enviada : atual)),
+              }
+            : item,
+        ),
+      );
+    } catch (problema) {
+      onError?.(mensagemDeErro(problema));
+    }
   }
 
-  /** "Desfazer match": encerra a conversa e remove o match da lista. */
-  function removeChat(id: string) {
-    setChats((prev) => prev.filter((chat) => chat.id !== id));
+  async function removeChat(id: string) {
+    try {
+      await desfazerMatch(id);
+      chatAberto.current = null;
+      setChats((prev) => prev.filter((chat) => chat.id !== id));
+    } catch (problema) {
+      onError?.(mensagemDeErro(problema));
+    }
   }
 
-  /** "Finalizar conversa": arquiva — ninguém escreve até alguém reabrir. */
-  function lockChat(id: string) {
-    setChats((prev) => prev.map((chat) => (chat.id === id ? { ...chat, locked: true } : chat)));
-  }
-
-  function unlockChat(id: string) {
-    setChats((prev) => prev.map((chat) => (chat.id === id ? { ...chat, locked: false } : chat)));
+  async function definirFinalizada(id: string, finalizada: boolean) {
+    try {
+      await definirConversaFinalizada(id, finalizada);
+      setChats((prev) =>
+        prev.map((chat) => (chat.id === id ? { ...chat, locked: finalizada } : chat)),
+      );
+    } catch (problema) {
+      onError?.(mensagemDeErro(problema));
+    }
   }
 
   return {
     chats,
-    resetChats: () => setChats(seedChats),
-    addMatchChat,
-    openChat,
-    sendMessage,
-    retryMessage,
-    receiveMessage,
-    removeChat,
-    lockChat,
-    unlockChat,
+    carregando,
+    recarregar,
+    resetChats: () => {
+      chatAberto.current = null;
+      setChats([]);
+    },
+    openChat: (id: string) => void openChat(id),
+    fecharChat,
+    sendMessage: (id: string, text: string, failed = false) => void sendMessage(id, text, failed),
+    retryMessage: (id: string, index: number) => void retryMessage(id, index),
+    removeChat: (id: string) => void removeChat(id),
+    lockChat: (id: string) => void definirFinalizada(id, true),
+    unlockChat: (id: string) => void definirFinalizada(id, false),
   };
 }

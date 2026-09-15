@@ -10,17 +10,18 @@ interface PhoneChangeScreenProps {
   onShowToast: (message: string) => void;
 }
 
+/**
+ * Edição do telefone do perfil. Nesta fase o número não autentica nem é
+ * verificado por SMS — por isso não há código de confirmação.
+ */
 export function PhoneChangeScreen({
   currentPhone,
   onBack,
   onConfirm,
   onShowToast,
 }: PhoneChangeScreenProps) {
-  const [step, setStep] = useState<1 | 2>(1);
   const [dial, setDial] = useState("+55");
   const [phone, setPhone] = useState("");
-  const [code, setCode] = useState("");
-  const [error, setError] = useState(false);
 
   const phoneValid = onlyDigits(phone).length >= 10;
 
@@ -31,101 +32,50 @@ export function PhoneChangeScreen({
       <div className={styles.body}>
         <div className={styles.currentCard}>
           <span className={styles.currentLabel}>Número atual</span>
-          <span className={styles.currentValue}>{currentPhone}</span>
+          <span className={styles.currentValue}>{currentPhone || "Nenhum número salvo"}</span>
         </div>
 
-        {step === 1 ? (
-          <div className={styles.step}>
-            <div className={styles.fieldGroup}>
-              <span className={styles.label}>Novo número</span>
-              <div className={styles.phoneRow}>
-                <input
-                  className={styles.ddiInput}
-                  type="tel"
-                  inputMode="tel"
-                  maxLength={4}
-                  value={dial}
-                  onChange={(e) => setDial(e.target.value.replace(/[^\d+]/g, ""))}
-                />
-                <input
-                  className={styles.input}
-                  type="tel"
-                  inputMode="numeric"
-                  placeholder="(47) 90000-0000"
-                  value={formatPhone(phone)}
-                  onChange={(e) => setPhone(onlyDigits(e.target.value))}
-                />
-              </div>
-            </div>
-            <p className={styles.note}>
-              Seus matches e conversas continuam os mesmos. O número não aparece no perfil.
-            </p>
-            <button
-              type="button"
-              className={
-                phoneValid ? styles.actionButton : `${styles.actionButton} ${styles.actionButtonDisabled}`
-              }
-              disabled={!phoneValid}
-              onClick={() => {
-                setStep(2);
-                onShowToast("Código enviado por SMS");
-              }}
-            >
-              Enviar código
-            </button>
-          </div>
-        ) : (
-          <div className={styles.step}>
-            <div className={styles.fieldGroup}>
-              <span className={styles.label}>
-                Código enviado para {dial} {formatPhone(phone)}
-              </span>
+        <div className={styles.step}>
+          <div className={styles.fieldGroup}>
+            <span className={styles.label}>Novo número</span>
+            <div className={styles.phoneRow}>
               <input
-                className={error ? `${styles.codeInput} ${styles.codeInputError}` : styles.codeInput}
-                type="text"
-                inputMode="numeric"
+                className={styles.ddiInput}
+                type="tel"
+                inputMode="tel"
                 maxLength={4}
-                placeholder="0000"
-                value={code}
-                onChange={(e) => {
-                  setCode(onlyDigits(e.target.value).slice(0, 4));
-                  setError(false);
-                }}
+                value={dial}
+                onChange={(e) => setDial(e.target.value.replace(/[^\d+]/g, ""))}
               />
-              {error && <p className={styles.errorText}>Código incorreto. Use 1234 no protótipo.</p>}
+              <input
+                className={styles.input}
+                type="tel"
+                inputMode="numeric"
+                placeholder="(47) 90000-0000"
+                value={formatPhone(phone)}
+                onChange={(e) => setPhone(onlyDigits(e.target.value))}
+              />
             </div>
-            <button
-              type="button"
-              className={
-                code.length === 4
-                  ? styles.actionButton
-                  : `${styles.actionButton} ${styles.actionButtonDisabled}`
-              }
-              disabled={code.length !== 4}
-              onClick={() => {
-                if (code !== "1234") {
-                  setError(true);
-                  return;
-                }
-                onConfirm(`${dial} ${formatPhone(phone)}`);
-                onShowToast("Número atualizado");
-              }}
-            >
-              Confirmar troca
-            </button>
-            <button
-              type="button"
-              className={styles.backLink}
-              onClick={() => {
-                setStep(1);
-                setCode("");
-                setError(false);
-              }}
-            >
-              Corrigir número
-            </button>
           </div>
-        )}
+          <p className={styles.note}>
+            Seus matches e conversas continuam os mesmos. O número não aparece no perfil.
+          </p>
+          <button
+            type="button"
+            className={
+              phoneValid
+                ? styles.actionButton
+                : `${styles.actionButton} ${styles.actionButtonDisabled}`
+            }
+            disabled={!phoneValid}
+            onClick={() => {
+              onConfirm(`${dial} ${formatPhone(phone)}`);
+              onShowToast("Número atualizado");
+            }}
+          >
+            Salvar número
+          </button>
+        </div>
       </div>
     </div>
   );

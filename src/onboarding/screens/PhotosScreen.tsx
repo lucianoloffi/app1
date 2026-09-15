@@ -5,32 +5,32 @@ import styles from "./PhotosScreen.module.css";
 
 interface PhotosScreenProps {
   photos: (string | null)[];
-  onChangePhotos: (photos: (string | null)[]) => void;
+  busy?: boolean;
+  onPickPhoto: (index: number, file: File) => void;
+  onRemovePhoto: (index: number) => void;
   onBack: () => void;
   onNext: () => void;
 }
 
-export function PhotosScreen({ photos, onChangePhotos, onBack, onNext }: PhotosScreenProps) {
+export function PhotosScreen({
+  photos,
+  busy,
+  onPickPhoto,
+  onRemovePhoto,
+  onBack,
+  onNext,
+}: PhotosScreenProps) {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
-  const isValid = photos.filter(Boolean).length >= MIN_ONBOARDING_PHOTOS;
+  const isValid = photos.filter(Boolean).length >= MIN_ONBOARDING_PHOTOS && !busy;
 
   function handleFile(index: number, file: File | null) {
-    if (!file) return;
-    const url = URL.createObjectURL(file);
-    const next = [...photos];
-    const previous = next[index];
-    next[index] = url;
-    onChangePhotos(next);
-    if (previous) URL.revokeObjectURL(previous);
+    if (file) onPickPhoto(index, file);
   }
 
   function handleTap(index: number) {
-    const current = photos[index];
-    if (current) {
-      const next = [...photos];
-      next[index] = null;
-      onChangePhotos(next);
-      URL.revokeObjectURL(current);
+    if (busy) return;
+    if (photos[index]) {
+      onRemovePhoto(index);
       return;
     }
     inputRefs.current[index]?.click();
@@ -43,7 +43,7 @@ export function PhotosScreen({ photos, onChangePhotos, onBack, onNext }: PhotosS
       title="Suas fotos"
       support="Escolha de 3 a 4. Perfis com 3 fotos recebem mais matches."
       contentGap={14}
-      ctaLabel="Continuar"
+      ctaLabel={busy ? "Enviando…" : "Continuar"}
       ctaDisabled={!isValid}
       onCta={onNext}
     >
@@ -88,7 +88,7 @@ export function PhotosScreen({ photos, onChangePhotos, onBack, onNext }: PhotosS
           );
         })}
       </div>
-      <p className={styles.note}>Toque para simular o envio. A primeira foto é a principal.</p>
+      <p className={styles.note}>Toque para enviar. A primeira foto é a principal.</p>
     </OnboardingLayout>
   );
 }

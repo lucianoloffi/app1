@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { OnboardingLayout } from "../OnboardingLayout";
+import { ageFromBirthdate } from "../../utils/age";
 import { formatBirthdate, onlyDigits } from "../phoneFormat";
 import fieldStyles from "../fields.module.css";
 
@@ -30,8 +31,13 @@ export function NameBirthdateScreen({
     nameRef.current?.focus();
   }, []);
 
+  const idade = ageFromBirthdate(birthdate);
+  const dataCompleta = onlyDigits(birthdate).length >= 8;
+  const menorDeIdade = dataCompleta && idade !== null && idade < 18;
+  const dataInvalida = dataCompleta && (idade === null || idade > 120);
+
   const isValid =
-    name.trim().length > 1 && onlyDigits(birthdate).length >= 8 && bio.trim().length > 4;
+    name.trim().length > 1 && dataCompleta && !menorDeIdade && !dataInvalida && bio.trim().length > 4;
 
   return (
     <OnboardingLayout
@@ -66,7 +72,16 @@ export function NameBirthdateScreen({
           value={formatBirthdate(birthdate)}
           onChange={(e) => onChangeBirthdate(onlyDigits(e.target.value))}
         />
-        <p className={fieldStyles.note}>Mostramos só a idade, nunca a data completa.</p>
+        {menorDeIdade ? (
+          <p className={fieldStyles.error}>
+            O Lovi é só para maiores de 18 anos. Volte quando fizer aniversário — a gente espera
+            por você.
+          </p>
+        ) : dataInvalida ? (
+          <p className={fieldStyles.error}>Confira a data de nascimento.</p>
+        ) : (
+          <p className={fieldStyles.note}>Mostramos só a idade, nunca a data completa.</p>
+        )}
       </div>
       <div className={fieldStyles.fieldGroup}>
         <span className={fieldStyles.label}>Sobre você</span>

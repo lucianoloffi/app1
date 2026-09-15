@@ -1,50 +1,87 @@
-import { useMemo, useRef, useState } from "react";
-import { mockProfiles } from "../data/mockProfiles";
-import type { Filters, Profile, SwipeDirection } from "../types";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { buscarFila } from "../lib/api/discovery";
+import { curtir, dispensar } from "../lib/api/swipes";
+import { mensagemDeErro } from "../lib/errors";
+import type { Profile, SwipeDirection } from "../types";
 
 const SWIPE_ANIMATION_MS = 240;
+const RECARREGA_QUANDO_RESTAM = 3;
 
 interface UseDiscoverQueueOptions {
-  onMatch?: (profile: Profile) => void;
+  /** Só busca a fila depois que a sessão está pronta. */
+  ativo: boolean;
+  /** Muda sempre que os filtros são aplicados, para refazer a fila. */
+  versaoDosFiltros: number;
+  onMatch?: (profile: Profile, matchId: string) => void;
   onLikeWithoutMatch?: (profile: Profile) => void;
-  filters?: Filters;
-}
-
-function applyFilters(profiles: Profile[], filters?: Filters): Profile[] {
-  if (!filters) return profiles;
-  return profiles.filter((profile) => {
-    if (filters.intention !== "todas" && profile.intention !== filters.intention) return false;
-    if (profile.distanceKm > filters.distanceKm) return false;
-    if (profile.age < filters.minAge || profile.age > filters.maxAge) return false;
-    if (filters.interestedIn !== "todos" && profile.gender !== filters.interestedIn) return false;
-    return true;
-  });
+  onError?: (mensagem: string) => void;
 }
 
 export function useDiscoverQueue({
+  ativo,
+  versaoDosFiltros,
   onMatch,
   onLikeWithoutMatch,
-  filters,
-}: UseDiscoverQueueOptions = {}) {
-  const filteredProfiles = useMemo(() => applyFilters(mockProfiles, filters), [filters]);
-  const [queue, setQueue] = useState<Profile[]>(filteredProfiles);
+  onError,
+}: UseDiscoverQueueOptions) {
+  const [queue, setQueue] = useState<Profile[]>([]);
   const [photoIndex, setPhotoIndex] = useState(0);
   const [swipeDirection, setSwipeDirection] = useState<SwipeDirection>(null);
   const [matchProfile, setMatchProfile] = useState<Profile | null>(null);
   const [seenCount, setSeenCount] = useState(0);
+  const [carregando, setCarregando] = useState(true);
+  const [houvePerfis, setHouvePerfis] = useState(true);
   const isAnimating = useRef(false);
+  const pagina = useRef(0);
+  const acabou = useRef(false);
 
-  const [appliedFilters, setAppliedFilters] = useState(filteredProfiles);
-  if (appliedFilters !== filteredProfiles) {
-    setAppliedFilters(filteredProfiles);
-    setQueue(filteredProfiles);
-    setPhotoIndex(0);
-  }
+  const carregarPagina = useCallback(
+    async (numero: number, substituir: boolean) => {
+      if (substituir) {
+        setCarregando(true);
+        setPhotoIndex(0);
+      }
+      try {
+        const perfis = await buscarFila(numero);
+        acabou.current = perfis.length === 0;
+        setQueue((prev) => {
+          const base = substituir ? [] : prev;
+          const jaTem = new Set(base.map((item) => item.id));
+          return [...base, ...perfis.filter((item) => !jaTem.has(item.id))];
+        });
+        if (substituir) setHouvePerfis(perfis.length > 0);
+      } catch (problema) {
+        onError?.(mensagemDeErro(problema));
+      } finally {
+        setCarregando(false);
+      }
+    },
+    [onError],
+  );
+
+  // Fila refeita a cada mudança de filtros (que já foram salvos no servidor).
+  // O efeito busca dados: o estado de carregamento muda dentro de carregarPagina.
+  useEffect(() => {
+    if (!ativo) return;
+    pagina.current = 0;
+    acabou.current = false;
+    // oxlint-disable-next-line react/set-state-in-effect
+    void carregarPagina(0, true);
+  }, [ativo, versaoDosFiltros, carregarPagina]);
+
+  // Busca a próxima página antes de a fila acabar.
+  useEffect(() => {
+    if (!ativo || carregando || acabou.current) return;
+    if (queue.length > RECARREGA_QUANDO_RESTAM) return;
+    pagina.current += 1;
+    // oxlint-disable-next-line react/set-state-in-effect
+    void carregarPagina(pagina.current, false);
+  }, [ativo, carregando, queue.length, carregarPagina]);
 
   const current = queue[0] ?? null;
 
   function nextPhoto() {
-    if (!current) return;
+    if (!current || current.photos.length === 0) return;
     setPhotoIndex((prev) => (prev + 1) % current.photos.length);
   }
 
@@ -61,20 +98,25 @@ export function useDiscoverQueue({
     }, SWIPE_ANIMATION_MS);
   }
 
-  function advance(direction: "left" | "right") {
+  async function advance(direction: "left" | "right") {
     if (isAnimating.current || !current) return;
-    const liked = direction === "right";
+    const perfil = current;
 
-    if (liked && current.likesYou) {
-      // Deu match: o card fica parado atrás do overlay, sem avançar a fila ainda.
-      setMatchProfile(current);
-      onMatch?.(current);
-      return;
+    try {
+      const resultado = direction === "right" ? await curtir(perfil.id) : await dispensar(perfil.id);
+
+      if (direction === "right" && resultado.matched && resultado.matchId) {
+        // O card fica parado atrás do overlay até a pessoa fechá-lo.
+        setMatchProfile(perfil);
+        onMatch?.(perfil, resultado.matchId);
+        return;
+      }
+
+      if (direction === "right") onLikeWithoutMatch?.(perfil);
+      completeAdvance();
+    } catch (problema) {
+      onError?.(mensagemDeErro(problema));
     }
-
-    if (liked) onLikeWithoutMatch?.(current);
-
-    completeAdvance();
   }
 
   return {
@@ -83,21 +125,22 @@ export function useDiscoverQueue({
     swipeDirection,
     matchProfile,
     seenCount,
-    hasAnyMatch: filteredProfiles.length > 0,
+    carregando,
+    hasAnyMatch: houvePerfis,
     nextPhoto,
-    like: () => advance("right"),
-    dislike: () => advance("left"),
+    like: () => void advance("right"),
+    dislike: () => void advance("left"),
     dismissMatch: () => {
       if (!matchProfile) return;
       setMatchProfile(null);
       completeAdvance();
     },
-    /** Desfazer match devolve o perfil logo atrás do card atual, sem curtida de volta. */
+    /** Desfazer match devolve o perfil logo atrás do card atual. */
     restoreToQueue: (profile: Profile) => {
       setQueue((prev) => {
         if (prev.some((item) => item.id === profile.id)) return prev;
         const next = [...prev];
-        next.splice(1, 0, { ...profile, likesYou: false });
+        next.splice(1, 0, profile);
         return next;
       });
     },

@@ -41,13 +41,16 @@ export function GenderInterestCityScreen({
 }: GenderInterestCityScreenProps) {
   const [suggestionsOpen, setSuggestionsOpen] = useState(false);
 
+  // A cidade é uma lista fechada: ela alimenta o fallback de localização
+  // (centro do município) quando a pessoa não libera o GPS.
   const suggestions = useMemo(() => {
-    if (city.trim().length < 3) return [];
     const query = city.trim().toLowerCase();
+    if (!query || CITY_OPTIONS.includes(city)) return CITY_OPTIONS.slice(0, 4);
     return CITY_OPTIONS.filter((option) => option.toLowerCase().includes(query)).slice(0, 4);
   }, [city]);
 
-  const isValid = Boolean(gender) && Boolean(interestedIn) && city.trim().length > 2;
+  const cidadeEscolhida = CITY_OPTIONS.includes(city);
+  const isValid = Boolean(gender) && Boolean(interestedIn) && cidadeEscolhida;
 
   return (
     <OnboardingLayout
@@ -79,7 +82,7 @@ export function GenderInterestCityScreen({
         <input
           className={fieldStyles.input}
           type="text"
-          placeholder="Sua cidade"
+          placeholder="Escolha sua cidade"
           value={city}
           onChange={(e) => {
             onChangeCity(e.target.value);
@@ -88,6 +91,9 @@ export function GenderInterestCityScreen({
           onFocus={() => setSuggestionsOpen(true)}
           onBlur={() => window.setTimeout(() => setSuggestionsOpen(false), 120)}
         />
+        {!cidadeEscolhida && city.trim().length > 0 && (
+          <p className={fieldStyles.note}>Escolha uma das cidades da lista.</p>
+        )}
         {suggestionsOpen && suggestions.length > 0 && (
           <div className={styles.suggestions}>
             {suggestions.map((option) => (

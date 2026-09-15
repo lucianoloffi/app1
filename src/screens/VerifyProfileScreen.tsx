@@ -1,61 +1,82 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
+import { enviarSelfieDeVerificacao } from "../lib/api/photos";
+import { mensagemDeErro } from "../lib/errors";
+import type { VerificationStatus } from "../types";
 import styles from "./VerifyProfileScreen.module.css";
-
-type VerifyState = "idle" | "loading" | "done";
 
 interface VerifyProfileScreenProps {
   photo?: string;
-  verified: boolean;
+  status: VerificationStatus;
   onClose: () => void;
-  onVerified: () => void;
+  onSent: () => void;
   onShowToast: (message: string) => void;
 }
 
 export function VerifyProfileScreen({
   photo,
-  verified,
+  status,
   onClose,
-  onVerified,
+  onSent,
   onShowToast,
 }: VerifyProfileScreenProps) {
-  const [state, setState] = useState<VerifyState>(verified ? "done" : "idle");
-  const timeoutRef = useRef<number | null>(null);
+  const [enviando, setEnviando] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    return () => {
-      if (timeoutRef.current) window.clearTimeout(timeoutRef.current);
-    };
-  }, []);
+  const emAnalise = status === "pendente";
+  const aprovada = status === "aprovada";
+  const recusada = status === "rejeitada";
+
+  async function enviarSelfie(arquivo: File) {
+    setEnviando(true);
+    try {
+      await enviarSelfieDeVerificacao(arquivo);
+      onSent();
+      onShowToast("Selfie enviada. Avisamos quando a análise terminar.");
+    } catch (problema) {
+      onShowToast(mensagemDeErro(problema));
+    } finally {
+      setEnviando(false);
+    }
+  }
 
   function handleCta() {
-    if (state === "loading") return;
-    if (state === "done") {
+    if (enviando) return;
+    if (aprovada || emAnalise) {
       onClose();
       return;
     }
-    setState("loading");
-    timeoutRef.current = window.setTimeout(() => {
-      setState("done");
-      onVerified();
-      onShowToast("Perfil verificado");
-    }, 1800);
+    inputRef.current?.click();
   }
 
-  const title =
-    state === "done"
-      ? "Perfil verificado"
-      : state === "loading"
-        ? "Analisando sua selfie"
-        : "Tire uma selfie agora";
+  const title = aprovada
+    ? "Perfil verificado"
+    : emAnalise
+      ? "Selfie em análise"
+      : enviando
+        ? "Enviando sua selfie"
+        : recusada
+          ? "Precisamos de outra selfie"
+          : "Tire uma selfie agora";
 
-  const body =
-    state === "done"
-      ? "Seu perfil recebeu o selo de verificado. Perfis verificados aparecem com prioridade na fila."
-      : state === "loading"
-        ? "Comparamos a selfie com as fotos do seu perfil. Leva poucos segundos."
-        : "Fique em um lugar iluminado, sem óculos escuros e sem boné. Comparamos a selfie com as fotos do seu perfil.";
+  const body = aprovada
+    ? "Seu perfil recebeu o selo de verificado. Perfis verificados aparecem com prioridade na fila."
+    : emAnalise
+      ? "Uma pessoa da nossa equipe compara a selfie com as fotos do seu perfil. A análise não é automática e pode levar até 24 horas — avisamos por aqui quando terminar."
+      : enviando
+        ? "Só um instante, estamos enviando sua foto com segurança."
+        : recusada
+          ? "A selfie anterior não deu para comparar com as fotos do seu perfil. Tente de novo em um lugar iluminado, sem óculos escuros e sem boné."
+          : "Fique em um lugar iluminado, sem óculos escuros e sem boné. Comparamos a selfie com as fotos do seu perfil — a análise é feita por uma pessoa e leva até 24 horas.";
 
-  const ctaLabel = state === "done" ? "Tudo certo" : state === "loading" ? "Analisando…" : "Tirar selfie";
+  const ctaLabel = aprovada
+    ? "Tudo certo"
+    : emAnalise
+      ? "Voltar"
+      : enviando
+        ? "Enviando…"
+        : recusada
+          ? "Enviar outra selfie"
+          : "Tirar selfie";
 
   return (
     <div className={styles.screen}>
@@ -76,12 +97,12 @@ export function VerifyProfileScreen({
 
       <div className={styles.body}>
         <div
-          className={`${styles.ring} ${state === "done" ? styles.ringDone : ""} ${
-            state === "loading" ? styles.ringLoading : ""
+          className={`${styles.ring} ${aprovada ? styles.ringDone : ""} ${
+            enviando ? styles.ringLoading : ""
           }`}
         >
           <img
-            className={state === "loading" ? `${styles.face} ${styles.faceLoading}` : styles.face}
+            className={enviando ? `${styles.face} ${styles.faceLoading}` : styles.face}
             src={photo ?? "https://i.pravatar.cc/300?img=15"}
             alt="Sua foto"
           />
@@ -101,10 +122,23 @@ export function VerifyProfileScreen({
         </div>
       </div>
 
+      <input
+        ref={inputRef}
+        className={styles.hiddenInput}
+        type="file"
+        accept="image/*"
+        capture="user"
+        onChange={(e) => {
+          const arquivo = e.target.files?.[0];
+          e.target.value = "";
+          if (arquivo) void enviarSelfie(arquivo);
+        }}
+      />
+
       <div className={styles.footer}>
         <button
           type="button"
-          className={state === "loading" ? `${styles.ctaButton} ${styles.ctaButtonLoading}` : styles.ctaButton}
+          className={enviando ? `${styles.ctaButton} ${styles.ctaButtonLoading}` : styles.ctaButton}
           onClick={handleCta}
         >
           {ctaLabel}

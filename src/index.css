@@ -52,3 +52,19 @@ button {
   flex-direction: column;
   position: relative;
 }
+
+/* Documentos legais cobrem o app inteiro sem desmontar a tela de baixo —
+   assim o cadastro não perde o que já foi preenchido. */
+.app-legal-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg);
+}
+
+.app-loading {
+  flex: 1;
+  background: var(--color-bg);
+}

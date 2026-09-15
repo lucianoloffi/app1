@@ -8,14 +8,18 @@ import type {
   OnboardingStep,
   RelationshipStatus,
 } from "../types";
-import { MAX_INTERESTS } from "./constants";
+import { cadastrar } from "../lib/api/auth";
+import { enviarFoto, removerFoto, type FotoDoPerfil } from "../lib/api/photos";
+import { concluirCadastro } from "../lib/api/profile";
+import { registrarConsentimentos } from "../lib/api/privacy";
+import { mensagemDeErro } from "../lib/errors";
+import { MAX_INTERESTS, MAX_ONBOARDING_PHOTOS } from "./constants";
 import { LoginFlow } from "./LoginFlow";
-import { CodeScreen } from "./screens/CodeScreen";
+import { AccountScreen, type DocumentoLegal } from "./screens/AccountScreen";
 import { GenderInterestCityScreen } from "./screens/GenderInterestCityScreen";
 import { IntentionInterestsScreen } from "./screens/IntentionInterestsScreen";
 import { LifestyleScreen } from "./screens/LifestyleScreen";
 import { NameBirthdateScreen } from "./screens/NameBirthdateScreen";
-import { PhoneScreen } from "./screens/PhoneScreen";
 import { PhotosScreen } from "./screens/PhotosScreen";
 import { ProfessionHeightStatusScreen } from "./screens/ProfessionHeightStatusScreen";
 import { SuccessScreen } from "./screens/SuccessScreen";
@@ -23,8 +27,11 @@ import { WelcomeScreen } from "./screens/WelcomeScreen";
 
 const INITIAL_STATE: OnboardingState = {
   step: "welcome",
+  email: "",
+  password: "",
   phone: "",
-  code: "",
+  acceptedTerms: false,
+  acceptedSensitiveData: false,
   name: "",
   birthdate: "",
   bio: "",
@@ -40,43 +47,94 @@ const INITIAL_STATE: OnboardingState = {
   relationshipStatus: null,
 };
 
-const DEMO_LOGIN_STATE: OnboardingState = {
-  step: null,
-  phone: "47988124470",
-  code: "1234",
-  name: "Mariana Silva",
-  birthdate: "12/05/1996",
-  bio: "Voltei a usar o app depois de um tempo.",
-  gender: "mulher",
-  interestedIn: "homem",
-  city: "Joinville, SC",
-  photos: ["https://i.pravatar.cc/600?img=48", null, null, null],
-  intention: "serio",
-  interests: ["Praia", "Viagem", "Café"],
-  lifestyle: { bebida: "socialmente", atividade: "algumas-vezes", filhos: "nao-tenho" },
-  profession: "Fisioterapeuta",
-  height: 1.68,
-  relationshipStatus: "solteiro",
-};
-
 interface OnboardingFlowProps {
-  onComplete: (state: OnboardingState) => void;
+  /** Chamado quando a conta já existe e o perfil está pronto para uso. */
+  onComplete: () => void;
   onShowToast: (message: string) => void;
+  onOpenLegal: (documento: DocumentoLegal) => void;
 }
 
-export function OnboardingFlow({ onComplete, onShowToast }: OnboardingFlowProps) {
+export function OnboardingFlow({ onComplete, onShowToast, onOpenLegal }: OnboardingFlowProps) {
   const [state, setState] = useState<OnboardingState>(INITIAL_STATE);
   const [mode, setMode] = useState<"signup" | "login">("signup");
+  const [fotos, setFotos] = useState<(FotoDoPerfil | null)[]>(
+    Array.from({ length: MAX_ONBOARDING_PHOTOS }, () => null),
+  );
+  const [ocupado, setOcupado] = useState(false);
+  const [erroDaConta, setErroDaConta] = useState<string | null>(null);
 
   function goTo(step: OnboardingStep) {
     setState((prev) => ({ ...prev, step }));
+  }
+
+  async function criarConta() {
+    if (ocupado) return;
+    setOcupado(true);
+    setErroDaConta(null);
+    try {
+      await cadastrar({ email: state.email, senha: state.password, telefone: state.phone });
+      await registrarConsentimentos(["termos", "diretrizes", "privacidade", "dados_sensiveis"]);
+      goTo("name-birthdate");
+    } catch (problema) {
+      setErroDaConta(mensagemDeErro(problema));
+    } finally {
+      setOcupado(false);
+    }
+  }
+
+  async function enviarFotoDoPasso(indice: number, arquivo: File) {
+    if (ocupado) return;
+    setOcupado(true);
+    try {
+      const foto = await enviarFoto(arquivo);
+      setFotos((prev) => prev.map((item, i) => (i === indice ? foto : item)));
+      setState((prev) => ({
+        ...prev,
+        photos: prev.photos.map((item, i) => (i === indice ? foto.url : item)),
+      }));
+    } catch (problema) {
+      onShowToast(mensagemDeErro(problema));
+    } finally {
+      setOcupado(false);
+    }
+  }
+
+  async function removerFotoDoPasso(indice: number) {
+    const foto = fotos[indice];
+    if (!foto || ocupado) return;
+    setOcupado(true);
+    try {
+      await removerFoto(foto.id, foto.path);
+      setFotos((prev) => prev.map((item, i) => (i === indice ? null : item)));
+      setState((prev) => ({
+        ...prev,
+        photos: prev.photos.map((item, i) => (i === indice ? null : item)),
+      }));
+    } catch (problema) {
+      onShowToast(mensagemDeErro(problema));
+    } finally {
+      setOcupado(false);
+    }
+  }
+
+  async function finalizarCadastro() {
+    if (ocupado) return;
+    setOcupado(true);
+    try {
+      await concluirCadastro(state);
+      goTo("success");
+    } catch (problema) {
+      onShowToast(mensagemDeErro(problema));
+    } finally {
+      setOcupado(false);
+    }
   }
 
   if (mode === "login") {
     return (
       <LoginFlow
         onGoSignup={() => setMode("signup")}
-        onLoginSuccess={() => onComplete(DEMO_LOGIN_STATE)}
+        onLoginSuccess={onComplete}
         onShowToast={onShowToast}
       />
     );
@@ -85,26 +143,32 @@ export function OnboardingFlow({ onComplete, onShowToast }: OnboardingFlowProps)
   switch (state.step) {
     case "welcome":
       return (
-        <WelcomeScreen onCreateAccount={() => goTo("phone")} onHaveAccount={() => setMode("login")} />
-      );
-
-    case "phone":
-      return (
-        <PhoneScreen
-          phone={state.phone}
-          onChangePhone={(phone) => setState((prev) => ({ ...prev, phone }))}
-          onBack={() => goTo("welcome")}
-          onNext={() => goTo("code")}
+        <WelcomeScreen
+          onCreateAccount={() => goTo("account")}
+          onHaveAccount={() => setMode("login")}
         />
       );
 
-    case "code":
+    case "account":
       return (
-        <CodeScreen
-          code={state.code}
-          onChangeCode={(code) => setState((prev) => ({ ...prev, code }))}
-          onBack={() => goTo("phone")}
-          onNext={() => goTo("name-birthdate")}
+        <AccountScreen
+          email={state.email}
+          password={state.password}
+          phone={state.phone}
+          acceptedTerms={state.acceptedTerms}
+          acceptedSensitiveData={state.acceptedSensitiveData}
+          loading={ocupado}
+          error={erroDaConta}
+          onChangeEmail={(email) => setState((prev) => ({ ...prev, email }))}
+          onChangePassword={(password) => setState((prev) => ({ ...prev, password }))}
+          onChangePhone={(phone) => setState((prev) => ({ ...prev, phone }))}
+          onToggleTerms={() => setState((prev) => ({ ...prev, acceptedTerms: !prev.acceptedTerms }))}
+          onToggleSensitiveData={() =>
+            setState((prev) => ({ ...prev, acceptedSensitiveData: !prev.acceptedSensitiveData }))
+          }
+          onOpenLegal={onOpenLegal}
+          onBack={() => goTo("welcome")}
+          onNext={() => void criarConta()}
         />
       );
 
@@ -117,7 +181,7 @@ export function OnboardingFlow({ onComplete, onShowToast }: OnboardingFlowProps)
           onChangeName={(name) => setState((prev) => ({ ...prev, name }))}
           onChangeBirthdate={(birthdate) => setState((prev) => ({ ...prev, birthdate }))}
           onChangeBio={(bio) => setState((prev) => ({ ...prev, bio }))}
-          onBack={() => goTo("code")}
+          onBack={() => goTo("account")}
           onNext={() => goTo("gender-interest-city")}
         />
       );
@@ -142,7 +206,9 @@ export function OnboardingFlow({ onComplete, onShowToast }: OnboardingFlowProps)
       return (
         <PhotosScreen
           photos={state.photos}
-          onChangePhotos={(photos) => setState((prev) => ({ ...prev, photos }))}
+          busy={ocupado}
+          onPickPhoto={(index, file) => void enviarFotoDoPasso(index, file)}
+          onRemovePhoto={(index) => void removerFotoDoPasso(index)}
           onBack={() => goTo("gender-interest-city")}
           onNext={() => goTo("intention-interests")}
         />
@@ -153,9 +219,7 @@ export function OnboardingFlow({ onComplete, onShowToast }: OnboardingFlowProps)
         <IntentionInterestsScreen
           intention={state.intention}
           interests={state.interests}
-          onChangeIntention={(intention: Intention) =>
-            setState((prev) => ({ ...prev, intention }))
-          }
+          onChangeIntention={(intention: Intention) => setState((prev) => ({ ...prev, intention }))}
           onToggleInterest={(interest) =>
             setState((prev) => ({
               ...prev,
@@ -194,12 +258,12 @@ export function OnboardingFlow({ onComplete, onShowToast }: OnboardingFlowProps)
             setState((prev) => ({ ...prev, relationshipStatus }))
           }
           onBack={() => goTo("lifestyle")}
-          onFinish={() => goTo("success")}
+          onFinish={() => void finalizarCadastro()}
         />
       );
 
     case "success":
-      return <SuccessScreen name={state.name} onDone={() => onComplete(state)} />;
+      return <SuccessScreen name={state.name} onDone={onComplete} />;
 
     default:
       return null;

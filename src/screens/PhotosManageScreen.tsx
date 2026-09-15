@@ -5,7 +5,10 @@ import styles from "./PhotosManageScreen.module.css";
 
 interface PhotosManageScreenProps {
   photos: string[];
-  onChange: (photos: string[]) => void;
+  busy?: boolean;
+  onAddPhoto: (file: File) => void;
+  onRemovePhoto: (index: number) => void;
+  onMakeMain: (index: number) => void;
   onBack: () => void;
   onShowToast: (message: string) => void;
 }
@@ -21,33 +24,28 @@ function photoHint(count: number): string {
 
 export function PhotosManageScreen({
   photos,
-  onChange,
+  busy,
+  onAddPhoto,
+  onRemovePhoto,
+  onMakeMain,
   onBack,
-  onShowToast,
 }: PhotosManageScreenProps) {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const slots = [...photos, ...Array(MAX_PROFILE_PHOTOS).fill(null)].slice(0, MAX_PROFILE_PHOTOS);
 
-  function handleFile(index: number, file: File | null) {
-    if (!file) return;
-    const url = URL.createObjectURL(file);
-    const next = [...photos];
-    next[index] = url;
-    onChange(next.filter(Boolean));
-    onShowToast("Foto adicionada");
+  function handleFile(_index: number, file: File | null) {
+    if (!file || busy) return;
+    onAddPhoto(file);
   }
 
   function handleRemove(index: number) {
-    onChange(photos.filter((_, i) => i !== index));
-    onShowToast("Foto removida");
+    if (busy) return;
+    onRemovePhoto(index);
   }
 
   function handleMakeMain(index: number) {
-    const next = [...photos];
-    const [chosen] = next.splice(index, 1);
-    next.unshift(chosen);
-    onChange(next);
-    onShowToast("Foto principal atualizada");
+    if (busy) return;
+    onMakeMain(index);
   }
 
   return (

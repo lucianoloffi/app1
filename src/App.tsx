@@ -1,10 +1,30 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { BottomNav } from "./components/BottomNav";
 import { Toast } from "./components/Toast";
 import { useChats } from "./chats/useChats";
-import { findProfileById } from "./data/mockProfiles";
 import { useDiscoverQueue } from "./discover/useDiscoverQueue";
 import { useToast } from "./hooks/useToast";
+import { sair } from "./lib/api/auth";
+import { carregarPerfilDoMatch } from "./lib/api/matches";
+import {
+  atualizarTelefone,
+  carregarMeuPerfil,
+  definirMostrarDistancia,
+  definirVisibilidade,
+  salvarFiltros,
+  salvarPerfil,
+} from "./lib/api/profile";
+import { excluirConta, exportarMeusDados } from "./lib/api/privacy";
+import { bloquear, denunciar, desbloquear, listarBloqueados } from "./lib/api/safety";
+import { carregarAjustes, salvarAjustes, type AjustesDeNotificacao } from "./lib/api/settings";
+import { mensagemDeErro } from "./lib/errors";
+import {
+  atualizarLocalizacaoNaAbertura,
+  estadoDaPermissao,
+  pedirEAtualizarLocalizacao,
+  usarCidadeComoLocalizacao,
+  type EstadoDaPermissao,
+} from "./lib/geo";
 import { OnboardingFlow } from "./onboarding/OnboardingFlow";
 import { BlockedProfilesScreen, type BlockedProfile } from "./screens/BlockedProfilesScreen";
 import { ChatScreen } from "./screens/ChatScreen";
@@ -12,6 +32,8 @@ import { ChatsScreen } from "./screens/ChatsScreen";
 import { DiscoverScreen } from "./screens/DiscoverScreen";
 import { EditProfileScreen } from "./screens/EditProfileScreen";
 import { FiltersScreen } from "./screens/FiltersScreen";
+import { LegalScreen, type DocumentoLegal } from "./screens/LegalScreen";
+import { LocationBlockedScreen } from "./screens/LocationBlockedScreen";
 import { MatchOverlay } from "./screens/MatchOverlay";
 import {
   PermissionsScreen,
@@ -23,97 +45,191 @@ import { ProfileDetailScreen } from "./screens/ProfileDetailScreen";
 import { ProfileScreen } from "./screens/ProfileScreen";
 import { SettingsScreen } from "./screens/SettingsScreen";
 import { VerifyProfileScreen } from "./screens/VerifyProfileScreen";
-import type { Filters, MyProfile, OnboardingState, Profile, Tab } from "./types";
+import type { Filters, MyProfile, Profile, Tab } from "./types";
 
-type Stage = "onboarding" | "main";
+type Stage = "carregando" | "onboarding" | "main";
 
 const INITIAL_FILTERS: Filters = {
   intention: "todas",
   distanceKm: 25,
   minAge: 25,
   maxAge: 45,
-  interestedIn: "mulher",
+  interestedIn: "todos",
 };
 
-function buildMyProfile(state: OnboardingState): MyProfile {
-  return {
-    name: state.name,
-    city: state.city,
-    birthdate: state.birthdate,
-    gender: state.gender ?? "outros",
-    bio: state.bio,
-    photos: state.photos.filter((photo): photo is string => Boolean(photo)),
-    intention: state.intention ?? "conhecer",
-    interestedIn: state.interestedIn ?? "todos",
-    interests: state.interests,
-    lifestyle: state.lifestyle,
-    profession: state.profession,
-    height: state.height,
-    relationshipStatus: state.relationshipStatus,
-  };
-}
+const AJUSTES_PADRAO: AjustesDeNotificacao = {
+  notifMatch: true,
+  notifMensagem: true,
+  notifNovidades: true,
+};
 
 export default function App() {
-  const [stage, setStage] = useState<Stage>("onboarding");
+  const [stage, setStage] = useState<Stage>("carregando");
   const [tab, setTab] = useState<Tab>("discover");
+
+  const [myProfile, setMyProfile] = useState<MyProfile | null>(null);
+  const [filters, setFilters] = useState<Filters>(INITIAL_FILTERS);
+  const [versaoDosFiltros, setVersaoDosFiltros] = useState(0);
+  const [ajustes, setAjustes] = useState<AjustesDeNotificacao>(AJUSTES_PADRAO);
 
   const [detailProfile, setDetailProfile] = useState<Profile | null>(null);
   const [detailChatId, setDetailChatId] = useState<string | null>(null);
+  const [chatProfile, setChatProfile] = useState<Profile | null>(null);
 
   const [editingProfile, setEditingProfile] = useState(false);
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
-  const [myProfile, setMyProfile] = useState<MyProfile | null>(null);
-  const [filters, setFilters] = useState<Filters>(INITIAL_FILTERS);
   const [filtersOpen, setFiltersOpen] = useState(false);
-
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [blockedOpen, setBlockedOpen] = useState(false);
   const [permissionsOpen, setPermissionsOpen] = useState(false);
   const [phoneChangeOpen, setPhoneChangeOpen] = useState(false);
-  const [myPhone, setMyPhone] = useState("+55 (47) 98812-4470");
+  const [verifyOpen, setVerifyOpen] = useState(false);
+  const [documentoLegal, setDocumentoLegal] = useState<DocumentoLegal | null>(null);
+
   const [blockedProfiles, setBlockedProfiles] = useState<BlockedProfile[]>([]);
   const [offlineSim, setOfflineSim] = useState(false);
-  const [verifyOpen, setVerifyOpen] = useState(false);
-  const [verified, setVerified] = useState(false);
   const [permissions, setPermissions] = useState<Record<PermissionKey, PermissionState>>({
-    local: "granted",
+    local: "ask",
     notif: "ask",
     cam: "ask",
   });
 
+  const [temLocalizacao, setTemLocalizacao] = useState(true);
+  const [permissaoLocal, setPermissaoLocal] = useState<EstadoDaPermissao>("perguntar");
+  const [localGateAberto, setLocalGateAberto] = useState(false);
+
   const { message: toastMessage, showToast } = useToast();
-  const chats = useChats();
+
+  const chats = useChats({ ativo: stage === "main", onError: showToast });
   const discover = useDiscoverQueue({
-    filters,
-    onMatch: (profile) => chats.addMatchChat(profile),
+    ativo: stage === "main",
+    versaoDosFiltros,
+    onMatch: () => void chats.recarregar(),
     onLikeWithoutMatch: (profile) =>
       showToast(`Você curtiu ${profile.name.split(" ")[0]}. Avisamos se ela curtir de volta.`),
+    onError: showToast,
   });
+
+  const carregarSessao = useCallback(async () => {
+    try {
+      const dados = await carregarMeuPerfil();
+      if (!dados) {
+        setMyProfile(null);
+        setStage("onboarding");
+        return;
+      }
+      setMyProfile(dados.perfil);
+      setFilters(dados.filtros);
+      setTemLocalizacao(dados.temLocalizacao);
+      setStage(dados.cadastroCompleto ? "main" : "onboarding");
+    } catch (problema) {
+      showToast(mensagemDeErro(problema));
+      setStage("onboarding");
+    }
+  }, [showToast]);
+
+  useEffect(() => {
+    void carregarSessao();
+  }, [carregarSessao]);
+
+  // Localização na abertura: só com a permissão já concedida, nunca em background.
+  useEffect(() => {
+    if (stage !== "main") return;
+    void (async () => {
+      const resultado = await atualizarLocalizacaoNaAbertura();
+      setPermissaoLocal(resultado.estado);
+      setPermissions((prev) => ({
+        ...prev,
+        local: resultado.estado === "concedida" ? "granted" : prev.local,
+      }));
+      if (resultado.atualizada) {
+        setTemLocalizacao(true);
+        setVersaoDosFiltros((valor) => valor + 1);
+        return;
+      }
+      if (!temLocalizacao) setLocalGateAberto(true);
+    })();
+    // A checagem roda uma vez por entrada no app.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stage]);
+
+  useEffect(() => {
+    if (stage !== "main") return;
+    void carregarAjustes().then(setAjustes);
+  }, [stage]);
+
+  async function abrirBloqueados() {
+    setBlockedOpen(true);
+    try {
+      const lista = await listarBloqueados();
+      setBlockedProfiles(
+        lista.map((item) => ({ id: item.id, name: item.nome, photo: item.foto, when: "" })),
+      );
+    } catch (problema) {
+      showToast(mensagemDeErro(problema));
+    }
+  }
 
   function openProfile(profile: Profile, chatId: string | null = null) {
     setDetailProfile(profile);
     setDetailChatId(chatId);
   }
 
-  function openProfileById(profileId: string, chatId: string | null = null) {
-    const profile = findProfileById(profileId);
-    if (!profile) {
-      showToast("Perfil não disponível");
-      return;
+  async function openProfileById(profileId: string, chatId: string | null = null) {
+    try {
+      const profile = await carregarPerfilDoMatch(profileId);
+      if (!profile) {
+        showToast("Perfil não disponível");
+        return;
+      }
+      openProfile(profile, chatId);
+    } catch (problema) {
+      showToast(mensagemDeErro(problema));
     }
-    openProfile(profile, chatId);
   }
 
-  function blockProfile(id: string, name: string, photo: string) {
-    setBlockedProfiles((prev) => [{ id, name, photo, when: "agora" }, ...prev]);
+  async function bloquearPerfil(profile: Profile) {
+    try {
+      await bloquear(profile.id);
+      showToast(`${profile.name} bloqueado. Não aparecerá mais para você.`);
+      setVersaoDosFiltros((valor) => valor + 1);
+      void chats.recarregar();
+    } catch (problema) {
+      showToast(mensagemDeErro(problema));
+    }
   }
 
-  function logout() {
+  async function denunciarPerfil(profileId: string, motivo: string) {
+    try {
+      await denunciar(profileId, motivo);
+      showToast("Denúncia enviada. Obrigado por avisar.");
+    } catch (problema) {
+      showToast(mensagemDeErro(problema));
+    }
+  }
+
+  async function aplicarFiltros(novos: Filters) {
+    setFilters(novos);
+    try {
+      await salvarFiltros(novos);
+      setVersaoDosFiltros((valor) => valor + 1);
+      setMyProfile((prev) => (prev ? { ...prev, interestedIn: novos.interestedIn } : prev));
+      showToast("Filtros aplicados — fila de perfis refeita");
+    } catch (problema) {
+      showToast(mensagemDeErro(problema));
+    }
+  }
+
+  async function logout() {
+    try {
+      await sair();
+    } catch {
+      /* já estamos saindo de qualquer forma */
+    }
     setStage("onboarding");
     setMyProfile(null);
     setTab("discover");
     setFilters(INITIAL_FILTERS);
-    setVerified(false);
     setBlockedProfiles([]);
     setOfflineSim(false);
     chats.resetChats();
@@ -122,33 +238,110 @@ export default function App() {
     setFiltersOpen(false);
     setActiveChatId(null);
     setDetailProfile(null);
+    setVerifyOpen(false);
+    setLocalGateAberto(false);
+  }
+
+  async function baixarMeusDados() {
+    try {
+      const dados = await exportarMeusDados();
+      const blob = new Blob([JSON.stringify(dados, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "meus-dados-lovi.json";
+      link.click();
+      URL.revokeObjectURL(url);
+      showToast("Arquivo gerado com seus dados");
+    } catch (problema) {
+      showToast(mensagemDeErro(problema));
+    }
+  }
+
+  async function excluirMinhaConta() {
+    try {
+      await excluirConta();
+      showToast("Conta excluída. Sentiremos sua falta.");
+      await logout();
+    } catch (problema) {
+      showToast(mensagemDeErro(problema));
+    }
   }
 
   const activeChat = activeChatId
     ? chats.chats.find((chat) => chat.id === activeChatId)
     : undefined;
+  const activeChatProfileId = activeChat?.profileId ?? null;
+
+  // Perfil da pessoa da conversa aberta — usado pelos quebra-gelos.
+  useEffect(() => {
+    if (!activeChatProfileId) return;
+    let cancelado = false;
+    void carregarPerfilDoMatch(activeChatProfileId).then((perfil) => {
+      if (!cancelado) setChatProfile(perfil);
+    });
+    return () => {
+      cancelado = true;
+    };
+  }, [activeChatProfileId]);
 
   const totalUnread = chats.chats.reduce((sum, chat) => sum + chat.unread, 0);
   const conversationsCount = chats.chats.filter((chat) => chat.messages.length > 1).length;
   const grantedPermissions = Object.values(permissions).filter(
     (value) => value === "granted",
   ).length;
+  const myInterests = myProfile?.interests ?? [];
+  const verificado = myProfile?.verificationStatus === "aprovada";
 
   /** Tela sobreposta à navegação por abas; null = está nas abas. */
   const overlayScreen = (() => {
+    if (stage === "carregando") return <div className="app-loading" aria-label="Carregando" />;
+
     if (stage === "onboarding") {
       return (
         <OnboardingFlow
           onShowToast={showToast}
-          onComplete={(state) => {
-            setMyProfile(buildMyProfile(state));
-            if (state.interestedIn) {
-              setFilters((prev) => ({ ...prev, interestedIn: state.interestedIn! }));
+          onOpenLegal={setDocumentoLegal}
+          onComplete={() => void carregarSessao()}
+        />
+      );
+    }
+
+    if (localGateAberto) {
+      return (
+        <LocationBlockedScreen
+          mode={permissaoLocal === "negada" ? "bloqueada" : "pedir"}
+          city={myProfile?.city ?? ""}
+          onShowToast={showToast}
+          onRetry={async () => {
+            const resultado = await pedirEAtualizarLocalizacao();
+            setPermissaoLocal(resultado.estado);
+            if (resultado.atualizada) {
+              setTemLocalizacao(true);
+              setLocalGateAberto(false);
+              setPermissions((prev) => ({ ...prev, local: "granted" }));
+              setMyProfile((prev) => (prev ? { ...prev, approximateLocation: false } : prev));
+              setVersaoDosFiltros((valor) => valor + 1);
+              return true;
             }
-            if (state.intention) {
-              setFilters((prev) => ({ ...prev, intention: state.intention! }));
+            if (resultado.estado === "negada") {
+              setPermissions((prev) => ({ ...prev, local: "denied" }));
             }
-            setStage("main");
+            return false;
+          }}
+          onUseCity={() => {
+            void (async () => {
+              try {
+                await usarCidadeComoLocalizacao(myProfile?.city ?? "");
+                setTemLocalizacao(true);
+                setLocalGateAberto(false);
+                setMyProfile((prev) => (prev ? { ...prev, approximateLocation: true } : prev));
+                setVersaoDosFiltros((valor) => valor + 1);
+                showToast("Usando sua cidade. Seu card mostra a cidade no lugar da distância.");
+              } catch (problema) {
+                showToast(mensagemDeErro(problema));
+              }
+            })();
           }}
         />
       );
@@ -158,6 +351,7 @@ export default function App() {
       return (
         <ProfileDetailScreen
           profile={detailProfile}
+          myInterests={myInterests}
           fromChat={detailChatId !== null}
           onBack={() => {
             if (detailChatId) setActiveChatId(detailChatId);
@@ -172,7 +366,7 @@ export default function App() {
             discover.dislike();
             setDetailProfile(null);
           }}
-          onShowToast={showToast}
+          onReport={(profile, motivo) => void denunciarPerfil(profile.id, motivo)}
         />
       );
     }
@@ -181,21 +375,25 @@ export default function App() {
       return (
         <ChatScreen
           chat={activeChat}
+          relatedProfile={chatProfile}
+          myInterests={myInterests}
           offline={offlineSim}
-          onBack={() => setActiveChatId(null)}
+          onBack={() => {
+            chats.fecharChat();
+            setActiveChatId(null);
+          }}
           onSend={chats.sendMessage}
-          onReceive={chats.receiveMessage}
           onRetryMessage={chats.retryMessage}
           onUndoMatch={(chatId) => {
-            const profile = findProfileById(activeChat.profileId);
-            if (profile) discover.restoreToQueue(profile);
+            if (chatProfile) discover.restoreToQueue(chatProfile);
             chats.removeChat(chatId);
             setActiveChatId(null);
-            showToast(profile ? "Match desfeito. O perfil volta para a fila." : "Match desfeito.");
+            showToast("Match desfeito. O perfil volta para a fila.");
           }}
           onLockChat={chats.lockChat}
           onUnlockChat={chats.unlockChat}
-          onOpenProfile={(profileId) => openProfileById(profileId, activeChatId)}
+          onOpenProfile={(profileId) => void openProfileById(profileId, activeChatId)}
+          onReport={(profileId, motivo) => void denunciarPerfil(profileId, motivo)}
           onShowToast={showToast}
         />
       );
@@ -207,9 +405,16 @@ export default function App() {
           profile={myProfile}
           onCancel={() => setEditingProfile(false)}
           onSave={(profile) => {
-            setMyProfile(profile);
-            setEditingProfile(false);
-            showToast("Perfil atualizado");
+            void (async () => {
+              try {
+                await salvarPerfil(profile);
+                setMyProfile(profile);
+                setEditingProfile(false);
+                showToast("Perfil atualizado");
+              } catch (problema) {
+                showToast(mensagemDeErro(problema));
+              }
+            })();
           }}
           onShowToast={showToast}
         />
@@ -222,19 +427,9 @@ export default function App() {
           filters={filters}
           onClose={() => setFiltersOpen(false)}
           onApply={(next) => {
-            setFilters(next);
-            setMyProfile((prev) =>
-              prev
-                ? {
-                    ...prev,
-                    interestedIn: next.interestedIn,
-                    intention: next.intention === "todas" ? prev.intention : next.intention,
-                  }
-                : prev,
-            );
             setFiltersOpen(false);
             setTab("discover");
-            showToast("Filtros aplicados — fila de perfis refeita");
+            void aplicarFiltros(next);
           }}
           onShowToast={showToast}
         />
@@ -244,11 +439,18 @@ export default function App() {
     if (phoneChangeOpen) {
       return (
         <PhoneChangeScreen
-          currentPhone={myPhone}
+          currentPhone={myProfile?.phone ?? ""}
           onBack={() => setPhoneChangeOpen(false)}
           onConfirm={(phone) => {
-            setMyPhone(phone);
-            setPhoneChangeOpen(false);
+            void (async () => {
+              try {
+                await atualizarTelefone(phone);
+                setMyProfile((prev) => (prev ? { ...prev, phone } : prev));
+                setPhoneChangeOpen(false);
+              } catch (problema) {
+                showToast(mensagemDeErro(problema));
+              }
+            })();
           }}
           onShowToast={showToast}
         />
@@ -259,9 +461,32 @@ export default function App() {
       return (
         <PermissionsScreen
           state={permissions}
-          onChange={(key, value) => setPermissions((prev) => ({ ...prev, [key]: value }))}
           onBack={() => setPermissionsOpen(false)}
           onShowToast={showToast}
+          onChange={(key, value) => {
+            setPermissions((prev) => ({ ...prev, [key]: value }));
+            if (key !== "local") return;
+            if (value === "granted") {
+              void (async () => {
+                const resultado = await pedirEAtualizarLocalizacao();
+                setPermissaoLocal(resultado.estado);
+                if (resultado.atualizada) {
+                  setTemLocalizacao(true);
+                  setMyProfile((prev) => (prev ? { ...prev, approximateLocation: false } : prev));
+                  setVersaoDosFiltros((valor) => valor + 1);
+                } else {
+                  setPermissions((prev) => ({
+                    ...prev,
+                    local: resultado.estado === "negada" ? "denied" : "ask",
+                  }));
+                  if (resultado.estado === "negada") setLocalGateAberto(true);
+                }
+              })();
+            }
+            if (value === "denied") {
+              void estadoDaPermissao().then(setPermissaoLocal);
+            }
+          }}
         />
       );
     }
@@ -271,9 +496,17 @@ export default function App() {
         <BlockedProfilesScreen
           blocked={blockedProfiles}
           onUnblock={(id) => {
-            const person = blockedProfiles.find((item) => item.id === id);
-            setBlockedProfiles((prev) => prev.filter((item) => item.id !== id));
-            if (person) showToast(`${person.name} desbloqueado`);
+            void (async () => {
+              const pessoa = blockedProfiles.find((item) => item.id === id);
+              try {
+                await desbloquear(id);
+                setBlockedProfiles((prev) => prev.filter((item) => item.id !== id));
+                if (pessoa) showToast(`${pessoa.name} desbloqueado`);
+                setVersaoDosFiltros((valor) => valor + 1);
+              } catch (problema) {
+                showToast(mensagemDeErro(problema));
+              }
+            })();
           }}
           onBack={() => setBlockedOpen(false)}
         />
@@ -284,9 +517,11 @@ export default function App() {
       return (
         <VerifyProfileScreen
           photo={myProfile?.photos[0]}
-          verified={verified}
+          status={myProfile?.verificationStatus ?? "nao_solicitada"}
           onClose={() => setVerifyOpen(false)}
-          onVerified={() => setVerified(true)}
+          onSent={() =>
+            setMyProfile((prev) => (prev ? { ...prev, verificationStatus: "pendente" } : prev))
+          }
           onShowToast={showToast}
         />
       );
@@ -295,20 +530,39 @@ export default function App() {
     if (settingsOpen) {
       return (
         <SettingsScreen
-          currentPhone={myPhone}
+          currentPhone={myProfile?.phone ?? ""}
           blockedCount={blockedProfiles.length}
           grantedPermissions={grantedPermissions}
           offlineSim={offlineSim}
+          profileVisible={myProfile?.visible ?? true}
+          showDistance={myProfile?.showDistance ?? true}
+          notifications={ajustes}
           onToggleOfflineSim={() => setOfflineSim((prev) => !prev)}
+          onToggleProfileVisible={(valor) => {
+            setMyProfile((prev) => (prev ? { ...prev, visible: valor } : prev));
+            void definirVisibilidade(valor).catch((problema) =>
+              showToast(mensagemDeErro(problema)),
+            );
+          }}
+          onToggleShowDistance={(valor) => {
+            setMyProfile((prev) => (prev ? { ...prev, showDistance: valor } : prev));
+            void definirMostrarDistancia(valor).catch((problema) =>
+              showToast(mensagemDeErro(problema)),
+            );
+          }}
+          onToggleNotification={(chave, valor) => {
+            setAjustes((prev) => ({ ...prev, [chave]: valor }));
+            void salvarAjustes({ [chave]: valor }).catch((problema) =>
+              showToast(mensagemDeErro(problema)),
+            );
+          }}
           onBack={() => setSettingsOpen(false)}
-          onOpenBlocked={() => setBlockedOpen(true)}
+          onOpenBlocked={() => void abrirBloqueados()}
           onOpenPermissions={() => setPermissionsOpen(true)}
           onOpenPhoneChange={() => setPhoneChangeOpen(true)}
-          onDeleteAccount={() => {
-            showToast("Conta excluída. Sentiremos sua falta.");
-            logout();
-          }}
-          onShowToast={showToast}
+          onOpenLegal={setDocumentoLegal}
+          onExportData={() => void baixarMeusDados()}
+          onDeleteAccount={() => void excluirMinhaConta()}
         />
       );
     }
@@ -324,6 +578,8 @@ export default function App() {
             {tab === "discover" && (
               <DiscoverScreen
                 current={discover.current}
+                myInterests={myInterests}
+                carregando={discover.carregando}
                 hasAnyMatch={discover.hasAnyMatch}
                 offline={offlineSim}
                 filters={filters}
@@ -335,14 +591,15 @@ export default function App() {
                 onOpenProfile={(profile) => openProfile(profile)}
                 onOpenFilters={() => setFiltersOpen(true)}
                 onWidenFilters={() => {
-                  setFilters((prev) => ({ ...prev, distanceKm: 60, minAge: 18, maxAge: 70 }));
+                  void aplicarFiltros({ ...filters, distanceKm: 60, minAge: 18, maxAge: 70 });
                   showToast("Filtros ampliados: até 60 km e 18–70 anos");
                 }}
                 onRetryConnection={() => {
                   setOfflineSim(false);
                   showToast("Conexão restabelecida");
                 }}
-                onBlock={(profile) => blockProfile(profile.id, profile.name, profile.photos[0])}
+                onBlock={(profile) => void bloquearPerfil(profile)}
+                onReport={(profile, motivo) => void denunciarPerfil(profile.id, motivo)}
                 onShowToast={showToast}
               />
             )}
@@ -353,7 +610,7 @@ export default function App() {
                   chats.openChat(chatId);
                   setActiveChatId(chatId);
                 }}
-                onOpenProfile={(profileId) => openProfileById(profileId, null)}
+                onOpenProfile={(profileId) => void openProfileById(profileId, null)}
               />
             )}
             {tab === "profile" && (
@@ -363,19 +620,24 @@ export default function App() {
                 conversationsCount={conversationsCount}
                 seenCount={discover.seenCount}
                 filters={filters}
-                verified={verified}
+                verified={verificado}
                 onOpenEdit={() => setEditingProfile(true)}
                 onOpenFilters={() => setFiltersOpen(true)}
                 onOpenSettings={() => setSettingsOpen(true)}
                 onVerifyProfile={() => setVerifyOpen(true)}
-                onLogout={logout}
+                onLogout={() => void logout()}
               />
             )}
           </>
         )}
       </div>
-      {!overlayScreen && (
-        <BottomNav active={tab} onChange={setTab} unreadChats={totalUnread} />
+      {!overlayScreen && <BottomNav active={tab} onChange={setTab} unreadChats={totalUnread} />}
+
+      {/* Sobreposto a tudo: abrir um documento legal não desmonta a tela atual. */}
+      {documentoLegal && (
+        <div className="app-legal-layer">
+          <LegalScreen documento={documentoLegal} onBack={() => setDocumentoLegal(null)} />
+        </div>
       )}
 
       {/* Acima da barra de navegação: durante o match nada mais é clicável. */}
@@ -384,11 +646,16 @@ export default function App() {
           profile={discover.matchProfile}
           myPhoto={myProfile?.photos[0]}
           onOpenChat={() => {
-            const chatId = `chat-${discover.matchProfile!.id}`;
+            const profileId = discover.matchProfile!.id;
             discover.dismissMatch();
-            chats.openChat(chatId);
-            setTab("chats");
-            setActiveChatId(chatId);
+            void chats.recarregar().then(() => {
+              const chat = chats.chats.find((item) => item.profileId === profileId);
+              if (chat) {
+                chats.openChat(chat.id);
+                setActiveChatId(chat.id);
+              }
+              setTab("chats");
+            });
           }}
           onContinue={discover.dismissMatch}
         />

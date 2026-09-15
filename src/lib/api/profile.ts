@@ -27,6 +27,8 @@ export interface MeuPerfilCompleto {
   perfil: MyProfile;
   filtros: Filters;
   cadastroCompleto: boolean;
+  /** false = ainda não temos nem GPS nem cidade gravados para esta pessoa. */
+  temLocalizacao: boolean;
 }
 
 export async function carregarMeuPerfil(): Promise<MeuPerfilCompleto | null> {
@@ -77,6 +79,7 @@ export async function carregarMeuPerfil(): Promise<MeuPerfilCompleto | null> {
       interestedIn: prefs?.interesse_em ?? "todos",
     },
     cadastroCompleto: Boolean(perfil.onboarding_completo),
+    temLocalizacao: perfil.localizacao !== null && perfil.localizacao !== undefined,
   };
 }
 
@@ -210,4 +213,16 @@ export async function statusDeVerificacao(): Promise<MyProfile["verificationStat
     .maybeSingle();
   lancaSeErro(error);
   return data?.verificacao_status ?? "nao_solicitada";
+}
+
+/** Envia a coordenada já arredondada (ver lib/geo.ts). */
+export async function atualizarLocalizacao(lat: number, lng: number): Promise<void> {
+  const { error } = await supabase.rpc("atualizar_localizacao", { p_lat: lat, p_lng: lng });
+  lancaSeErro(error);
+}
+
+/** Fallback: passa a usar o centro do município escolhido no cadastro. */
+export async function usarLocalizacaoDaCidade(cidade: string): Promise<void> {
+  const { error } = await supabase.rpc("usar_localizacao_da_cidade", { p_cidade: cidade });
+  lancaSeErro(error);
 }

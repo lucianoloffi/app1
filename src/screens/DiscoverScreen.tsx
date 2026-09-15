@@ -2,12 +2,14 @@ import { useMemo, useState } from "react";
 import { Logo } from "../components/Logo";
 import { CloseIcon, HeartIcon } from "../components/icons/ActionIcons";
 import { ReportSheet } from "../components/ReportSheet";
-import { CURRENT_USER_INTERESTS } from "../data/mockProfiles";
 import { INTENTION_LABEL, type Filters, type Profile, type SwipeDirection } from "../types";
 import styles from "./DiscoverScreen.module.css";
 
 interface DiscoverScreenProps {
   current: Profile | null;
+  /** Interesses do usuário logado, para destacar os que são comuns. */
+  myInterests: string[];
+  carregando?: boolean;
   hasAnyMatch: boolean;
   offline: boolean;
   filters: Filters;
@@ -21,11 +23,14 @@ interface DiscoverScreenProps {
   onWidenFilters: () => void;
   onRetryConnection: () => void;
   onBlock: (profile: Profile) => void;
+  onReport: (profile: Profile, motivo: string) => void;
   onShowToast: (message: string) => void;
 }
 
 export function DiscoverScreen({
   current,
+  myInterests,
+  carregando = false,
   hasAnyMatch,
   offline,
   filters,
@@ -39,6 +44,7 @@ export function DiscoverScreen({
   onWidenFilters,
   onRetryConnection,
   onBlock,
+  onReport,
   onShowToast,
 }: DiscoverScreenProps) {
   const [cardMenuOpen, setCardMenuOpen] = useState(false);
@@ -46,15 +52,15 @@ export function DiscoverScreen({
 
   const commonInterests = useMemo(() => {
     if (!current) return [];
-    return current.interests.filter((interest) => CURRENT_USER_INTERESTS.includes(interest));
-  }, [current]);
+    return current.interests.filter((interest) => myInterests.includes(interest));
+  }, [current, myInterests]);
 
   const otherInterests = useMemo(() => {
     if (!current) return [];
     return current.interests.filter((interest) => !commonInterests.includes(interest));
   }, [current, commonInterests]);
 
-  const emptyByFilter = !current && !hasAnyMatch;
+  const emptyByFilter = !current && !hasAnyMatch && !carregando;
 
   return (
     <div className={styles.screen}>
@@ -218,7 +224,12 @@ export function DiscoverScreen({
                 </p>
                 <p className={styles.profession}>{current.profession}</p>
                 <p className={styles.cityDistance}>
-                  {current.city.replace(", ", "/")} · a {current.distanceKm} km daqui
+                  {current.city.replace(", ", "/")}
+                  {current.distanceKm === null
+                    ? ""
+                    : current.distanceKm < 1
+                      ? " · a menos de 1 km daqui"
+                      : ` · a ${current.distanceKm} km daqui`}
                 </p>
               </div>
 
@@ -338,9 +349,9 @@ export function DiscoverScreen({
         <ReportSheet
           name={current.name}
           onCancel={() => setReportOpen(false)}
-          onSelectReason={() => {
+          onSelectReason={(motivo) => {
             setReportOpen(false);
-            onShowToast("Denúncia enviada. Obrigado por avisar.");
+            onReport(current, motivo);
           }}
         />
       )}

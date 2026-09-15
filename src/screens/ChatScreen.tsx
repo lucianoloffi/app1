@@ -1,59 +1,49 @@
 import { useEffect, useRef, useState } from "react";
 import { icebreakersFor } from "../chats/icebreakers";
 import { ReportSheet } from "../components/ReportSheet";
-import { CURRENT_USER_INTERESTS, findProfileById } from "../data/mockProfiles";
-import type { Chat } from "../types";
+import type { Chat, Profile } from "../types";
 import styles from "./ChatScreen.module.css";
-
-const REPLY_POOL = [
-  "Oi! Tudo bem?",
-  "Haha, gostei da resposta.",
-  "Também curto isso!",
-  "Bora marcar um café então?",
-  "Que bom falar com alguém assim.",
-  "Concordo demais. Você faz o quê no fim de semana?",
-];
-
-const REPLY_DELAY_MS = 1400;
 
 interface ChatScreenProps {
   chat: Chat;
+  /** Perfil da outra pessoa, para os quebra-gelos. */
+  relatedProfile: Profile | null;
+  myInterests: string[];
   offline: boolean;
   onBack: () => void;
   onSend: (chatId: string, text: string, failed?: boolean) => void;
-  onReceive: (chatId: string, text: string) => void;
   onRetryMessage: (chatId: string, index: number) => void;
   onUndoMatch: (chatId: string) => void;
   onLockChat: (chatId: string) => void;
   onUnlockChat: (chatId: string) => void;
   onOpenProfile: (profileId: string) => void;
+  onReport: (profileId: string, motivo: string) => void;
   onShowToast: (message: string) => void;
 }
 
 export function ChatScreen({
   chat,
+  relatedProfile,
+  myInterests,
   offline,
   onBack,
   onSend,
-  onReceive,
   onRetryMessage,
   onUndoMatch,
   onLockChat,
   onUnlockChat,
   onOpenProfile,
+  onReport,
   onShowToast,
 }: ChatScreenProps) {
   const [draft, setDraft] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
   const bodyRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     bodyRef.current?.scrollTo({ top: bodyRef.current.scrollHeight });
-  }, [chat.messages, isTyping]);
-
-  const relatedProfile = findProfileById(chat.profileId);
+  }, [chat.messages]);
 
   function handleSend(text: string) {
     const trimmed = text.trim();
@@ -66,12 +56,6 @@ export function ChatScreen({
     }
     onSend(chat.id, trimmed);
     setDraft("");
-    setIsTyping(true);
-    window.setTimeout(() => {
-      const reply = REPLY_POOL[Math.floor(Math.random() * REPLY_POOL.length)];
-      onReceive(chat.id, reply);
-      setIsTyping(false);
-    }, REPLY_DELAY_MS);
   }
 
   return (
@@ -228,16 +212,6 @@ export function ChatScreen({
             </div>
           </div>
         ))}
-
-        {isTyping && (
-          <div className={styles.bubbleRow}>
-            <div className={styles.typingBubble}>
-              <span className={styles.typingDot} style={{ animationDelay: "0ms" }} />
-              <span className={styles.typingDot} style={{ animationDelay: "150ms" }} />
-              <span className={styles.typingDot} style={{ animationDelay: "300ms" }} />
-            </div>
-          </div>
-        )}
       </div>
 
       {chat.locked ? (
@@ -270,7 +244,7 @@ export function ChatScreen({
       ) : (
         <div className={styles.footer}>
           <div className={styles.icebreakers}>
-            {icebreakersFor(relatedProfile?.interests ?? [], CURRENT_USER_INTERESTS).map(
+            {icebreakersFor(relatedProfile?.interests ?? [], myInterests).map(
               (suggestion) => (
                 <button
                   key={suggestion}
@@ -316,9 +290,9 @@ export function ChatScreen({
         <ReportSheet
           name={chat.name}
           onCancel={() => setReportOpen(false)}
-          onSelectReason={() => {
+          onSelectReason={(motivo) => {
             setReportOpen(false);
-            onShowToast("Denúncia enviada. Obrigado por avisar.");
+            onReport(chat.profileId, motivo);
           }}
         />
       )}

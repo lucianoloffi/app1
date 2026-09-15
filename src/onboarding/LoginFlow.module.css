@@ -69,38 +69,6 @@
   gap: 12px;
 }
 
-.appleButton,
-.googleButton,
-.phoneButton {
-  appearance: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  font: 700 16px var(--font-ui);
-  padding: 16px;
-  border-radius: var(--radius-pill);
-  border: 0;
-}
-
-.appleButton {
-  background: var(--color-ink);
-  color: #fff;
-}
-
-.googleButton {
-  background: #fff;
-  border: 1.5px solid var(--color-line-2);
-  color: var(--color-ink);
-}
-
-.phoneButton {
-  background: var(--color-accent-soft);
-  border: 1px solid var(--color-accent-line);
-  color: var(--color-accent-2);
-}
-
 .forgotLink {
   appearance: none;
   border: 0;
@@ -159,43 +127,8 @@
   box-shadow: none;
 }
 
-.legal {
-  margin: 0;
-  text-align: center;
-  font: 400 12px/1.5 var(--font-ui);
-  color: var(--color-ink-40);
-}
-
-.resendWaiting {
-  margin: 0;
-  text-align: center;
-  font: 600 14px var(--font-ui);
-  color: var(--color-ink-40);
-}
-
-.resendLink {
-  appearance: none;
-  border: 0;
-  background: none;
-  cursor: pointer;
-  text-align: center;
-  font: 700 14px var(--font-ui);
-  color: var(--color-accent-2);
-}
-
 .errorText {
   margin: 0;
   font: 600 13px var(--font-ui);
   color: #c8353c;
-}
-
-.changeNumberLink {
-  appearance: none;
-  border: 0;
-  background: none;
-  cursor: pointer;
-  text-align: center;
-  font: 600 15px var(--font-ui);
-  color: var(--color-ink-40);
-  padding: 4px;
 }

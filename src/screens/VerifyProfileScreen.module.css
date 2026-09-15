@@ -145,3 +145,7 @@
   color: var(--color-ink-40);
   padding: 8px;
 }
+
+.hiddenInput {
+  display: none;
+}

@@ -1,9 +1,17 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { HeightSheet } from "../components/HeightSheet";
 import { InterestBottomSheet } from "../components/InterestBottomSheet";
 import { RowBottomSheet } from "../components/RowBottomSheet";
 import { SelectedInterests } from "../components/SelectedInterests";
 import { LIFE_GROUPS, STATUS_SHEET_OPTIONS } from "../data/lifestyle";
+import {
+  definirPrincipal,
+  minhasFotos,
+  removerFoto,
+  enviarFoto,
+  type FotoDoPerfil,
+} from "../lib/api/photos";
+import { mensagemDeErro } from "../lib/errors";
 import { MAX_PROFILE_PHOTOS, selectedInterestsLabel } from "../onboarding/constants";
 import { formatBirthdate, onlyDigits } from "../onboarding/phoneFormat";
 import type { Gender, Lifestyle, MyProfile, RelationshipStatus } from "../types";
@@ -41,7 +49,9 @@ export function EditProfileScreen({ profile, onCancel, onSave, onShowToast }: Ed
   const [profession, setProfession] = useState(profile.profession);
   const [height, setHeight] = useState(profile.height);
   const [bio, setBio] = useState(profile.bio);
-  const [photos, setPhotos] = useState<string[]>(profile.photos);
+  const [fotos, setFotos] = useState<FotoDoPerfil[]>([]);
+  const [fotosOcupado, setFotosOcupado] = useState(false);
+  const photos = fotos.map((foto) => foto.url);
   const [interests, setInterests] = useState<string[]>(profile.interests);
   const [lifestyle, setLifestyle] = useState<Lifestyle>(profile.lifestyle);
   const [relationshipStatus, setRelationshipStatus] = useState<RelationshipStatus | null>(
@@ -49,6 +59,25 @@ export function EditProfileScreen({ profile, onCancel, onSave, onShowToast }: Ed
   );
 
   const [photosManageOpen, setPhotosManageOpen] = useState(false);
+
+  useEffect(() => {
+    void minhasFotos()
+      .then(setFotos)
+      .catch((problema) => onShowToast(mensagemDeErro(problema)));
+  }, [onShowToast]);
+
+  async function comFotos(acao: () => Promise<void>, mensagem: string) {
+    setFotosOcupado(true);
+    try {
+      await acao();
+      setFotos(await minhasFotos());
+      onShowToast(mensagem);
+    } catch (problema) {
+      onShowToast(mensagemDeErro(problema));
+    } finally {
+      setFotosOcupado(false);
+    }
+  }
   const [heightSheetOpen, setHeightSheetOpen] = useState(false);
   const [interestSheetOpen, setInterestSheetOpen] = useState(false);
 
@@ -252,7 +281,24 @@ export function EditProfileScreen({ profile, onCancel, onSave, onShowToast }: Ed
         <PhotosManageScreen
           onShowToast={onShowToast}
           photos={photos}
-          onChange={setPhotos}
+          busy={fotosOcupado}
+          onAddPhoto={(file) =>
+            void comFotos(async () => {
+              await enviarFoto(file);
+            }, "Foto adicionada")
+          }
+          onRemovePhoto={(index) =>
+            void comFotos(async () => {
+              const foto = fotos[index];
+              if (foto) await removerFoto(foto.id, foto.path);
+            }, "Foto removida")
+          }
+          onMakeMain={(index) =>
+            void comFotos(async () => {
+              const foto = fotos[index];
+              if (foto) await definirPrincipal(foto.id);
+            }, "Foto principal atualizada")
+          }
           onBack={() => setPhotosManageOpen(false)}
         />
       )}

@@ -1,8 +1,7 @@
 import type { OnboardingStep } from "../types";
 
 export const PROGRESS_STEPS: OnboardingStep[] = [
-  "phone",
-  "code",
+  "account",
   "name-birthdate",
   "gender-interest-city",
   "photos",
@@ -24,7 +23,6 @@ export const CITY_OPTIONS = [
   "São Francisco do Sul, SC",
   "São José, SC",
   "São João Batista, SC",
-  "São Judas Tadeu, SC",
   "São Bento do Sul, SC",
   "Balneário Camboriú, SC",
   "Florianópolis, SC",

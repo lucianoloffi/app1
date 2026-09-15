@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { ScreenHeader } from "../components/ScreenHeader";
 import { ToggleRow } from "../components/ToggleRow";
+import type { AjustesDeNotificacao } from "../lib/api/settings";
 import { DeleteAccountSheet } from "./DeleteAccountSheet";
+import type { DocumentoLegal } from "./LegalScreen";
 import styles from "./SettingsScreen.module.css";
 
 interface SettingsScreenProps {
@@ -9,13 +11,20 @@ interface SettingsScreenProps {
   blockedCount: number;
   grantedPermissions: number;
   offlineSim: boolean;
+  profileVisible: boolean;
+  showDistance: boolean;
+  notifications: AjustesDeNotificacao;
   onToggleOfflineSim: () => void;
+  onToggleProfileVisible: (valor: boolean) => void;
+  onToggleShowDistance: (valor: boolean) => void;
+  onToggleNotification: (chave: keyof AjustesDeNotificacao, valor: boolean) => void;
   onBack: () => void;
   onOpenBlocked: () => void;
   onOpenPermissions: () => void;
   onOpenPhoneChange: () => void;
+  onOpenLegal: (documento: DocumentoLegal) => void;
+  onExportData: () => void;
   onDeleteAccount: () => void;
-  onShowToast: (message: string) => void;
 }
 
 export function SettingsScreen({
@@ -23,20 +32,23 @@ export function SettingsScreen({
   blockedCount,
   grantedPermissions,
   offlineSim,
+  profileVisible,
+  showDistance,
+  notifications,
   onToggleOfflineSim,
+  onToggleProfileVisible,
+  onToggleShowDistance,
+  onToggleNotification,
   onBack,
   onOpenBlocked,
   onOpenPermissions,
   onOpenPhoneChange,
+  onOpenLegal,
+  onExportData,
   onDeleteAccount,
-  onShowToast,
 }: SettingsScreenProps) {
-  const [profileVisible, setProfileVisible] = useState(true);
-  const [showDistance, setShowDistance] = useState(true);
-  const [notifMatch, setNotifMatch] = useState(true);
-  const [notifMessage, setNotifMessage] = useState(true);
-  const [notifNews, setNotifNews] = useState(true);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [revogarOpen, setRevogarOpen] = useState(false);
 
   return (
     <div className={styles.screen}>
@@ -50,13 +62,13 @@ export function SettingsScreen({
               label="Perfil visível"
               sub="Desligado, ninguém vê seu perfil na fila"
               on={profileVisible}
-              onToggle={() => setProfileVisible((v) => !v)}
+              onToggle={() => onToggleProfileVisible(!profileVisible)}
             />
             <ToggleRow
               label="Mostrar distância"
               sub="Exibe a quantos km você está"
               on={showDistance}
-              onToggle={() => setShowDistance((v) => !v)}
+              onToggle={() => onToggleShowDistance(!showDistance)}
             />
             <ToggleRow
               label="Simular sem conexão"
@@ -73,20 +85,22 @@ export function SettingsScreen({
             <ToggleRow
               label="Novos matches"
               sub="Avisa quando alguém combina com você"
-              on={notifMatch}
-              onToggle={() => setNotifMatch((v) => !v)}
+              on={notifications.notifMatch}
+              onToggle={() => onToggleNotification("notifMatch", !notifications.notifMatch)}
             />
             <ToggleRow
               label="Mensagens"
               sub="Avisa a cada mensagem recebida"
-              on={notifMessage}
-              onToggle={() => setNotifMessage((v) => !v)}
+              on={notifications.notifMensagem}
+              onToggle={() => onToggleNotification("notifMensagem", !notifications.notifMensagem)}
             />
             <ToggleRow
               label="Novidades do Lovi"
               sub="Dicas e recursos novos, no máximo uma vez por mês"
-              on={notifNews}
-              onToggle={() => setNotifNews((v) => !v)}
+              on={notifications.notifNovidades}
+              onToggle={() =>
+                onToggleNotification("notifNovidades", !notifications.notifNovidades)
+              }
             />
           </div>
         </div>
@@ -109,9 +123,37 @@ export function SettingsScreen({
             <button
               type="button"
               className={styles.accessRow}
-              onClick={() => onShowToast("Abriria os termos no navegador")}
+              onClick={() => onOpenLegal("termos")}
             >
-              Termos e política de privacidade
+              Termos de uso
+              <span className={styles.accessValue}>›</span>
+            </button>
+            <button
+              type="button"
+              className={styles.accessRow}
+              onClick={() => onOpenLegal("privacidade")}
+            >
+              Política de privacidade
+              <span className={styles.accessValue}>›</span>
+            </button>
+            <button
+              type="button"
+              className={styles.accessRow}
+              onClick={() => onOpenLegal("diretrizes")}
+            >
+              Diretrizes de comunidade
+              <span className={styles.accessValue}>›</span>
+            </button>
+            <button type="button" className={styles.accessRow} onClick={onExportData}>
+              Baixar meus dados
+              <span className={styles.accessValue}>›</span>
+            </button>
+            <button
+              type="button"
+              className={styles.accessRow}
+              onClick={() => setRevogarOpen(true)}
+            >
+              Revogar consentimento
               <span className={styles.accessValue}>›</span>
             </button>
             <button
@@ -125,7 +167,7 @@ export function SettingsScreen({
           </div>
         </div>
 
-        <p className={styles.footerNote}>Lovi · versão de protótipo</p>
+        <p className={styles.footerNote}>Lovi · versão de testes</p>
       </div>
 
       {deleteOpen && (
@@ -133,6 +175,21 @@ export function SettingsScreen({
           onCancel={() => setDeleteOpen(false)}
           onConfirm={() => {
             setDeleteOpen(false);
+            onDeleteAccount();
+          }}
+        />
+      )}
+
+      {/* Revogar o consentimento dos dados sensíveis encerra a conta: sem
+          preferência de interesse, cidade e fotos o app não funciona. */}
+      {revogarOpen && (
+        <DeleteAccountSheet
+          title="Revogar consentimento"
+          body="Sem o consentimento para tratar sua preferência de interesse, cidade e fotos, o Lovi não tem como funcionar. Revogar encerra sua conta e apaga seus dados."
+          confirmLabel="Revogar e excluir conta"
+          onCancel={() => setRevogarOpen(false)}
+          onConfirm={() => {
+            setRevogarOpen(false);
             onDeleteAccount();
           }}
         />
