@@ -379,7 +379,7 @@
   border-radius: var(--radius-pill);
   border: 8px solid var(--color-line-3);
   border-top-color: var(--color-accent);
-  animation: lovi-spin 1.6s linear infinite;
+  composes: lovi-anim-spin from global;
 }
 
 .emptyTitle {

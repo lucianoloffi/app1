@@ -119,7 +119,7 @@
   align-items: center;
   gap: 14px;
   text-align: center;
-  animation: lovi-success-pop 250ms var(--ease-standard) both;
+  composes: lovi-anim-success-pop-fast from global;
 }
 
 .dialogIcon {

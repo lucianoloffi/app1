@@ -1,3 +1,100 @@
+/* Animações locais: os @keyframes precisam morar no mesmo arquivo de quem os
+ * cita, senão os CSS Modules renomeiam só a citação e a animação não roda. */
+@keyframes heart-enter {
+  0% {
+    transform: scale(0.3) rotate(-10deg);
+    opacity: 0;
+  }
+  55% {
+    transform: scale(1.12) rotate(3deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(0);
+    opacity: 1;
+  }
+}
+
+@keyframes heart-beat {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  14% {
+    transform: scale(1.11);
+  }
+  28% {
+    transform: scale(1.02);
+  }
+  42% {
+    transform: scale(1.07);
+  }
+  60% {
+    transform: scale(1);
+  }
+}
+
+@keyframes heart-glow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 18px rgba(192, 123, 255, 0.45));
+  }
+  50% {
+    filter: drop-shadow(0 0 44px rgba(246, 206, 255, 0.85));
+  }
+}
+
+@keyframes halo-pulse {
+  0%,
+  100% {
+    transform: scale(0.9);
+    opacity: 0.35;
+  }
+  50% {
+    transform: scale(1.25);
+    opacity: 0.08;
+  }
+}
+
+@keyframes ray {
+  0% {
+    transform: translateY(-52px) scaleY(0.25);
+    opacity: 0;
+  }
+  18% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-210px) scaleY(1.5);
+    opacity: 0;
+  }
+}
+
+@keyframes spark {
+  0% {
+    transform: translateY(-46px) scale(0.2);
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-168px) scale(1);
+    opacity: 0;
+  }
+}
+
+@keyframes rise-in {
+  from {
+    transform: translateY(14px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
 .overlay {
   position: absolute;
   inset: 0;
@@ -26,7 +123,7 @@
   height: 300px;
   border-radius: var(--radius-pill);
   background: radial-gradient(circle, rgba(192, 123, 255, 0.9) 0%, rgba(139, 92, 246, 0) 68%);
-  animation: lovi-halo-pulse 2.6s ease-in-out infinite;
+  animation: halo-pulse 2.6s ease-in-out infinite;
 }
 
 .rayAxis {
@@ -44,7 +141,7 @@
   height: 54px;
   border-radius: var(--radius-pill);
   background: linear-gradient(to top, rgba(255, 255, 255, 0), #fff);
-  animation: lovi-ray 1.5s cubic-bezier(0.2, 0.7, 0.3, 1) infinite;
+  animation: ray 1.5s cubic-bezier(0.2, 0.7, 0.3, 1) infinite;
 }
 
 .rayBig {
@@ -69,21 +166,21 @@
   border-radius: var(--radius-pill);
   background: #fff;
   box-shadow: 0 0 12px rgba(255, 255, 255, 0.9);
-  animation: lovi-spark 1.5s cubic-bezier(0.2, 0.7, 0.3, 1) infinite;
+  animation: spark 1.5s cubic-bezier(0.2, 0.7, 0.3, 1) infinite;
 }
 
 .heartEnter {
   position: relative;
   display: block;
-  animation: lovi-heart-enter 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+  animation: heart-enter 0.8s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .heart {
   display: block;
   transform-origin: 50% 55%;
   animation:
-    lovi-heart-beat 2.2s cubic-bezier(0.4, 0, 0.3, 1) infinite,
-    lovi-heart-glow 2.6s ease-in-out infinite;
+    heart-beat 2.2s cubic-bezier(0.4, 0, 0.3, 1) infinite,
+    heart-glow 2.6s ease-in-out infinite;
 }
 
 .title {
@@ -100,7 +197,7 @@
 .avatars {
   display: flex;
   align-items: center;
-  animation: lovi-rise-in 500ms var(--ease-standard) 150ms both;
+  animation: rise-in 500ms var(--ease-standard) 150ms both;
 }
 
 .avatar {
@@ -123,7 +220,7 @@
   margin: 0;
   font: 500 16px/1.5 var(--font-ui);
   color: #fff;
-  animation: lovi-rise-in 500ms var(--ease-standard) 200ms both;
+  animation: rise-in 500ms var(--ease-standard) 200ms both;
 }
 
 .footer {
@@ -131,7 +228,7 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  animation: lovi-rise-in 500ms var(--ease-standard) 300ms both;
+  animation: rise-in 500ms var(--ease-standard) 300ms both;
 }
 
 .primaryButton {

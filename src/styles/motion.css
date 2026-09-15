@@ -1,101 +1,15 @@
+/*
+ * Os CSS Modules renomeiam o nome da animação citado em `animation:`, mas não
+ * renomeiam os @keyframes declarados aqui (arquivo global) — a referência
+ * apontaria para um nome inexistente e a animação não rodaria. Por isso as
+ * animações compartilhadas por mais de uma tela são expostas como classes
+ * globais, consumidas com `composes: ... from global`. Animações usadas por um
+ * único componente ficam no .module.css dele.
+ */
+
 @keyframes lovi-spin {
   to {
     transform: rotate(360deg);
-  }
-}
-
-@keyframes lovi-heart-enter {
-  0% {
-    transform: scale(0.3) rotate(-10deg);
-    opacity: 0;
-  }
-  55% {
-    transform: scale(1.12) rotate(3deg);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(1) rotate(0);
-    opacity: 1;
-  }
-}
-
-@keyframes lovi-heart-beat {
-  0%,
-  100% {
-    transform: scale(1);
-  }
-  14% {
-    transform: scale(1.11);
-  }
-  28% {
-    transform: scale(1.02);
-  }
-  42% {
-    transform: scale(1.07);
-  }
-  60% {
-    transform: scale(1);
-  }
-}
-
-@keyframes lovi-heart-glow {
-  0%,
-  100% {
-    filter: drop-shadow(0 0 18px rgba(192, 123, 255, 0.45));
-  }
-  50% {
-    filter: drop-shadow(0 0 44px rgba(246, 206, 255, 0.85));
-  }
-}
-
-@keyframes lovi-rise-in {
-  from {
-    transform: translateY(14px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-@keyframes lovi-halo-pulse {
-  0%,
-  100% {
-    transform: scale(0.9);
-    opacity: 0.35;
-  }
-  50% {
-    transform: scale(1.25);
-    opacity: 0.08;
-  }
-}
-
-@keyframes lovi-ray {
-  0% {
-    transform: translateY(-52px) scaleY(0.25);
-    opacity: 0;
-  }
-  18% {
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(-210px) scaleY(1.5);
-    opacity: 0;
-  }
-}
-
-@keyframes lovi-spark {
-  0% {
-    transform: translateY(-46px) scale(0.2);
-    opacity: 0;
-  }
-  25% {
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(-168px) scale(1);
-    opacity: 0;
   }
 }
 
@@ -133,4 +47,28 @@
     transform: scale(1) rotate(0);
     opacity: 1;
   }
+}
+
+.lovi-anim-spin {
+  animation: lovi-spin 1.6s linear infinite;
+}
+
+.lovi-anim-spin-slow {
+  animation: lovi-spin 6s linear infinite;
+}
+
+.lovi-anim-typing-dot {
+  animation: lovi-typing-dot 1.1s ease-in-out infinite;
+}
+
+.lovi-anim-sheet-up {
+  animation: lovi-sheet-up 200ms var(--ease-standard) both;
+}
+
+.lovi-anim-success-pop {
+  animation: lovi-success-pop 600ms var(--ease-standard) both;
+}
+
+.lovi-anim-success-pop-fast {
+  animation: lovi-success-pop 250ms var(--ease-standard) both;
 }

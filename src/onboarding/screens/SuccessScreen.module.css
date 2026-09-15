@@ -19,7 +19,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  animation: lovi-success-pop 600ms var(--ease-standard) both;
+  composes: lovi-anim-success-pop from global;
 }
 
 .textBlock {
@@ -50,5 +50,5 @@
   height: 8px;
   border-radius: var(--radius-pill);
   background: var(--color-accent);
-  animation: lovi-typing-dot 1.1s ease-in-out infinite;
+  composes: lovi-anim-typing-dot from global;
 }

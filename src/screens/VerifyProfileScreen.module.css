@@ -60,7 +60,7 @@
 }
 
 .ringLoading {
-  animation: lovi-spin 6s linear infinite;
+  composes: lovi-anim-spin-slow from global;
 }
 
 .face {

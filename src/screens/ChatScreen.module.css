@@ -176,7 +176,7 @@
   height: 7px;
   border-radius: var(--radius-pill);
   background: #a9b0a9;
-  animation: lovi-typing-dot 1.1s ease-in-out infinite;
+  composes: lovi-anim-typing-dot from global;
 }
 
 .footer {
