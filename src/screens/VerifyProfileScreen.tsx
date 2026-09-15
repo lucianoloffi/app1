@@ -109,11 +109,9 @@ export function VerifyProfileScreen({
         >
           {ctaLabel}
         </button>
-        {state !== "done" && (
-          <button type="button" className={styles.laterLink} onClick={onClose}>
-            Agora não
-          </button>
-        )}
+        <button type="button" className={styles.laterLink} onClick={onClose}>
+          Agora não
+        </button>
       </div>
     </div>
   );

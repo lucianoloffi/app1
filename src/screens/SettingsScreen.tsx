@@ -7,6 +7,7 @@ import styles from "./SettingsScreen.module.css";
 interface SettingsScreenProps {
   currentPhone: string;
   blockedCount: number;
+  grantedPermissions: number;
   offlineSim: boolean;
   onToggleOfflineSim: () => void;
   onBack: () => void;
@@ -20,6 +21,7 @@ interface SettingsScreenProps {
 export function SettingsScreen({
   currentPhone,
   blockedCount,
+  grantedPermissions,
   offlineSim,
   onToggleOfflineSim,
   onBack,
@@ -98,7 +100,7 @@ export function SettingsScreen({
             </button>
             <button type="button" className={styles.accessRow} onClick={onOpenPermissions}>
               Permissões do app
-              <span className={styles.accessValue}>›</span>
+              <span className={styles.accessValue}>{grantedPermissions} de 3</span>
             </button>
             <button type="button" className={styles.accessRow} onClick={onOpenPhoneChange}>
               Trocar número
@@ -118,6 +120,7 @@ export function SettingsScreen({
               onClick={() => setDeleteOpen(true)}
             >
               Excluir minha conta
+              <span className={styles.accessValueDestructive}>›</span>
             </button>
           </div>
         </div>

@@ -18,8 +18,8 @@
   flex: none;
   width: 88px;
   text-align: center;
-  font: 800 20px var(--font-ui);
-  color: var(--color-accent);
+  font: 700 15px var(--font-ui);
+  color: var(--color-ink);
   background: #fff;
   border: 1.5px solid var(--color-line-2);
   border-radius: var(--radius-field);

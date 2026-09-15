@@ -7,7 +7,16 @@
   align-items: flex-end;
 }
 
+.backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: none;
+  cursor: default;
+}
+
 .sheet {
+  position: relative;
   width: 100%;
   background: #fff;
   border-radius: 22px 22px 0 0;
@@ -77,6 +86,6 @@
   background: none;
   cursor: pointer;
   font: 600 15px var(--font-ui);
-  color: var(--color-ink-60);
-  padding: 4px;
+  color: var(--color-ink-40);
+  padding: 10px;
 }

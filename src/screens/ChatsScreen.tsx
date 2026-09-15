@@ -30,22 +30,6 @@ export function ChatsScreen({ chats, onOpenChat, onOpenProfile }: ChatsScreenPro
     railRef.current?.scrollBy({ left: railRef.current.clientWidth * 0.7, behavior: "smooth" });
   }
 
-  if (chats.length === 0) {
-    return (
-      <div className={styles.screen}>
-        <div className={styles.header}>
-          <h1 className={styles.title}>Conversas</h1>
-        </div>
-        <div className={styles.emptyWrap}>
-          <p className={styles.emptyTitle}>Nenhuma conversa ainda</p>
-          <p className={styles.emptySupport}>
-            Curta perfis na aba Descobrir. Quando houver match, a conversa aparece aqui.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   const matchHeadline =
     newMatches.length === 0
       ? "Seus matches"
@@ -83,7 +67,13 @@ export function ChatsScreen({ chats, onOpenChat, onOpenProfile }: ChatsScreenPro
                   src={chat.photo}
                   alt={chat.name}
                 />
-                <span className={styles.matchName}>{chat.name.split(" ")[0]}</span>
+                <span
+                  className={
+                    chat.isNew ? `${styles.matchName} ${styles.matchNameNew}` : styles.matchName
+                  }
+                >
+                  {chat.name.split(" ")[0]}
+                </span>
               </button>
             ))}
           </div>
@@ -111,6 +101,14 @@ export function ChatsScreen({ chats, onOpenChat, onOpenProfile }: ChatsScreenPro
         </div>
       </div>
 
+      {chats.length === 0 ? (
+        <div className={styles.emptyWrap}>
+          <p className={styles.emptyTitle}>Nenhuma conversa ainda</p>
+          <p className={styles.emptySupport}>
+            Curta perfis na aba Descobrir. Quando houver match, a conversa aparece aqui.
+          </p>
+        </div>
+      ) : (
       <div className={styles.list}>
         {conversations.map((chat) => {
           const lastMessage = chat.messages[chat.messages.length - 1];
@@ -150,6 +148,7 @@ export function ChatsScreen({ chats, onOpenChat, onOpenProfile }: ChatsScreenPro
           );
         })}
       </div>
+      )}
     </div>
   );
 }

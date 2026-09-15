@@ -19,7 +19,7 @@
   color: #fff;
   font: 600 14px var(--font-ui);
   border-radius: 14px;
-  padding: 14px 18px;
+  padding: 13px 18px;
   text-align: center;
   animation: toast-in 200ms var(--ease-standard) both;
   pointer-events: none;

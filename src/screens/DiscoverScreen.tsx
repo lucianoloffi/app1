@@ -139,6 +139,15 @@ export function DiscoverScreen({
                         onDislike();
                       }}
                     >
+                      <svg width="19" height="19" viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M3 12h12M11 7l5 5-5 5M20 5v14"
+                          stroke="#5C6660"
+                          strokeWidth={2}
+                          fill="none"
+                          strokeLinecap="round"
+                        />
+                      </svg>
                       Pular este perfil
                     </button>
                     <button
@@ -149,6 +158,16 @@ export function DiscoverScreen({
                         setReportOpen(true);
                       }}
                     >
+                      <svg width="19" height="19" viewBox="0 0 24 24" aria-hidden="true">
+                        <path
+                          d="M5 3v18M5 4h11l-2 4 2 4H5"
+                          fill="none"
+                          stroke="#5C6660"
+                          strokeWidth={2}
+                          strokeLinejoin="round"
+                          strokeLinecap="round"
+                        />
+                      </svg>
                       Denunciar perfil
                     </button>
                     <button
@@ -158,9 +177,18 @@ export function DiscoverScreen({
                         setCardMenuOpen(false);
                         onBlock(current);
                         onDislike();
-                        onShowToast("Perfil bloqueado.");
+                        onShowToast(`${current.name} bloqueado. Não aparecerá mais para você.`);
                       }}
                     >
+                      <svg width="19" height="19" viewBox="0 0 24 24" aria-hidden="true">
+                        <circle cx="12" cy="12" r="9" fill="none" stroke="#C8353C" strokeWidth={2} />
+                        <path
+                          d="M5.6 5.6l12.8 12.8"
+                          stroke="#C8353C"
+                          strokeWidth={2}
+                          strokeLinecap="round"
+                        />
+                      </svg>
                       Bloquear perfil
                     </button>
                   </div>
@@ -190,7 +218,7 @@ export function DiscoverScreen({
                 </p>
                 <p className={styles.profession}>{current.profession}</p>
                 <p className={styles.cityDistance}>
-                  {current.city} · a {current.distanceKm} km daqui
+                  {current.city.replace(", ", "/")} · a {current.distanceKm} km daqui
                 </p>
               </div>
 

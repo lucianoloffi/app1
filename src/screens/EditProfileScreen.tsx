@@ -250,6 +250,7 @@ export function EditProfileScreen({ profile, onCancel, onSave, onShowToast }: Ed
 
       {photosManageOpen && (
         <PhotosManageScreen
+          onShowToast={onShowToast}
           photos={photos}
           onChange={setPhotos}
           onBack={() => setPhotosManageOpen(false)}

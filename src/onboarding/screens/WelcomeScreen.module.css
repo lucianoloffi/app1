@@ -3,7 +3,7 @@
   min-height: 0;
   display: flex;
   flex-direction: column;
-  background: var(--color-surface);
+  background: var(--color-bg);
   padding: 0 var(--onboarding-padding-x);
 }
 
@@ -55,7 +55,7 @@
   border: 0;
   background: none;
   cursor: pointer;
-  font: 700 15px var(--font-ui);
-  color: var(--color-accent-2);
+  font: 600 15px var(--font-ui);
+  color: var(--color-ink-60);
   padding: 4px;
 }

@@ -12,7 +12,7 @@ interface ProfessionHeightStatusScreenProps {
   relationshipStatus: RelationshipStatus | null;
   onChangeProfession: (value: string) => void;
   onChangeHeight: (value: number) => void;
-  onChangeStatus: (value: RelationshipStatus) => void;
+  onChangeStatus: (value: RelationshipStatus | null) => void;
   onBack: () => void;
   onFinish: () => void;
 }
@@ -33,6 +33,7 @@ export function ProfessionHeightStatusScreen({
       onBack={onBack}
       title="Suas informações"
       support="Opcional. Aparece no seu perfil completo."
+      contentGap={28}
       ctaLabel="Concluir cadastro"
       onCta={onFinish}
     >
@@ -83,7 +84,7 @@ export function ProfessionHeightStatusScreen({
           <PillChipRow
             options={ONBOARDING_STATUS_OPTIONS}
             selected={relationshipStatus}
-            onSelect={onChangeStatus}
+            onSelect={(value) => onChangeStatus(relationshipStatus === value ? null : value)}
             size="xs"
           />
         </div>

@@ -28,6 +28,7 @@ interface FiltersScreenProps {
   filters: Filters;
   onApply: (filters: Filters) => void;
   onClose: () => void;
+  onShowToast: (message: string) => void;
 }
 
 function isEqual(a: Filters, b: Filters) {
@@ -40,7 +41,12 @@ function isEqual(a: Filters, b: Filters) {
   );
 }
 
-export function FiltersScreen({ filters, onApply, onClose }: FiltersScreenProps) {
+export function FiltersScreen({
+  filters,
+  onApply,
+  onClose,
+  onShowToast,
+}: FiltersScreenProps) {
   const [draft, setDraft] = useState<Filters>(filters);
   const isDirty = !isEqual(draft, filters);
 
@@ -75,6 +81,9 @@ export function FiltersScreen({ filters, onApply, onClose }: FiltersScreenProps)
               minGap={1}
               ariaLabels={["Idade mínima", "Idade máxima"]}
               onChange={([minAge, maxAge]) => setDraft((prev) => ({ ...prev, minAge, maxAge }))}
+              onCommit={([minAge, maxAge]) =>
+                onShowToast(`Faixa de idade: ${minAge} – ${maxAge} anos`)
+              }
             />
           </div>
 
@@ -90,6 +99,7 @@ export function FiltersScreen({ filters, onApply, onClose }: FiltersScreenProps)
               values={[draft.distanceKm]}
               ariaLabels={["Distância máxima"]}
               onChange={([distanceKm]) => setDraft((prev) => ({ ...prev, distanceKm }))}
+              onCommit={([distanceKm]) => onShowToast(`Distância: até ${distanceKm} km`)}
             />
           </div>
 
@@ -112,7 +122,11 @@ export function FiltersScreen({ filters, onApply, onClose }: FiltersScreenProps)
           className={
             isDirty ? styles.revertButton : `${styles.revertButton} ${styles.revertButtonDisabled}`
           }
-          onClick={() => isDirty && setDraft(filters)}
+          onClick={() => {
+            if (!isDirty) return;
+            setDraft(filters);
+            onShowToast("Filtros revertidos");
+          }}
         >
           Reverter
         </button>

@@ -41,6 +41,7 @@ export function IntentionInterestsScreen({
       onBack={onBack}
       title="Intenção e interesses"
       support="É o que combina você com as pessoas certas."
+      contentGap={16}
       ctaLabel="Continuar"
       ctaDisabled={!isValid}
       onCta={onFinish}

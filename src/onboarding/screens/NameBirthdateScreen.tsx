@@ -39,6 +39,7 @@ export function NameBirthdateScreen({
       onBack={onBack}
       title="Como podemos te chamar?"
       support="Esse é o nome que aparece no seu perfil."
+      contentGap={16}
       ctaLabel="Continuar"
       ctaDisabled={!isValid}
       onCta={onNext}
@@ -49,7 +50,7 @@ export function NameBirthdateScreen({
           ref={nameRef}
           className={fieldStyles.input}
           type="text"
-          placeholder="Seu nome"
+          placeholder="Como quer ser chamado"
           value={name}
           onChange={(e) => onChangeName(e.target.value)}
         />

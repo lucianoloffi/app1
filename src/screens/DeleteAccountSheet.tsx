@@ -12,6 +12,12 @@ export function DeleteAccountSheet({ onCancel, onConfirm }: DeleteAccountSheetPr
 
   return (
     <div className={styles.overlay} role="dialog" aria-label="Excluir minha conta">
+      <button
+        type="button"
+        className={styles.backdrop}
+        aria-label="Fechar"
+        onClick={onCancel}
+      />
       <div className={styles.sheet}>
         <h2 className={styles.title}>Excluir minha conta</h2>
         <p className={styles.body}>

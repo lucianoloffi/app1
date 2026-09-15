@@ -7,10 +7,15 @@
   position: relative;
 }
 
-.scroll {
+.section {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+  background: var(--color-bg);
+  padding: 18px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
 }
 
 .header {
@@ -106,13 +111,6 @@
   flex: none;
 }
 
-.section {
-  padding: 18px var(--screen-padding-x);
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
 .metrics {
   display: flex;
   gap: 10px;
@@ -142,7 +140,7 @@
   border: 0;
   background: #fff;
   border-radius: 16px;
-  padding: 16px;
+  padding: 18px;
   display: flex;
   align-items: center;
   gap: 14px;
@@ -168,7 +166,7 @@
 
 .filtersTitle {
   margin: 0;
-  font: 700 15px var(--font-ui);
+  font: 600 15px var(--font-ui);
 }
 
 .filtersSummary {
@@ -213,4 +211,14 @@
 .verifyHintDone {
   font: 600 13px var(--font-ui);
   color: var(--color-accent-2);
+}
+
+.rowChevron {
+  font: 500 14px var(--font-ui);
+  color: var(--color-ink-40);
+}
+
+.rowChevronDestructive {
+  font: 500 14px var(--font-ui);
+  color: #c8353c;
 }

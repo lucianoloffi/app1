@@ -6,6 +6,7 @@ const SWIPE_ANIMATION_MS = 240;
 
 interface UseDiscoverQueueOptions {
   onMatch?: (profile: Profile) => void;
+  onLikeWithoutMatch?: (profile: Profile) => void;
   filters?: Filters;
 }
 
@@ -20,7 +21,11 @@ function applyFilters(profiles: Profile[], filters?: Filters): Profile[] {
   });
 }
 
-export function useDiscoverQueue({ onMatch, filters }: UseDiscoverQueueOptions = {}) {
+export function useDiscoverQueue({
+  onMatch,
+  onLikeWithoutMatch,
+  filters,
+}: UseDiscoverQueueOptions = {}) {
   const filteredProfiles = useMemo(() => applyFilters(mockProfiles, filters), [filters]);
   const [queue, setQueue] = useState<Profile[]>(filteredProfiles);
   const [photoIndex, setPhotoIndex] = useState(0);
@@ -67,6 +72,8 @@ export function useDiscoverQueue({ onMatch, filters }: UseDiscoverQueueOptions =
       return;
     }
 
+    if (liked) onLikeWithoutMatch?.(current);
+
     completeAdvance();
   }
 
@@ -84,6 +91,15 @@ export function useDiscoverQueue({ onMatch, filters }: UseDiscoverQueueOptions =
       if (!matchProfile) return;
       setMatchProfile(null);
       completeAdvance();
+    },
+    /** Desfazer match devolve o perfil logo atrás do card atual, sem curtida de volta. */
+    restoreToQueue: (profile: Profile) => {
+      setQueue((prev) => {
+        if (prev.some((item) => item.id === profile.id)) return prev;
+        const next = [...prev];
+        next.splice(1, 0, { ...profile, likesYou: false });
+        return next;
+      });
     },
   };
 }

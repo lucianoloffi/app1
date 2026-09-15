@@ -6,19 +6,23 @@ import type { Chat } from "../types";
 import styles from "./ChatScreen.module.css";
 
 const REPLY_POOL = [
-  "Haha adorei, me conta mais!",
-  "Verdade! Também acho isso.",
-  "Boa! Vamos combinar algo então?",
-  "Que legal, não sabia disso.",
+  "Oi! Tudo bem?",
+  "Haha, gostei da resposta.",
+  "Também curto isso!",
+  "Bora marcar um café então?",
+  "Que bom falar com alguém assim.",
+  "Concordo demais. Você faz o quê no fim de semana?",
 ];
 
 const REPLY_DELAY_MS = 1400;
 
 interface ChatScreenProps {
   chat: Chat;
+  offline: boolean;
   onBack: () => void;
-  onSend: (chatId: string, text: string) => void;
+  onSend: (chatId: string, text: string, failed?: boolean) => void;
   onReceive: (chatId: string, text: string) => void;
+  onRetryMessage: (chatId: string, index: number) => void;
   onUndoMatch: (chatId: string) => void;
   onLockChat: (chatId: string) => void;
   onUnlockChat: (chatId: string) => void;
@@ -28,9 +32,11 @@ interface ChatScreenProps {
 
 export function ChatScreen({
   chat,
+  offline,
   onBack,
   onSend,
   onReceive,
+  onRetryMessage,
   onUndoMatch,
   onLockChat,
   onUnlockChat,
@@ -52,6 +58,12 @@ export function ChatScreen({
   function handleSend(text: string) {
     const trimmed = text.trim();
     if (!trimmed || chat.locked) return;
+    if (offline) {
+      onSend(chat.id, trimmed, true);
+      setDraft("");
+      onShowToast("Sem conexão. A mensagem não foi enviada.");
+      return;
+    }
     onSend(chat.id, trimmed);
     setDraft("");
     setIsTyping(true);
@@ -66,8 +78,14 @@ export function ChatScreen({
     <div className={styles.screen}>
       <div className={styles.header}>
         <button type="button" className={styles.backButton} onClick={onBack} aria-label="Voltar">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M15 4l-8 8 8 8" stroke="#16211A" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path
+              d="M15 4l-8 8 8 8"
+              stroke="#16211A"
+              strokeWidth={3}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
           </svg>
         </button>
         <button
@@ -79,9 +97,7 @@ export function ChatScreen({
           <img className={styles.avatar} src={chat.photo} alt={chat.name} />
         </button>
         <div className={styles.headerInfo}>
-          <div className={styles.headerName}>
-            {relatedProfile ? `${chat.name}, ${relatedProfile.age}` : chat.name}
-          </div>
+          <div className={styles.headerName}>{chat.name}</div>
         </div>
         <div className={styles.menuWrap}>
           <button
@@ -116,6 +132,16 @@ export function ChatScreen({
                     onBack();
                   }}
                 >
+                  <svg width="19" height="19" viewBox="0 0 24 24" aria-hidden="true">
+                    <rect x="5" y="10.5" width="14" height="9.5" rx="3" fill="#5C6660" />
+                    <path
+                      d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"
+                      stroke="#5C6660"
+                      strokeWidth={2}
+                      fill="none"
+                      strokeLinecap="round"
+                    />
+                  </svg>
                   Finalizar a conversa
                 </button>
                 <button
@@ -126,6 +152,16 @@ export function ChatScreen({
                     setReportOpen(true);
                   }}
                 >
+                  <svg width="19" height="19" viewBox="0 0 24 24" aria-hidden="true">
+                    <path
+                      d="M5 3v18M5 4h11l-2 4 2 4H5"
+                      fill="none"
+                      stroke="#5C6660"
+                      strokeWidth={2}
+                      strokeLinejoin="round"
+                      strokeLinecap="round"
+                    />
+                  </svg>
                   Denunciar perfil
                 </button>
                 <button
@@ -136,6 +172,16 @@ export function ChatScreen({
                     onUndoMatch(chat.id);
                   }}
                 >
+                  <svg width="19" height="19" viewBox="0 0 24 24" aria-hidden="true">
+                    <path
+                      d="M12 20.4c-6-4.1-8.8-7.4-8.8-10.6A4.5 4.5 0 0 1 12 7.5a4.5 4.5 0 0 1 8.8 2.3c0 3.2-2.8 6.5-8.8 10.6z"
+                      fill="none"
+                      stroke="#C8353C"
+                      strokeWidth={2}
+                      strokeLinejoin="round"
+                    />
+                    <path d="M4.5 4.5l15 15" stroke="#C8353C" strokeWidth={2} strokeLinecap="round" />
+                  </svg>
                   Desfazer match
                 </button>
               </div>
@@ -145,23 +191,46 @@ export function ChatScreen({
       </div>
 
       <div className={styles.body} ref={bodyRef}>
-        <p className={styles.stamp}>Vocês deram match, {chat.time}</p>
+        <p className={styles.stamp}>
+          {chat.isNew ? "Vocês deram match agora" : "Vocês deram match ontem"}
+        </p>
 
         {chat.messages.map((message, index) => (
           <div
             key={index}
             className={message.mine ? `${styles.bubbleRow} ${styles.bubbleRowMine}` : styles.bubbleRow}
           >
-            {!message.mine && <img className={styles.bubbleAvatar} src={chat.photo} alt="" />}
-            <div className={message.mine ? `${styles.bubble} ${styles.bubbleMine}` : styles.bubble}>
-              {message.text}
+            <div className={styles.bubbleStack}>
+              <div
+                className={message.mine ? `${styles.bubble} ${styles.bubbleMine}` : styles.bubble}
+              >
+                {message.text}
+              </div>
+              {message.failed && (
+                <div className={styles.failedRow}>
+                  <span className={styles.failedLabel}>Não enviada</span>
+                  <button
+                    type="button"
+                    className={styles.retryLink}
+                    onClick={() => {
+                      if (offline) {
+                        onShowToast("Ainda sem conexão");
+                        return;
+                      }
+                      onRetryMessage(chat.id, index);
+                      onShowToast("Mensagem enviada");
+                    }}
+                  >
+                    Tentar de novo
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         ))}
 
         {isTyping && (
           <div className={styles.bubbleRow}>
-            <img className={styles.bubbleAvatar} src={chat.photo} alt="" />
             <div className={styles.typingBubble}>
               <span className={styles.typingDot} style={{ animationDelay: "0ms" }} />
               <span className={styles.typingDot} style={{ animationDelay: "150ms" }} />
@@ -173,11 +242,20 @@ export function ChatScreen({
 
       {chat.locked ? (
         <div className={styles.lockedBar}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <rect x="5" y="10" width="14" height="10" rx="2" stroke="#8A928B" strokeWidth={1.8} />
-            <path d="M8 10V7a4 4 0 0 1 8 0v3" stroke="#8A928B" strokeWidth={1.8} />
+          <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="5" y="10.5" width="14" height="9.5" rx="3" fill="#8A928B" />
+            <path
+              d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"
+              stroke="#8A928B"
+              strokeWidth={2}
+              fill="none"
+              strokeLinecap="round"
+            />
           </svg>
-          <span className={styles.lockedText}>Conversa finalizada</span>
+          <div className={styles.lockedMain}>
+            <span className={styles.lockedText}>Conversa finalizada</span>
+            <span className={styles.lockedSub}>Ela fica arquivada e ninguém pode escrever.</span>
+          </div>
           <button
             type="button"
             className={styles.reopenLink}
@@ -191,22 +269,20 @@ export function ChatScreen({
         </div>
       ) : (
         <div className={styles.footer}>
-          {chat.messages.length === 0 && (
-            <div className={styles.icebreakers}>
-              {icebreakersFor(relatedProfile?.interests ?? [], CURRENT_USER_INTERESTS).map(
-                (suggestion) => (
-                  <button
-                    key={suggestion}
-                    type="button"
-                    className={styles.icebreakerChip}
-                    onClick={() => handleSend(suggestion)}
-                  >
-                    {suggestion}
-                  </button>
-                ),
-              )}
-            </div>
-          )}
+          <div className={styles.icebreakers}>
+            {icebreakersFor(relatedProfile?.interests ?? [], CURRENT_USER_INTERESTS).map(
+              (suggestion) => (
+                <button
+                  key={suggestion}
+                  type="button"
+                  className={styles.icebreakerChip}
+                  onClick={() => setDraft(suggestion)}
+                >
+                  {suggestion}
+                </button>
+              ),
+            )}
+          </div>
 
           <div className={styles.inputRow}>
             <input
@@ -225,8 +301,11 @@ export function ChatScreen({
               onClick={() => handleSend(draft)}
               aria-label="Enviar mensagem"
             >
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path d="M3 20l18-8L3 4l4 8-4 8z" fill="#fff" />
+              <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="M5 4.6l14.2 6.5a1 1 0 0 1 0 1.8L5 19.4a1 1 0 0 1-1.4-1.1l1.6-6.3-1.6-6.3A1 1 0 0 1 5 4.6z"
+                  fill="#fff"
+                />
               </svg>
             </button>
           </div>

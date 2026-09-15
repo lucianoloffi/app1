@@ -101,19 +101,25 @@
 }
 
 .matchAvatar {
+  box-sizing: content-box;
   width: 70px;
   height: 70px;
+  border: 3px solid transparent;
   border-radius: var(--radius-pill);
   object-fit: cover;
   background: var(--color-accent-soft);
 }
 
 .matchAvatarNew {
-  border: 3px solid var(--color-accent);
+  border-color: var(--color-accent);
 }
 
 .matchName {
   font: 600 12px var(--font-ui);
+  color: var(--color-ink-40);
+}
+
+.matchNameNew {
   color: var(--color-ink);
 }
 

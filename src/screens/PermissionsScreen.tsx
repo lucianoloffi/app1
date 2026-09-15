@@ -2,8 +2,8 @@ import { useState } from "react";
 import { ScreenHeader } from "../components/ScreenHeader";
 import styles from "./PermissionsScreen.module.css";
 
-type PermissionState = "granted" | "denied" | "ask";
-type PermissionKey = "local" | "notif" | "cam";
+export type PermissionState = "granted" | "denied" | "ask";
+export type PermissionKey = "local" | "notif" | "cam";
 
 const PERMISSIONS: { key: PermissionKey; label: string; sub: string }[] = [
   {
@@ -70,26 +70,23 @@ function PermissionIcon({ permission }: { permission: PermissionKey }) {
 }
 
 interface PermissionsScreenProps {
+  state: Record<PermissionKey, PermissionState>;
+  onChange: (key: PermissionKey, value: PermissionState) => void;
   onBack: () => void;
+  onShowToast: (message: string) => void;
 }
 
-export function PermissionsScreen({ onBack }: PermissionsScreenProps) {
-  const [state, setState] = useState<Record<PermissionKey, PermissionState>>({
-    local: "granted",
-    notif: "ask",
-    cam: "ask",
-  });
+export function PermissionsScreen({
+  state,
+  onChange,
+  onBack,
+  onShowToast,
+}: PermissionsScreenProps) {
   const [asking, setAsking] = useState<PermissionKey | null>(null);
-
-  const grantedCount = Object.values(state).filter((value) => value === "granted").length;
 
   return (
     <div className={styles.screen}>
-      <ScreenHeader
-        title="Permissões do app"
-        onBack={onBack}
-        trailing={<span className={styles.headerSummary}>{grantedCount} de 3</span>}
-      />
+      <ScreenHeader title="Permissões do app" onBack={onBack} />
 
       <div className={styles.body}>
         <p className={styles.intro}>
@@ -121,9 +118,7 @@ export function PermissionsScreen({ onBack }: PermissionsScreenProps) {
                     : `${styles.actionButton} ${styles.actionButtonAsk}`
                 }
                 onClick={() =>
-                  st === "granted"
-                    ? setState((prev) => ({ ...prev, [perm.key]: "denied" }))
-                    : setAsking(perm.key)
+                  st === "granted" ? onChange(perm.key, "denied") : setAsking(perm.key)
                 }
               >
                 {btnLabel}
@@ -146,8 +141,9 @@ export function PermissionsScreen({ onBack }: PermissionsScreenProps) {
                 type="button"
                 className={styles.allowButton}
                 onClick={() => {
-                  setState((prev) => ({ ...prev, [asking]: "granted" }));
+                  onChange(asking, "granted");
                   setAsking(null);
+                  onShowToast("Permissão concedida");
                 }}
               >
                 Permitir
@@ -156,8 +152,9 @@ export function PermissionsScreen({ onBack }: PermissionsScreenProps) {
                 type="button"
                 className={styles.denyButton}
                 onClick={() => {
-                  setState((prev) => ({ ...prev, [asking]: "denied" }));
+                  onChange(asking, "denied");
                   setAsking(null);
+                  onShowToast("Você pode liberar depois nas configurações");
                 }}
               >
                 Não permitir

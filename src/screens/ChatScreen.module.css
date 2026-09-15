@@ -87,8 +87,9 @@
   right: 0;
   width: 250px;
   background: #fff;
+  border: 1px solid #e9e5f2;
   border-radius: var(--radius-card-sm);
-  box-shadow: 0 20px 40px -18px rgba(15, 40, 25, 0.35);
+  box-shadow: 0 18px 40px -14px rgba(15, 20, 25, 0.4);
   overflow: hidden;
   z-index: 36;
 }
@@ -99,9 +100,17 @@
   border: 0;
   background: none;
   cursor: pointer;
-  padding: 14px 18px;
+  padding: 14px 16px;
   font: 600 15px var(--font-ui);
   color: var(--color-ink);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.menuItem:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
 }
 
 .menuItem:not(:last-child) {
@@ -139,17 +148,15 @@
   justify-content: flex-end;
 }
 
-.bubbleAvatar {
-  width: 28px;
-  height: 28px;
-  border-radius: var(--radius-pill);
-  object-fit: cover;
-  flex: none;
-  background: var(--color-accent-soft);
+.bubbleStack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  max-width: 78%;
 }
 
 .bubble {
-  max-width: 78%;
   padding: 13px 16px;
   font: 400 15px/1.45 var(--font-ui);
   background: #fff;
@@ -245,10 +252,20 @@
   gap: 12px;
 }
 
-.lockedText {
+.lockedMain {
   flex: 1;
-  font: 600 14px var(--font-ui);
+  display: flex;
+  flex-direction: column;
+}
+
+.lockedText {
+  font: 700 14px var(--font-ui);
   color: var(--color-ink-60);
+}
+
+.lockedSub {
+  font: 400 13px var(--font-ui);
+  color: var(--color-ink-40);
 }
 
 .reopenLink {
@@ -263,7 +280,10 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font: 500 12px var(--font-ui);
+}
+
+.failedLabel {
+  font: 600 11px var(--font-ui);
   color: #c8353c;
 }
 
@@ -271,7 +291,7 @@
   border: 0;
   background: none;
   cursor: pointer;
-  font: 700 12px var(--font-ui);
-  color: #c8353c;
-  text-decoration: underline;
+  font: 700 11px var(--font-ui);
+  color: var(--color-accent-2);
+  padding: 0;
 }

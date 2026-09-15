@@ -60,6 +60,11 @@
   color: var(--color-ink-40);
 }
 
+.accessValueDestructive {
+  font: 500 14px var(--font-ui);
+  color: #c8353c;
+}
+
 .accessRowDestructive {
   color: #c8353c;
 }

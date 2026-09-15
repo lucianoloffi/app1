@@ -55,6 +55,7 @@ export function GenderInterestCityScreen({
       onBack={onBack}
       title="Sobre você e quem procura"
       support="Isso define quais perfis entram na sua fila."
+      contentGap={28}
       ctaLabel="Continuar"
       ctaDisabled={!isValid}
       onCta={onNext}

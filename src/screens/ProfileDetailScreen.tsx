@@ -56,7 +56,7 @@ export function ProfileDetailScreen({
     lifeRows.push({ label: "Altura", value: heightLabel(profile.height) });
   }
 
-  const thumbnails = profile.photos.slice(1, 3);
+  const thumbnails = [profile.photos[1] ?? profile.photos[0], profile.photos[2] ?? profile.photos[0]];
 
   return (
     <div className={styles.screen}>
@@ -74,7 +74,12 @@ export function ProfileDetailScreen({
 
       <div className={styles.scroll}>
         <div className={styles.photoWrap}>
-          <img className={styles.photo} src={profile.photos[0]} alt={`Foto de ${profile.name}`} />
+          <img
+            className={styles.photo}
+            src={profile.photos[0]}
+            alt={`Foto de ${profile.name}`}
+            style={{ objectPosition: "center 25%" }}
+          />
           <span className={styles.intentionBadge}>{INTENTION_LABEL[profile.intention]}</span>
         </div>
 
@@ -84,59 +89,52 @@ export function ProfileDetailScreen({
               {profile.name}, {profile.age}
             </p>
             <p className={styles.meta}>
-              {profile.profession} · {profile.city}
+              {profile.profession} · {profile.city.replace(", ", "/")} · a {profile.distanceKm} km
+              daqui
             </p>
           </div>
 
           <p className={styles.bio}>{profile.bio}</p>
 
-          <div>
-            <span className={styles.sectionLabel}>Interesses</span>
-            <div className={styles.chipsRow} style={{ marginTop: 10 }}>
-              {profile.interests.map((interest) => {
-                const isCommon = commonInterests.has(interest);
-                return (
-                  <span
-                    key={interest}
-                    className={isCommon ? `${styles.chip} ${styles.chipCommon}` : styles.chip}
-                  >
-                    {interest}
-                  </span>
-                );
-              })}
-            </div>
+          <div className={styles.chipsRow}>
+            {profile.interests.map((interest) => {
+              const isCommon = commonInterests.has(interest);
+              return (
+                <span
+                  key={interest}
+                  className={isCommon ? `${styles.chip} ${styles.chipCommon}` : styles.chip}
+                >
+                  {interest}
+                </span>
+              );
+            })}
           </div>
 
           {lifeRows.length > 0 && (
-            <div>
-              <span className={styles.sectionLabel}>Estilo de vida</span>
-              <div className={styles.lifeList} style={{ marginTop: 10 }}>
-                {lifeRows.map((row) => (
-                  <div key={row.label} className={styles.lifeRow}>
-                    <span className={styles.lifeLabel}>{row.label}</span>
-                    <span className={styles.lifeValue}>{row.value}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {thumbnails.length > 0 && (
-            <div className={styles.thumbGrid}>
-              {thumbnails.map((photo, index) => (
-                <img
-                  key={photo}
-                  className={styles.thumb}
-                  src={photo}
-                  alt={`Mais uma foto de ${profile.name}`}
-                  style={{ objectPosition: index === 0 ? "center 55%" : "center 80%" }}
-                />
+            <div className={styles.lifeList}>
+              {lifeRows.map((row) => (
+                <div key={row.label} className={styles.lifeRow}>
+                  <span className={styles.lifeLabel}>{row.label}</span>
+                  <span className={styles.lifeValue}>{row.value}</span>
+                </div>
               ))}
             </div>
           )}
 
+          <div className={styles.thumbGrid}>
+            {thumbnails.map((photo, index) => (
+              <img
+                key={index}
+                className={styles.thumb}
+                src={photo}
+                alt={`Mais uma foto de ${profile.name}`}
+                style={{ objectPosition: index === 0 ? "center 55%" : "center 80%" }}
+              />
+            ))}
+          </div>
+
           <button type="button" className={styles.reportLink} onClick={() => setReportOpen(true)}>
-            Denunciar {profile.name}
+            Denunciar este perfil
           </button>
         </div>
       </div>
@@ -152,7 +150,7 @@ export function ProfileDetailScreen({
         />
       )}
 
-      <div className={styles.actions}>
+      <div className={fromChat ? styles.backToChatBar : styles.actions}>
         {fromChat ? (
           <button type="button" className={styles.backToChatButton} onClick={onBack}>
             Voltar à conversa

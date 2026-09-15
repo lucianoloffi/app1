@@ -7,6 +7,7 @@ interface PhotosManageScreenProps {
   photos: string[];
   onChange: (photos: string[]) => void;
   onBack: () => void;
+  onShowToast: (message: string) => void;
 }
 
 function photoHint(count: number): string {
@@ -15,10 +16,15 @@ function photoHint(count: number): string {
     return `Quanto mais fotos, mais atrativo fica seu perfil. Você ainda pode adicionar ${6 - count} ${
       6 - count === 1 ? "foto" : "fotos"
     }.`;
-  return "Perfil completo de fotos. Você pode reordenar tornando outra a principal.";
+  return "Perfil completo de fotos. Você pode reordenar tornando outra a capa.";
 }
 
-export function PhotosManageScreen({ photos, onChange, onBack }: PhotosManageScreenProps) {
+export function PhotosManageScreen({
+  photos,
+  onChange,
+  onBack,
+  onShowToast,
+}: PhotosManageScreenProps) {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const slots = [...photos, ...Array(MAX_PROFILE_PHOTOS).fill(null)].slice(0, MAX_PROFILE_PHOTOS);
 
@@ -28,10 +34,12 @@ export function PhotosManageScreen({ photos, onChange, onBack }: PhotosManageScr
     const next = [...photos];
     next[index] = url;
     onChange(next.filter(Boolean));
+    onShowToast("Foto adicionada");
   }
 
   function handleRemove(index: number) {
     onChange(photos.filter((_, i) => i !== index));
+    onShowToast("Foto removida");
   }
 
   function handleMakeMain(index: number) {
@@ -39,6 +47,7 @@ export function PhotosManageScreen({ photos, onChange, onBack }: PhotosManageScr
     const [chosen] = next.splice(index, 1);
     next.unshift(chosen);
     onChange(next);
+    onShowToast("Foto principal atualizada");
   }
 
   return (
@@ -52,7 +61,16 @@ export function PhotosManageScreen({ photos, onChange, onBack }: PhotosManageScr
         </p>
         <div className={styles.grid}>
           {slots.map((photo, index) => (
-            <div key={index} className={photo ? styles.tile : `${styles.tile} ${styles.tileEmpty}`}>
+            <div
+              key={index}
+              className={[
+                styles.tile,
+                photo ? "" : styles.tileEmpty,
+                photo && index === 0 ? styles.tileCover : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+            >
               {photo ? (
                 <>
                   <img className={styles.photo} src={photo} alt={`Foto ${index + 1}`} />

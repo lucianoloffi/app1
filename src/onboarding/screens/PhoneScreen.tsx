@@ -26,12 +26,12 @@ export function PhoneScreen({ phone, onChangePhone, onBack, onNext }: PhoneScree
       onBack={onBack}
       title="Qual seu telefone?"
       support="Usamos o número só para confirmar que você é uma pessoa real."
+      contentGap={12}
       ctaLabel="Enviar código"
       ctaDisabled={!isValid}
       onCta={onNext}
     >
       <div className={fieldStyles.fieldGroup}>
-        <span className={fieldStyles.label}>Telefone</span>
         <div className={styles.phoneRow}>
           <span className={styles.ddiBox}>+55</span>
           <input
@@ -45,6 +45,9 @@ export function PhoneScreen({ phone, onChangePhone, onBack, onNext }: PhoneScree
           />
         </div>
       </div>
+      <p className={fieldStyles.note}>
+        Enviamos um código por SMS. Seu número nunca aparece no perfil.
+      </p>
     </OnboardingLayout>
   );
 }

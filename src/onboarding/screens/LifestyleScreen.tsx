@@ -18,6 +18,7 @@ export function LifestyleScreen({ lifestyle, onChange, onBack, onNext }: Lifesty
       onBack={onBack}
       title="Seu estilo de vida"
       support="Opcional. Ajuda quem vê seu perfil a entender sua rotina."
+      contentGap={30}
       ctaLabel="Continuar"
       onCta={onNext}
     >
@@ -35,7 +36,12 @@ export function LifestyleScreen({ lifestyle, onChange, onBack, onNext }: Lifesty
             <PillChipRow
               options={group.options}
               selected={lifestyle[group.key]}
-              onSelect={(value) => onChange({ ...lifestyle, [group.key]: value })}
+              onSelect={(value) =>
+                onChange({
+                  ...lifestyle,
+                  [group.key]: lifestyle[group.key] === value ? null : value,
+                })
+              }
               size="xs"
             />
           </div>

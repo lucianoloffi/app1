@@ -46,6 +46,7 @@ export interface Profile {
 export interface ChatMessage {
   mine: boolean;
   text: string;
+  failed?: boolean;
 }
 
 export interface Chat {
@@ -121,9 +122,9 @@ export type SwipeDirection = "left" | "right" | null;
 export type Tab = "chats" | "discover" | "profile";
 
 export const INTENTION_LABEL: Record<Intention, string> = {
-  serio: "Busca algo sério",
-  conhecer: "Quer conhecer pessoas",
-  amizade: "Busca amizade",
+  serio: "Relacionamento sério",
+  conhecer: "Conhecer pessoas",
+  amizade: "Amizade",
 };
 
 export const DRINK_LABEL: Record<Drink, string> = {

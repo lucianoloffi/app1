@@ -53,11 +53,18 @@ export function LoginFlow({ onGoSignup, onLoginSuccess, onShowToast }: LoginFlow
   const [phone, setPhone] = useState("");
   const [code, setCode] = useState("");
   const [codeError, setCodeError] = useState(false);
+  const [resendIn, setResendIn] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     inputRef.current?.focus();
   }, [step]);
+
+  useEffect(() => {
+    if (resendIn <= 0) return;
+    const timer = window.setInterval(() => setResendIn((prev) => prev - 1), 1000);
+    return () => window.clearInterval(timer);
+  }, [resendIn]);
 
   const phoneValid = onlyDigits(phone).length >= 10;
 
@@ -172,7 +179,10 @@ export function LoginFlow({ onGoSignup, onLoginSuccess, onShowToast }: LoginFlow
               type="button"
               className={styles.ctaButton}
               disabled={!phoneValid}
-              onClick={() => setStep("code")}
+              onClick={() => {
+                setStep("code");
+                setResendIn(30);
+              }}
             >
               Enviar código
             </button>
@@ -189,7 +199,7 @@ export function LoginFlow({ onGoSignup, onLoginSuccess, onShowToast }: LoginFlow
             <div>
               <h1 className={styles.title}>Digite o código</h1>
               <p className={styles.support}>
-                Enviamos um SMS de 4 dígitos para {formatPhone(phone)}.
+                Enviamos para +55 {formatPhone(phone)}.
               </p>
             </div>
             <input
@@ -207,6 +217,20 @@ export function LoginFlow({ onGoSignup, onLoginSuccess, onShowToast }: LoginFlow
             />
             {codeError && (
               <p className={styles.errorText}>Código incorreto. Confira o SMS e tente de novo.</p>
+            )}
+            {resendIn > 0 ? (
+              <p className={styles.resendWaiting}>Reenviar código em {resendIn}s</p>
+            ) : (
+              <button
+                type="button"
+                className={styles.resendLink}
+                onClick={() => {
+                  setResendIn(30);
+                  onShowToast("Novo código enviado");
+                }}
+              >
+                Reenviar código
+              </button>
             )}
             <button
               type="button"
@@ -235,6 +259,7 @@ export function LoginFlow({ onGoSignup, onLoginSuccess, onShowToast }: LoginFlow
                 setStep("phone");
                 setCode("");
                 setCodeError(false);
+                setResendIn(0);
               }}
             >
               Usar outro número

@@ -25,6 +25,7 @@ export function CodeScreen({ code, onChangeCode, onBack, onNext }: CodeScreenPro
       onBack={onBack}
       title="Digite o código"
       support="Enviamos um SMS de 4 dígitos para o número informado."
+      contentGap={14}
       ctaLabel="Confirmar"
       ctaDisabled={!isValid}
       onCta={onNext}

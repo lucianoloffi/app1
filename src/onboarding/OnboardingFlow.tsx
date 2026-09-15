@@ -30,7 +30,7 @@ const INITIAL_STATE: OnboardingState = {
   bio: "",
   gender: null,
   interestedIn: null,
-  city: "",
+  city: "Joinville, SC",
   photos: [null, null, null, null],
   intention: null,
   interests: [],
@@ -190,7 +190,7 @@ export function OnboardingFlow({ onComplete, onShowToast }: OnboardingFlowProps)
           relationshipStatus={state.relationshipStatus}
           onChangeProfession={(profession) => setState((prev) => ({ ...prev, profession }))}
           onChangeHeight={(height) => setState((prev) => ({ ...prev, height }))}
-          onChangeStatus={(relationshipStatus: RelationshipStatus) =>
+          onChangeStatus={(relationshipStatus: RelationshipStatus | null) =>
             setState((prev) => ({ ...prev, relationshipStatus }))
           }
           onBack={() => goTo("lifestyle")}

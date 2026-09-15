@@ -12,6 +12,8 @@ interface OnboardingLayoutProps {
   ctaLabel: string;
   ctaDisabled?: boolean;
   onCta: () => void;
+  /** Espaçamento interno do conteúdo do passo (cada passo tem o seu no design). */
+  contentGap?: number;
 }
 
 export function OnboardingLayout({
@@ -23,6 +25,7 @@ export function OnboardingLayout({
   ctaLabel,
   ctaDisabled,
   onCta,
+  contentGap = 16,
 }: OnboardingLayoutProps) {
   return (
     <div className={styles.screen}>
@@ -46,7 +49,9 @@ export function OnboardingLayout({
           <h1 className={styles.title}>{title}</h1>
           {support && <p className={styles.support}>{support}</p>}
         </div>
-        {children}
+        <div className={styles.stepContent} style={{ gap: contentGap }}>
+          {children}
+        </div>
       </div>
 
       <div className={styles.footer}>

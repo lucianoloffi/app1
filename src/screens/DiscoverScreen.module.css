@@ -8,7 +8,7 @@
 
 .header {
   flex: none;
-  height: 64px;
+  height: 56px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -84,7 +84,7 @@
   flex: 1;
   height: 3px;
   border-radius: var(--radius-pill);
-  background: rgba(255, 255, 255, 0.45);
+  background: rgba(255, 255, 255, 0.5);
 }
 
 .segmentActive {
@@ -133,9 +133,8 @@
 }
 
 .offlineWrap {
-  position: absolute;
-  inset: 0;
-  z-index: 5;
+  flex: 1;
+  min-height: 0;
   background: #fff;
   display: flex;
   flex-direction: column;
@@ -207,8 +206,9 @@
   left: 0;
   width: 238px;
   background: #fff;
+  border: 1px solid #e9e5f2;
   border-radius: var(--radius-card-sm);
-  box-shadow: 0 20px 40px -18px rgba(15, 40, 25, 0.35);
+  box-shadow: 0 18px 40px -14px rgba(15, 20, 25, 0.4);
   overflow: hidden;
   z-index: 4;
 }
@@ -220,8 +220,11 @@
   background: none;
   cursor: pointer;
   padding: 14px 16px;
-  font: 600 14px var(--font-ui);
+  font: 600 15px var(--font-ui);
   color: var(--color-ink);
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .cardMenuItem:not(:last-child) {
@@ -261,13 +264,13 @@
 .profession {
   margin: 2px 0 0;
   font: 500 15px var(--font-ui);
-  color: rgba(255, 255, 255, 0.86);
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .cityDistance {
   margin: 2px 0 0;
   font: 500 14px var(--font-ui);
-  color: rgba(255, 255, 255, 0.72);
+  color: rgba(255, 255, 255, 0.75);
 }
 
 .chipsRow {

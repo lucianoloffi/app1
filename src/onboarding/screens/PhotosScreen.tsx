@@ -42,6 +42,7 @@ export function PhotosScreen({ photos, onChangePhotos, onBack, onNext }: PhotosS
       onBack={onBack}
       title="Suas fotos"
       support="Escolha de 3 a 4. Perfis com 3 fotos recebem mais matches."
+      contentGap={14}
       ctaLabel="Continuar"
       ctaDisabled={!isValid}
       onCta={onNext}

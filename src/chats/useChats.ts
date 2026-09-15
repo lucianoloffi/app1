@@ -14,9 +14,9 @@ export function useChats() {
         name: profile.name,
         photo: profile.photos[0],
         isNew: true,
-        unread: 0,
+        unread: 1,
         time: "agora",
-        messages: [],
+        messages: [{ mine: false, text: "Oi! Vi que temos bastante coisa em comum." }],
       };
       return [chat, ...prev];
     });
@@ -28,11 +28,31 @@ export function useChats() {
     );
   }
 
-  function sendMessage(id: string, text: string) {
+  function sendMessage(id: string, text: string, failed = false) {
     setChats((prev) =>
       prev.map((chat) =>
         chat.id === id
-          ? { ...chat, isNew: false, messages: [...chat.messages, { mine: true, text }] }
+          ? {
+              ...chat,
+              isNew: false,
+              time: "agora",
+              messages: [...chat.messages, { mine: true, text, failed }],
+            }
+          : chat,
+      ),
+    );
+  }
+
+  function retryMessage(id: string, index: number) {
+    setChats((prev) =>
+      prev.map((chat) =>
+        chat.id === id
+          ? {
+              ...chat,
+              messages: chat.messages.map((message, i) =>
+                i === index ? { ...message, failed: false } : message,
+              ),
+            }
           : chat,
       ),
     );
@@ -62,9 +82,11 @@ export function useChats() {
 
   return {
     chats,
+    resetChats: () => setChats(seedChats),
     addMatchChat,
     openChat,
     sendMessage,
+    retryMessage,
     receiveMessage,
     removeChat,
     lockChat,

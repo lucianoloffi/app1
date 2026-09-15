@@ -22,7 +22,7 @@ export function BlockedProfilesScreen({ blocked, onUnblock, onBack }: BlockedPro
       {blocked.length === 0 ? (
         <div className={styles.emptyWrap}>
           <p className={styles.emptyTitle}>Nenhum perfil bloqueado</p>
-          <p className={styles.emptySupport}>Perfis que você bloquear aparecem aqui.</p>
+          <p className={styles.emptySupport}>Quem você bloquear pelo menu do card ou da conversa aparece aqui.</p>
         </div>
       ) : (
         <div className={styles.body}>

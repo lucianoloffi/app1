@@ -13,7 +13,11 @@ import { DiscoverScreen } from "./screens/DiscoverScreen";
 import { EditProfileScreen } from "./screens/EditProfileScreen";
 import { FiltersScreen } from "./screens/FiltersScreen";
 import { MatchOverlay } from "./screens/MatchOverlay";
-import { PermissionsScreen } from "./screens/PermissionsScreen";
+import {
+  PermissionsScreen,
+  type PermissionKey,
+  type PermissionState,
+} from "./screens/PermissionsScreen";
 import { PhoneChangeScreen } from "./screens/PhoneChangeScreen";
 import { ProfileDetailScreen } from "./screens/ProfileDetailScreen";
 import { ProfileScreen } from "./screens/ProfileScreen";
@@ -71,12 +75,19 @@ export default function App() {
   const [offlineSim, setOfflineSim] = useState(false);
   const [verifyOpen, setVerifyOpen] = useState(false);
   const [verified, setVerified] = useState(false);
+  const [permissions, setPermissions] = useState<Record<PermissionKey, PermissionState>>({
+    local: "granted",
+    notif: "ask",
+    cam: "ask",
+  });
 
   const { message: toastMessage, showToast } = useToast();
   const chats = useChats();
   const discover = useDiscoverQueue({
     filters,
     onMatch: (profile) => chats.addMatchChat(profile),
+    onLikeWithoutMatch: (profile) =>
+      showToast(`Você curtiu ${profile.name.split(" ")[0]}. Avisamos se ela curtir de volta.`),
   });
 
   function openProfile(profile: Profile, chatId: string | null = null) {
@@ -97,291 +108,291 @@ export default function App() {
     setBlockedProfiles((prev) => [{ id, name, photo, when: "agora" }, ...prev]);
   }
 
-  if (stage === "onboarding") {
-    return (
-      <div className="app-shell">
-        <div className="app-shell__content">
-          <OnboardingFlow
-            onShowToast={showToast}
-            onComplete={(state) => {
-              setMyProfile(buildMyProfile(state));
-              if (state.interestedIn) {
-                setFilters((prev) => ({ ...prev, interestedIn: state.interestedIn! }));
-              }
-              if (state.intention) {
-                setFilters((prev) => ({ ...prev, intention: state.intention! }));
-              }
-              setStage("main");
-            }}
-          />
-        </div>
-      </div>
-    );
+  function logout() {
+    setStage("onboarding");
+    setMyProfile(null);
+    setTab("discover");
+    setFilters(INITIAL_FILTERS);
+    setVerified(false);
+    setBlockedProfiles([]);
+    setOfflineSim(false);
+    chats.resetChats();
+    setSettingsOpen(false);
+    setEditingProfile(false);
+    setFiltersOpen(false);
+    setActiveChatId(null);
+    setDetailProfile(null);
   }
 
-  if (detailProfile) {
-    return (
-      <div className="app-shell">
-        <div className="app-shell__content">
-          <ProfileDetailScreen
-            profile={detailProfile}
-            fromChat={detailChatId !== null}
-            onBack={() => {
-              if (detailChatId) setActiveChatId(detailChatId);
-              setDetailProfile(null);
-              setDetailChatId(null);
-            }}
-            onLike={() => {
-              discover.like();
-              setDetailProfile(null);
-            }}
-            onDislike={() => {
-              discover.dislike();
-              setDetailProfile(null);
-            }}
-            onShowToast={showToast}
-          />
-        </div>
-      </div>
-    );
-  }
-
-  if (activeChatId) {
-    const activeChat = chats.chats.find((chat) => chat.id === activeChatId);
-    if (activeChat) {
-      return (
-        <div className="app-shell">
-          <div className="app-shell__content">
-            <ChatScreen
-              chat={activeChat}
-              onBack={() => setActiveChatId(null)}
-              onSend={chats.sendMessage}
-              onReceive={chats.receiveMessage}
-              onUndoMatch={(chatId) => {
-                chats.removeChat(chatId);
-                setActiveChatId(null);
-              }}
-              onLockChat={chats.lockChat}
-              onUnlockChat={chats.unlockChat}
-              onOpenProfile={(profileId) => openProfileById(profileId, activeChatId)}
-              onShowToast={showToast}
-            />
-          </div>
-        </div>
-      );
-    }
-  }
-
-  if (editingProfile && myProfile) {
-    return (
-      <div className="app-shell">
-        <div className="app-shell__content">
-          <EditProfileScreen
-            profile={myProfile}
-            onCancel={() => setEditingProfile(false)}
-            onSave={(profile) => {
-              setMyProfile(profile);
-              setEditingProfile(false);
-              showToast("Perfil atualizado");
-            }}
-            onShowToast={showToast}
-          />
-        </div>
-      </div>
-    );
-  }
-
-  if (filtersOpen) {
-    return (
-      <div className="app-shell">
-        <div className="app-shell__content">
-          <FiltersScreen
-            filters={filters}
-            onClose={() => setFiltersOpen(false)}
-            onApply={(next) => {
-              setFilters(next);
-              setMyProfile((prev) =>
-                prev
-                  ? {
-                      ...prev,
-                      interestedIn: next.interestedIn,
-                      intention: next.intention === "todas" ? prev.intention : next.intention,
-                    }
-                  : prev,
-              );
-              setFiltersOpen(false);
-              setTab("discover");
-              showToast("Filtros aplicados — fila de perfis refeita");
-            }}
-          />
-        </div>
-      </div>
-    );
-  }
-
-  if (phoneChangeOpen) {
-    return (
-      <div className="app-shell">
-        <div className="app-shell__content">
-          <PhoneChangeScreen
-            currentPhone={myPhone}
-            onBack={() => setPhoneChangeOpen(false)}
-            onConfirm={(phone) => {
-              setMyPhone(phone);
-              setPhoneChangeOpen(false);
-            }}
-            onShowToast={showToast}
-          />
-        </div>
-      </div>
-    );
-  }
-
-  if (permissionsOpen) {
-    return (
-      <div className="app-shell">
-        <div className="app-shell__content">
-          <PermissionsScreen onBack={() => setPermissionsOpen(false)} />
-        </div>
-      </div>
-    );
-  }
-
-  if (blockedOpen) {
-    return (
-      <div className="app-shell">
-        <div className="app-shell__content">
-          <BlockedProfilesScreen
-            blocked={blockedProfiles}
-            onUnblock={(id) => {
-              const person = blockedProfiles.find((item) => item.id === id);
-              setBlockedProfiles((prev) => prev.filter((item) => item.id !== id));
-              if (person) showToast(`${person.name} desbloqueado`);
-            }}
-            onBack={() => setBlockedOpen(false)}
-          />
-        </div>
-      </div>
-    );
-  }
-
-  if (verifyOpen) {
-    return (
-      <div className="app-shell">
-        <div className="app-shell__content">
-          <VerifyProfileScreen
-            photo={myProfile?.photos[0]}
-            verified={verified}
-            onClose={() => setVerifyOpen(false)}
-            onVerified={() => setVerified(true)}
-            onShowToast={showToast}
-          />
-        </div>
-      </div>
-    );
-  }
-
-  if (settingsOpen) {
-    return (
-      <div className="app-shell">
-        <div className="app-shell__content">
-          <SettingsScreen
-            currentPhone={myPhone}
-            blockedCount={blockedProfiles.length}
-            offlineSim={offlineSim}
-            onToggleOfflineSim={() => setOfflineSim((prev) => !prev)}
-            onBack={() => setSettingsOpen(false)}
-            onOpenBlocked={() => setBlockedOpen(true)}
-            onOpenPermissions={() => setPermissionsOpen(true)}
-            onOpenPhoneChange={() => setPhoneChangeOpen(true)}
-            onDeleteAccount={() => {
-              showToast("Conta excluída. Sentiremos sua falta.");
-              setSettingsOpen(false);
-              setMyProfile(null);
-              setStage("onboarding");
-            }}
-            onShowToast={showToast}
-          />
-        </div>
-      </div>
-    );
-  }
+  const activeChat = activeChatId
+    ? chats.chats.find((chat) => chat.id === activeChatId)
+    : undefined;
 
   const totalUnread = chats.chats.reduce((sum, chat) => sum + chat.unread, 0);
-  const conversationsCount = chats.chats.filter((chat) => chat.messages.length > 0).length;
+  const conversationsCount = chats.chats.filter((chat) => chat.messages.length > 1).length;
+  const grantedPermissions = Object.values(permissions).filter(
+    (value) => value === "granted",
+  ).length;
+
+  /** Tela sobreposta à navegação por abas; null = está nas abas. */
+  const overlayScreen = (() => {
+    if (stage === "onboarding") {
+      return (
+        <OnboardingFlow
+          onShowToast={showToast}
+          onComplete={(state) => {
+            setMyProfile(buildMyProfile(state));
+            if (state.interestedIn) {
+              setFilters((prev) => ({ ...prev, interestedIn: state.interestedIn! }));
+            }
+            if (state.intention) {
+              setFilters((prev) => ({ ...prev, intention: state.intention! }));
+            }
+            setStage("main");
+          }}
+        />
+      );
+    }
+
+    if (detailProfile) {
+      return (
+        <ProfileDetailScreen
+          profile={detailProfile}
+          fromChat={detailChatId !== null}
+          onBack={() => {
+            if (detailChatId) setActiveChatId(detailChatId);
+            setDetailProfile(null);
+            setDetailChatId(null);
+          }}
+          onLike={() => {
+            discover.like();
+            setDetailProfile(null);
+          }}
+          onDislike={() => {
+            discover.dislike();
+            setDetailProfile(null);
+          }}
+          onShowToast={showToast}
+        />
+      );
+    }
+
+    if (activeChat) {
+      return (
+        <ChatScreen
+          chat={activeChat}
+          offline={offlineSim}
+          onBack={() => setActiveChatId(null)}
+          onSend={chats.sendMessage}
+          onReceive={chats.receiveMessage}
+          onRetryMessage={chats.retryMessage}
+          onUndoMatch={(chatId) => {
+            const profile = findProfileById(activeChat.profileId);
+            if (profile) discover.restoreToQueue(profile);
+            chats.removeChat(chatId);
+            setActiveChatId(null);
+            showToast(profile ? "Match desfeito. O perfil volta para a fila." : "Match desfeito.");
+          }}
+          onLockChat={chats.lockChat}
+          onUnlockChat={chats.unlockChat}
+          onOpenProfile={(profileId) => openProfileById(profileId, activeChatId)}
+          onShowToast={showToast}
+        />
+      );
+    }
+
+    if (editingProfile && myProfile) {
+      return (
+        <EditProfileScreen
+          profile={myProfile}
+          onCancel={() => setEditingProfile(false)}
+          onSave={(profile) => {
+            setMyProfile(profile);
+            setEditingProfile(false);
+            showToast("Perfil atualizado");
+          }}
+          onShowToast={showToast}
+        />
+      );
+    }
+
+    if (filtersOpen) {
+      return (
+        <FiltersScreen
+          filters={filters}
+          onClose={() => setFiltersOpen(false)}
+          onApply={(next) => {
+            setFilters(next);
+            setMyProfile((prev) =>
+              prev
+                ? {
+                    ...prev,
+                    interestedIn: next.interestedIn,
+                    intention: next.intention === "todas" ? prev.intention : next.intention,
+                  }
+                : prev,
+            );
+            setFiltersOpen(false);
+            setTab("discover");
+            showToast("Filtros aplicados — fila de perfis refeita");
+          }}
+          onShowToast={showToast}
+        />
+      );
+    }
+
+    if (phoneChangeOpen) {
+      return (
+        <PhoneChangeScreen
+          currentPhone={myPhone}
+          onBack={() => setPhoneChangeOpen(false)}
+          onConfirm={(phone) => {
+            setMyPhone(phone);
+            setPhoneChangeOpen(false);
+          }}
+          onShowToast={showToast}
+        />
+      );
+    }
+
+    if (permissionsOpen) {
+      return (
+        <PermissionsScreen
+          state={permissions}
+          onChange={(key, value) => setPermissions((prev) => ({ ...prev, [key]: value }))}
+          onBack={() => setPermissionsOpen(false)}
+          onShowToast={showToast}
+        />
+      );
+    }
+
+    if (blockedOpen) {
+      return (
+        <BlockedProfilesScreen
+          blocked={blockedProfiles}
+          onUnblock={(id) => {
+            const person = blockedProfiles.find((item) => item.id === id);
+            setBlockedProfiles((prev) => prev.filter((item) => item.id !== id));
+            if (person) showToast(`${person.name} desbloqueado`);
+          }}
+          onBack={() => setBlockedOpen(false)}
+        />
+      );
+    }
+
+    if (verifyOpen) {
+      return (
+        <VerifyProfileScreen
+          photo={myProfile?.photos[0]}
+          verified={verified}
+          onClose={() => setVerifyOpen(false)}
+          onVerified={() => setVerified(true)}
+          onShowToast={showToast}
+        />
+      );
+    }
+
+    if (settingsOpen) {
+      return (
+        <SettingsScreen
+          currentPhone={myPhone}
+          blockedCount={blockedProfiles.length}
+          grantedPermissions={grantedPermissions}
+          offlineSim={offlineSim}
+          onToggleOfflineSim={() => setOfflineSim((prev) => !prev)}
+          onBack={() => setSettingsOpen(false)}
+          onOpenBlocked={() => setBlockedOpen(true)}
+          onOpenPermissions={() => setPermissionsOpen(true)}
+          onOpenPhoneChange={() => setPhoneChangeOpen(true)}
+          onDeleteAccount={() => {
+            showToast("Conta excluída. Sentiremos sua falta.");
+            logout();
+          }}
+          onShowToast={showToast}
+        />
+      );
+    }
+
+    return null;
+  })();
 
   return (
     <div className="app-shell">
       <div className="app-shell__content">
-        {tab === "discover" && (
-          <DiscoverScreen
-            current={discover.current}
-            hasAnyMatch={discover.hasAnyMatch}
-            offline={offlineSim}
-            filters={filters}
-            photoIndex={discover.photoIndex}
-            swipeDirection={discover.swipeDirection}
-            onNextPhoto={discover.nextPhoto}
-            onLike={discover.like}
-            onDislike={discover.dislike}
-            onOpenProfile={(profile) => openProfile(profile)}
-            onOpenFilters={() => setFiltersOpen(true)}
-            onWidenFilters={() => {
-              setFilters((prev) => ({ ...prev, distanceKm: 60, minAge: 18, maxAge: 70 }));
-              showToast("Filtros ampliados: até 60 km e 18–70 anos");
-            }}
-            onRetryConnection={() => {
-              setOfflineSim(false);
-              showToast("Conexão restabelecida");
-            }}
-            onBlock={(profile) => blockProfile(profile.id, profile.name, profile.photos[0])}
-            onShowToast={showToast}
-          />
-        )}
-        {tab === "chats" && (
-          <ChatsScreen
-            chats={chats.chats}
-            onOpenChat={(chatId) => {
-              chats.openChat(chatId);
-              setActiveChatId(chatId);
-            }}
-            onOpenProfile={(profileId) => openProfileById(profileId, null)}
-          />
-        )}
-        {tab === "profile" && (
-          <ProfileScreen
-            myProfile={myProfile}
-            matchesCount={chats.chats.length}
-            conversationsCount={conversationsCount}
-            seenCount={discover.seenCount}
-            filters={filters}
-            verified={verified}
-            onOpenEdit={() => setEditingProfile(true)}
-            onOpenFilters={() => setFiltersOpen(true)}
-            onOpenSettings={() => setSettingsOpen(true)}
-            onVerifyProfile={() => setVerifyOpen(true)}
-            onLogout={() => {
-              setStage("onboarding");
-              setMyProfile(null);
-            }}
-          />
-        )}
+        {overlayScreen ?? (
+          <>
+            {tab === "discover" && (
+              <DiscoverScreen
+                current={discover.current}
+                hasAnyMatch={discover.hasAnyMatch}
+                offline={offlineSim}
+                filters={filters}
+                photoIndex={discover.photoIndex}
+                swipeDirection={discover.swipeDirection}
+                onNextPhoto={discover.nextPhoto}
+                onLike={discover.like}
+                onDislike={discover.dislike}
+                onOpenProfile={(profile) => openProfile(profile)}
+                onOpenFilters={() => setFiltersOpen(true)}
+                onWidenFilters={() => {
+                  setFilters((prev) => ({ ...prev, distanceKm: 60, minAge: 18, maxAge: 70 }));
+                  showToast("Filtros ampliados: até 60 km e 18–70 anos");
+                }}
+                onRetryConnection={() => {
+                  setOfflineSim(false);
+                  showToast("Conexão restabelecida");
+                }}
+                onBlock={(profile) => blockProfile(profile.id, profile.name, profile.photos[0])}
+                onShowToast={showToast}
+              />
+            )}
+            {tab === "chats" && (
+              <ChatsScreen
+                chats={chats.chats}
+                onOpenChat={(chatId) => {
+                  chats.openChat(chatId);
+                  setActiveChatId(chatId);
+                }}
+                onOpenProfile={(profileId) => openProfileById(profileId, null)}
+              />
+            )}
+            {tab === "profile" && (
+              <ProfileScreen
+                myProfile={myProfile}
+                matchesCount={chats.chats.length}
+                conversationsCount={conversationsCount}
+                seenCount={discover.seenCount}
+                filters={filters}
+                verified={verified}
+                onOpenEdit={() => setEditingProfile(true)}
+                onOpenFilters={() => setFiltersOpen(true)}
+                onOpenSettings={() => setSettingsOpen(true)}
+                onVerifyProfile={() => setVerifyOpen(true)}
+                onLogout={logout}
+              />
+            )}
 
-        {discover.matchProfile && (
-          <MatchOverlay
-            profile={discover.matchProfile}
-            myPhoto={myProfile?.photos[0]}
-            onOpenChat={() => {
-              discover.dismissMatch();
-              setTab("chats");
-            }}
-            onContinue={discover.dismissMatch}
-          />
+            {discover.matchProfile && (
+              <MatchOverlay
+                profile={discover.matchProfile}
+                myPhoto={myProfile?.photos[0]}
+                onOpenChat={() => {
+                  const chatId = `chat-${discover.matchProfile!.id}`;
+                  discover.dismissMatch();
+                  chats.openChat(chatId);
+                  setTab("chats");
+                  setActiveChatId(chatId);
+                }}
+                onContinue={discover.dismissMatch}
+              />
+            )}
+          </>
         )}
-
-        <Toast message={toastMessage} />
       </div>
-      <BottomNav active={tab} onChange={setTab} unreadChats={totalUnread} />
+      {!overlayScreen && (
+        <BottomNav active={tab} onChange={setTab} unreadChats={totalUnread} />
+      )}
+      <Toast message={toastMessage} />
     </div>
   );
 }
