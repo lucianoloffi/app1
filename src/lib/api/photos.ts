@@ -24,7 +24,12 @@ export async function assinarFotos(paths: string[]): Promise<Map<string, string>
   const { data, error } = await supabase.storage
     .from(BUCKET)
     .createSignedUrls(unicos, VALIDADE_URL_SEGUNDOS);
-  if (error) return mapa;
+
+  // Sem URL a foto some da tela sem explicação — vale deixar o motivo no console.
+  if (error) {
+    console.warn("Não foi possível assinar as fotos:", error.message);
+    return mapa;
+  }
 
   for (const item of data ?? []) {
     if (item.signedUrl && item.path) mapa.set(item.path, item.signedUrl);
