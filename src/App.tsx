@@ -56,7 +56,7 @@ const INITIAL_FILTERS: Filters = {
   intention: "todas",
   distanceKm: 25,
   minAge: 25,
-  maxAge: 45,
+  maxAge: 35,
   interestedIn: "todos",
 };
 

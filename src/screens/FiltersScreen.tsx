@@ -12,10 +12,10 @@ const GENDER_OPTIONS: { value: FilterGender; label: string }[] = [
 ];
 
 const INTENTION_OPTIONS: { value: Filters["intention"]; label: string }[] = [
-  { value: "todas", label: "Todos" },
   { value: "serio", label: "Relacionamento sério" },
   { value: "conhecer", label: "Conhecer pessoas" },
   { value: "amizade", label: "Amizade" },
+  { value: "todas", label: "Todos" },
 ];
 
 const AGE_MIN = 18;

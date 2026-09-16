@@ -75,7 +75,7 @@ export async function carregarMeuPerfil(): Promise<MeuPerfilCompleto | null> {
       intention: prefs?.intencao_filtro ?? "todas",
       distanceKm: prefs?.distancia_max_km ?? 25,
       minAge: prefs?.idade_min ?? 25,
-      maxAge: prefs?.idade_max ?? 45,
+      maxAge: prefs?.idade_max ?? 35,
       interestedIn: prefs?.interesse_em ?? "todos",
     },
     cadastroCompleto: Boolean(perfil.onboarding_completo),
