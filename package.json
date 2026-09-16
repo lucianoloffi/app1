@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "configurar": "node scripts/configurar-env.mjs"
+    "configurar": "node scripts/configurar-env.mjs",
+    "popular": "node scripts/popular-perfis.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.116.0",

@@ -100,7 +100,51 @@ Crie uma conta de teste e confira no painel:
 - **Table Editor → consents**: dois registros (termos e dados sensíveis)
 - **Storage → fotos**: os arquivos ficam em uma pasta com o id do usuário
 
-## 7. Moderação (manual, por enquanto)
+## 7. Popular o app com perfis de teste
+
+Com o banco vazio a fila do Descobrir fica vazia também. O script cria 20
+perfis — 10 mulheres que buscam homens e 10 homens que buscam mulheres —, cada
+um com foto, bio, profissão, interesses, estilo de vida e localização.
+
+```bash
+npm run popular -- --simular    # mostra os 20 perfis, sem tocar no banco
+npm run popular                 # cria (pede a service role e a chave do Pexels)
+npm run popular -- --limpar     # apaga tudo o que o script criou
+```
+
+**Service role.** Criar usuário no `auth` é a única coisa que a chave anon não
+faz; o resto o script grava entrando como cada perfil, pelo mesmo caminho do
+app e com o RLS ligado. Passe a chave só na hora de rodar, nunca no `.env`:
+
+```bash
+SUPABASE_SERVICE_ROLE_KEY=cole_aqui npm run popular
+```
+
+**Fotos.** Por padrão vêm do [Pexels](https://www.pexels.com/api/), que é banco
+de imagens de licença livre e dá uma chave gratuita na hora:
+
+```bash
+PEXELS_API_KEY=cole_aqui SUPABASE_SERVICE_ROLE_KEY=cole_aqui npm run popular
+```
+
+As três fotos de um perfil são três enquadramentos da mesma imagem — três
+rostos diferentes no mesmo perfil fariam o app parecer quebrado. Sem chave do
+Pexels, `npm run popular -- --fotos=cores` gera as imagens aqui mesmo (degradê
+com silhueta): feias, mas não dependem de rede nem de licença.
+
+**O que aparece na fila.** Quem acabou de criar conta começa com os filtros em
+25 km e 25–45 anos, e a intenção que escolheu no cadastro. Com isso, de
+Joinville aparecem uns 10 a 13 dos 20 perfis; os de Blumenau, Itajaí e Jaraguá
+do Sul ficam de fora até você abrir **Filtros de busca** e aumentar a
+distância. É de propósito: serve para testar o filtro.
+
+**Antes de abrir o app para outras pessoas**, rode `npm run popular -- --limpar`.
+São contas de verdade no seu projeto, e o build publicado no GitHub Pages fala
+com o mesmo banco — para quem chega de fora elas parecem gente real. As fotos
+do Pexels são de pessoas reais, e a licença não cobre esse tipo de uso fora de
+teste.
+
+## 8. Moderação (manual, por enquanto)
 
 - **Fotos**: nascem com `status_moderacao = 'aprovada'`. Para tirar uma foto do
   ar, mude para `'rejeitada'` no Table Editor — ela some dos perfis na hora.
@@ -109,7 +153,7 @@ Crie uma conta de teste e confira no painel:
   para `'aprovada'`. O selo só aparece depois disso.
 - **Denúncias**: `reports`, com `status` `aberta` → `em_analise` → `resolvida`.
 
-## 8. O que já foi testado
+## 9. O que já foi testado
 
 As cinco migrations foram aplicadas em um PostgreSQL 16 local (com stubs no
 lugar do PostGIS e do schema `auth`) antes da entrega. Confirmado:
