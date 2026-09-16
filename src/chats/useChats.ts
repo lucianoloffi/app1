@@ -5,15 +5,17 @@ import {
   listarMatches,
   type ResumoDeMatch,
 } from "../lib/api/matches";
+import { usuarioAtual } from "../lib/api/auth";
 import {
   enviarMensagem,
   listarMensagens,
   marcarMensagensLidas,
   ouvirMatches,
-  ouvirMensagens,
+  ouvirMinhasMensagens,
 } from "../lib/api/messages";
 import { mensagemDeErro } from "../lib/errors";
 import type { Chat, ChatMessage } from "../types";
+import { aplicaMensagemRecebida } from "./aplicaMensagem";
 import { tempoRelativo } from "./tempo";
 
 interface UseChatsOptions {
@@ -70,31 +72,34 @@ export function useChats({ ativo, onError }: UseChatsOptions) {
   useEffect(() => {
     if (!ativo) return;
     void recarregar();
-    const parar = ouvirMatches(() => void recarregar());
-    return parar;
-  }, [ativo, recarregar]);
 
-  // Mensagens novas da conversa aberta chegam por realtime.
-  useEffect(() => {
-    if (!ativo) return;
-    const id = chatAberto.current;
-    if (!id) return;
-    return ouvirMensagens(id, (mensagem) => {
-      setChats((prev) =>
-        prev.map((chat) =>
-          chat.id === id && !chat.messages.some((item) => item.id === mensagem.id)
-            ? {
-                ...chat,
-                time: "agora",
-                messages: [...chat.messages, mensagem],
-                unread: mensagem.mine ? chat.unread : 0,
-              }
-            : chat,
-        ),
-      );
-      if (!mensagem.mine) void marcarMensagensLidas(id);
+    let pararMensagens: (() => void) | null = null;
+    let cancelado = false;
+
+    const pararMatches = ouvirMatches(() => void recarregar());
+
+    void usuarioAtual().then((usuario) => {
+      if (!usuario || cancelado) return;
+
+      pararMensagens = ouvirMinhasMensagens(usuario.id, ({ matchId, mensagem }) => {
+        const estaAberta = chatAberto.current === matchId;
+
+        setChats((prev) => {
+          const resultado = aplicaMensagemRecebida(prev, matchId, mensagem, estaAberta);
+          if (resultado.precisaRecarregar) void recarregar();
+          return resultado.chats;
+        });
+
+        if (!mensagem.mine && estaAberta) void marcarMensagensLidas(matchId);
+      });
     });
-  }, [ativo, chats.length]);
+
+    return () => {
+      cancelado = true;
+      pararMatches();
+      pararMensagens?.();
+    };
+  }, [ativo, recarregar]);
 
   async function openChat(id: string) {
     chatAberto.current = id;

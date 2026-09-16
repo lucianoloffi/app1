@@ -50,31 +50,38 @@ export async function marcarMensagensLidas(matchId: string): Promise<void> {
   lancaSeErro(error);
 }
 
-/**
- * Escuta mensagens novas de uma conversa. Devolve a função que encerra a
- * escuta — quem chama é responsável por encerrá-la ao sair da tela.
- */
-export function ouvirMensagens(
-  matchId: string,
-  aoChegar: (mensagem: ChatMessage) => void,
-): () => void {
-  let meuId: string | undefined;
-  void supabase.auth.getUser().then(({ data }) => {
-    meuId = data.user?.id;
-  });
+export interface MensagemRecebida {
+  matchId: string;
+  mensagem: ChatMessage;
+}
 
+/**
+ * Escuta as mensagens de todas as minhas conversas de uma vez — é o que
+ * permite a conversa aberta atualizar na hora e, estando em outra aba, o
+ * contador de não lidas subir. O RLS decide o que chega: só mensagens de
+ * matches meus passam.
+ *
+ * Devolve a função que encerra a escuta.
+ */
+export function ouvirMinhasMensagens(
+  meuId: string,
+  aoChegar: (recebida: MensagemRecebida) => void,
+): () => void {
   const canal = supabase
-    .channel(`mensagens:${matchId}`)
+    .channel("minhas-mensagens")
     .on(
       "postgres_changes",
-      { event: "INSERT", schema: "public", table: "messages", filter: `match_id=eq.${matchId}` },
+      { event: "INSERT", schema: "public", table: "messages" },
       (payload) => {
         const linha = payload.new as LinhaDeMensagem;
         aoChegar({
-          id: linha.id,
-          mine: linha.sender_id === meuId,
-          text: linha.conteudo,
-          createdAt: linha.criado_em,
+          matchId: linha.match_id,
+          mensagem: {
+            id: linha.id,
+            mine: linha.sender_id === meuId,
+            text: linha.conteudo,
+            createdAt: linha.criado_em,
+          },
         });
       },
     )
