@@ -613,10 +613,6 @@ export default function App() {
                 onDislike={discover.dislike}
                 onOpenProfile={(profile) => openProfile(profile)}
                 onOpenFilters={() => setFiltersOpen(true)}
-                onWidenFilters={() => {
-                  void aplicarFiltros({ ...filters, distanceKm: 60, minAge: 18, maxAge: 70 });
-                  showToast("Filtros ampliados: até 60 km e 18–70 anos");
-                }}
                 onRetryConnection={() => {
                   setOfflineSim(false);
                   showToast("Conexão restabelecida");

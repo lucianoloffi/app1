@@ -20,7 +20,6 @@ interface DiscoverScreenProps {
   onDislike: () => void;
   onOpenProfile: (profile: Profile) => void;
   onOpenFilters: () => void;
-  onWidenFilters: () => void;
   onRetryConnection: () => void;
   onBlock: (profile: Profile) => void;
   onReport: (profile: Profile, motivo: string) => void;
@@ -41,7 +40,6 @@ export function DiscoverScreen({
   onDislike,
   onOpenProfile,
   onOpenFilters,
-  onWidenFilters,
   onRetryConnection,
   onBlock,
   onReport,
@@ -304,11 +302,8 @@ export function DiscoverScreen({
             Seus filtros estão bem estreitos: até {filters.distanceKm} km e {filters.minAge}–
             {filters.maxAge} anos. Ampliar a distância ou a faixa de idade traz mais gente.
           </p>
-          <button type="button" className={styles.primaryButton} onClick={onWidenFilters}>
-            Ampliar filtros
-          </button>
-          <button type="button" className={styles.secondaryLink} onClick={onOpenFilters}>
-            Ajustar manualmente
+          <button type="button" className={styles.primaryButton} onClick={onOpenFilters}>
+            Ajustar filtros
           </button>
         </div>
       ) : (
