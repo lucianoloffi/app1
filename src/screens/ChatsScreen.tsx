@@ -7,12 +7,32 @@ interface ChatsScreenProps {
   onOpenChat: (chatId: string) => void;
 }
 
+/** Compara ignorando acento e caixa: "jessica" acha "Jéssica". */
+function comparavel(texto: string): string {
+  return texto.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
+}
+
 export function ChatsScreen({ chats, onOpenChat }: ChatsScreenProps) {
   const railRef = useRef<HTMLDivElement>(null);
   const [hasMore, setHasMore] = useState(false);
+  /** null enquanto a busca está fechada; string (mesmo vazia) com ela aberta. */
+  const [busca, setBusca] = useState<string | null>(null);
+  const buscaRef = useRef<HTMLInputElement>(null);
+  const buscaAberta = busca !== null;
+
+  useEffect(() => {
+    if (buscaAberta) buscaRef.current?.focus();
+  }, [buscaAberta]);
 
   const newMatches = chats.filter((chat) => chat.isNew);
-  const conversations = chats;
+  const termo = comparavel(busca?.trim() ?? "");
+  // Procura no nome e na prévia — o que está escrito na linha.
+  const conversations = termo
+    ? chats.filter((chat) => {
+        const ultima = chat.messages[chat.messages.length - 1]?.text ?? "";
+        return comparavel(chat.name).includes(termo) || comparavel(ultima).includes(termo);
+      })
+    : chats;
 
   function updateHasMore() {
     const el = railRef.current;
@@ -39,15 +59,48 @@ export function ChatsScreen({ chats, onOpenChat }: ChatsScreenProps) {
   return (
     <div className={styles.screen}>
       <div className={styles.header}>
-        <h1 className={styles.title}>Conversas</h1>
-        <button type="button" className={styles.searchButton} aria-label="Buscar conversas">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <circle cx="11" cy="11" r="7" stroke="#5C6660" strokeWidth={2.6} />
-            <path d="M16.5 16.5L21 21" stroke="#5C6660" strokeWidth={2.6} strokeLinecap="round" />
-          </svg>
-        </button>
+        {buscaAberta ? (
+          <>
+            <div className={styles.searchField}>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle cx="11" cy="11" r="7" stroke="#5C6660" strokeWidth={2.6} />
+                <path d="M16.5 16.5L21 21" stroke="#5C6660" strokeWidth={2.6} strokeLinecap="round" />
+              </svg>
+              <input
+                ref={buscaRef}
+                className={styles.searchInput}
+                type="text"
+                placeholder="Buscar por nome"
+                value={busca ?? ""}
+                onChange={(e) => setBusca(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Escape") setBusca(null);
+                }}
+              />
+            </div>
+            <button type="button" className={styles.searchCancel} onClick={() => setBusca(null)}>
+              Cancelar
+            </button>
+          </>
+        ) : (
+          <>
+            <h1 className={styles.title}>Conversas</h1>
+            <button
+              type="button"
+              className={styles.searchButton}
+              aria-label="Buscar conversas"
+              onClick={() => setBusca("")}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <circle cx="11" cy="11" r="7" stroke="#5C6660" strokeWidth={2.6} />
+                <path d="M16.5 16.5L21 21" stroke="#5C6660" strokeWidth={2.6} strokeLinecap="round" />
+              </svg>
+            </button>
+          </>
+        )}
       </div>
 
+      {!buscaAberta && (
       <div className={styles.matchStrip}>
         <p className={styles.matchLabel}>{matchHeadline}</p>
         <div className={styles.matchRailWrap}>
@@ -99,13 +152,23 @@ export function ChatsScreen({ chats, onOpenChat }: ChatsScreenProps) {
           )}
         </div>
       </div>
+      )}
 
-      {chats.length === 0 ? (
+      {conversations.length === 0 ? (
         <div className={styles.emptyWrap}>
-          <p className={styles.emptyTitle}>Nenhuma conversa ainda</p>
-          <p className={styles.emptySupport}>
-            Curta perfis na aba Descobrir. Quando houver match, a conversa aparece aqui.
-          </p>
+          {termo ? (
+            <>
+              <p className={styles.emptyTitle}>Nenhuma conversa encontrada</p>
+              <p className={styles.emptySupport}>Tente outro nome ou apague a busca.</p>
+            </>
+          ) : (
+            <>
+              <p className={styles.emptyTitle}>Nenhuma conversa ainda</p>
+              <p className={styles.emptySupport}>
+                Curta perfis na aba Descobrir. Quando houver match, a conversa aparece aqui.
+              </p>
+            </>
+          )}
         </div>
       ) : (
       <div className={styles.list}>

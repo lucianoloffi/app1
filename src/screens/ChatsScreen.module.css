@@ -33,6 +33,42 @@
   flex: none;
 }
 
+.searchField {
+  flex: 1;
+  min-width: 0;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px;
+  border-radius: var(--radius-pill);
+  background: var(--color-bg);
+}
+
+.searchInput {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: none;
+  outline: none;
+  font: 500 15px var(--font-ui);
+  color: var(--color-ink);
+}
+
+.searchInput::placeholder {
+  color: var(--color-ink-40);
+}
+
+.searchCancel {
+  flex: none;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  padding: 0 0 0 14px;
+  font: 600 15px var(--font-ui);
+  color: var(--color-accent-2);
+}
+
 .matchStrip {
   flex: none;
   padding: 0 24px 18px;
