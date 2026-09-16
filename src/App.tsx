@@ -381,23 +381,31 @@ export default function App() {
     }
 
     if (detailProfile) {
+      // Quem já é match nunca mostra curtir/dispensar, tenha sido aberto de onde for.
+      const conversaDoPerfil =
+        detailChatId ?? chats.chats.find((chat) => chat.profileId === detailProfile.id)?.id ?? null;
+      const fecharDetalhe = () => {
+        setDetailProfile(null);
+        setDetailChatId(null);
+      };
       return (
         <ProfileDetailScreen
           profile={detailProfile}
           myInterests={myInterests}
           bottomAction={
-            detailOrigin === "chat" ? "backToChat" : detailOrigin === "chatList" ? "openChat" : "swipe"
+            detailOrigin === "chat" ? "backToChat" : conversaDoPerfil ? "openChat" : "swipe"
           }
           onBack={() => {
             // Da lista de conversas a volta é para a própria lista, não para o chat.
             if (detailOrigin === "chat" && detailChatId) setActiveChatId(detailChatId);
-            setDetailProfile(null);
-            setDetailChatId(null);
+            fecharDetalhe();
           }}
           onOpenChat={() => {
-            if (detailChatId) setActiveChatId(detailChatId);
-            setDetailProfile(null);
-            setDetailChatId(null);
+            if (conversaDoPerfil) {
+              chats.openChat(conversaDoPerfil);
+              setActiveChatId(conversaDoPerfil);
+            }
+            fecharDetalhe();
           }}
           onLike={() => {
             discover.like();
