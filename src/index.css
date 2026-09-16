@@ -54,11 +54,13 @@ button {
 }
 
 /* Documentos legais cobrem o app inteiro sem desmontar a tela de baixo —
-   assim o cadastro não perde o que já foi preenchido. */
+   assim o cadastro não perde o que já foi preenchido. O z-index fica acima de
+   tudo (Configurações é 20, as folhas de baixo são 40): os links para os
+   documentos saem justamente dessas telas. */
 .app-legal-layer {
   position: absolute;
   inset: 0;
-  z-index: 7;
+  z-index: 50;
   display: flex;
   flex-direction: column;
   background: var(--color-bg);
