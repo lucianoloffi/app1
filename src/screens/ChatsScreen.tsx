@@ -5,7 +5,7 @@ import styles from "./ChatsScreen.module.css";
 interface ChatsScreenProps {
   chats: Chat[];
   onOpenChat: (chatId: string) => void;
-  onOpenProfile: (profileId: string) => void;
+  onOpenProfile: (profileId: string, chatId: string) => void;
 }
 
 export function ChatsScreen({ chats, onOpenChat, onOpenProfile }: ChatsScreenProps) {
@@ -128,7 +128,7 @@ export function ChatsScreen({ chats, onOpenChat, onOpenProfile }: ChatsScreenPro
                 alt={chat.name}
                 onClick={(e) => {
                   e.stopPropagation();
-                  onOpenProfile(chat.profileId);
+                  onOpenProfile(chat.profileId, chat.id);
                 }}
               />
               <div className={styles.rowMain}>

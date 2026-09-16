@@ -77,6 +77,8 @@ export default function App() {
 
   const [detailProfile, setDetailProfile] = useState<Profile | null>(null);
   const [detailChatId, setDetailChatId] = useState<string | null>(null);
+  /** De onde o perfil aberto veio: define a barra de baixo e a volta. */
+  const [detailOrigin, setDetailOrigin] = useState<"discover" | "chat" | "chatList">("discover");
   const [chatProfile, setChatProfile] = useState<Profile | null>(null);
 
   const [editingProfile, setEditingProfile] = useState(false);
@@ -189,19 +191,28 @@ export default function App() {
     }
   }
 
-  function openProfile(profile: Profile, chatId: string | null = null) {
+  function openProfile(
+    profile: Profile,
+    chatId: string | null = null,
+    origin: "discover" | "chat" | "chatList" = "discover",
+  ) {
     setDetailProfile(profile);
     setDetailChatId(chatId);
+    setDetailOrigin(origin);
   }
 
-  async function openProfileById(profileId: string, chatId: string | null = null) {
+  async function openProfileById(
+    profileId: string,
+    chatId: string | null = null,
+    origin: "discover" | "chat" | "chatList" = "discover",
+  ) {
     try {
       const profile = await carregarPerfilDoMatch(profileId);
       if (!profile) {
         showToast("Perfil não disponível");
         return;
       }
-      openProfile(profile, chatId);
+      openProfile(profile, chatId, origin);
     } catch (problema) {
       showToast(mensagemDeErro(problema));
     }
@@ -374,8 +385,16 @@ export default function App() {
         <ProfileDetailScreen
           profile={detailProfile}
           myInterests={myInterests}
-          fromChat={detailChatId !== null}
+          bottomAction={
+            detailOrigin === "chat" ? "backToChat" : detailOrigin === "chatList" ? "openChat" : "swipe"
+          }
           onBack={() => {
+            // Da lista de conversas a volta é para a própria lista, não para o chat.
+            if (detailOrigin === "chat" && detailChatId) setActiveChatId(detailChatId);
+            setDetailProfile(null);
+            setDetailChatId(null);
+          }}
+          onOpenChat={() => {
             if (detailChatId) setActiveChatId(detailChatId);
             setDetailProfile(null);
             setDetailChatId(null);
@@ -414,7 +433,7 @@ export default function App() {
           }}
           onLockChat={chats.lockChat}
           onUnlockChat={chats.unlockChat}
-          onOpenProfile={(profileId) => void openProfileById(profileId, activeChatId)}
+          onOpenProfile={(profileId) => void openProfileById(profileId, activeChatId, "chat")}
           onReport={(profileId, motivo) => void denunciarPerfil(profileId, motivo)}
           onShowToast={showToast}
         />
@@ -628,7 +647,7 @@ export default function App() {
                   chats.openChat(chatId);
                   setActiveChatId(chatId);
                 }}
-                onOpenProfile={(profileId) => void openProfileById(profileId, null)}
+                onOpenProfile={(profileId, chatId) => void openProfileById(profileId, chatId, "chatList")}
               />
             )}
             {tab === "profile" && (

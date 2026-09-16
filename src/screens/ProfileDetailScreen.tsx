@@ -20,7 +20,13 @@ interface ProfileDetailScreenProps {
   onLike: () => void;
   onDislike: () => void;
   onReport: (profile: Profile, motivo: string) => void;
-  fromChat?: boolean;
+  /** Volta para a conversa quando o perfil foi aberto de dentro dela. */
+  onOpenChat?: () => void;
+  /**
+   * Barra de baixo. "swipe" só vale para quem veio da fila do Descobrir: com
+   * match já feito não faz sentido curtir ou dispensar de novo.
+   */
+  bottomAction?: "swipe" | "backToChat" | "openChat";
 }
 
 export function ProfileDetailScreen({
@@ -30,7 +36,8 @@ export function ProfileDetailScreen({
   onLike,
   onDislike,
   onReport,
-  fromChat = false,
+  onOpenChat,
+  bottomAction = "swipe",
 }: ProfileDetailScreenProps) {
   const [reportOpen, setReportOpen] = useState(false);
   const commonInterests = useMemo(
@@ -156,10 +163,14 @@ export function ProfileDetailScreen({
         />
       )}
 
-      <div className={fromChat ? styles.backToChatBar : styles.actions}>
-        {fromChat ? (
+      <div className={bottomAction === "swipe" ? styles.actions : styles.backToChatBar}>
+        {bottomAction === "backToChat" ? (
           <button type="button" className={styles.backToChatButton} onClick={onBack}>
             Voltar à conversa
+          </button>
+        ) : bottomAction === "openChat" ? (
+          <button type="button" className={styles.backToChatButton} onClick={onOpenChat}>
+            Abrir conversa
           </button>
         ) : (
           <>
