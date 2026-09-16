@@ -1,0 +1,56 @@
+.screen {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 0 34px;
+  background: #fff;
+  text-align: center;
+}
+
+.icon {
+  width: 84px;
+  height: 84px;
+  border-radius: var(--radius-pill);
+  background: var(--color-accent-soft);
+  border: 1px solid var(--color-accent-line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.title {
+  margin: 0;
+  font: 800 22px/1.25 var(--font-ui);
+  letter-spacing: -0.02em;
+}
+
+.support {
+  margin: 0;
+  font: 400 15px/1.55 var(--font-ui);
+  color: var(--color-ink-60);
+}
+
+.email {
+  font-weight: 700;
+  color: var(--color-ink);
+}
+
+.note {
+  margin: 0;
+  font: 400 13px/1.5 var(--font-ui);
+  color: var(--color-ink-40);
+}
+
+.backLink {
+  appearance: none;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  font: 700 15px var(--font-ui);
+  color: var(--color-ink);
+  padding: 6px;
+}

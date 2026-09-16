@@ -4,7 +4,7 @@ import { Toast } from "./components/Toast";
 import { useChats } from "./chats/useChats";
 import { useDiscoverQueue } from "./discover/useDiscoverQueue";
 import { useToast } from "./hooks/useToast";
-import { sair } from "./lib/api/auth";
+import { aoMudarSessao, sair } from "./lib/api/auth";
 import { erroDeConfiguracao } from "./lib/supabaseClient";
 import { carregarPerfilDoMatch } from "./lib/api/matches";
 import { tempoRelativo } from "./chats/tempo";
@@ -48,7 +48,7 @@ import { ProfileDetailScreen } from "./screens/ProfileDetailScreen";
 import { ProfileScreen } from "./screens/ProfileScreen";
 import { SettingsScreen } from "./screens/SettingsScreen";
 import { VerifyProfileScreen } from "./screens/VerifyProfileScreen";
-import type { Filters, MyProfile, Profile, Tab } from "./types";
+import type { Filters, MyProfile, OnboardingStep, Profile, Tab } from "./types";
 
 type Stage = "carregando" | "onboarding" | "main";
 
@@ -97,6 +97,7 @@ export default function App() {
     cam: "ask",
   });
 
+  const [passoDoCadastro, setPassoDoCadastro] = useState<OnboardingStep>(null);
   const [temLocalizacao, setTemLocalizacao] = useState(true);
   const [permissaoLocal, setPermissaoLocal] = useState<EstadoDaPermissao>("perguntar");
   const [localGateAberto, setLocalGateAberto] = useState(false);
@@ -118,12 +119,16 @@ export default function App() {
       const dados = await carregarMeuPerfil();
       if (!dados) {
         setMyProfile(null);
+        setPassoDoCadastro(null);
         setStage("onboarding");
         return;
       }
       setMyProfile(dados.perfil);
       setFilters(dados.filtros);
       setTemLocalizacao(dados.temLocalizacao);
+      // Conta criada mas cadastro inacabado (e-mail confirmado agora, ou saiu
+      // no meio): retoma do passo seguinte, sem pedir a conta de novo.
+      setPassoDoCadastro(dados.cadastroCompleto ? null : "name-birthdate");
       setStage(dados.cadastroCompleto ? "main" : "onboarding");
     } catch (problema) {
       showToast(mensagemDeErro(problema));
@@ -133,6 +138,12 @@ export default function App() {
 
   useEffect(() => {
     void carregarSessao();
+  }, [carregarSessao]);
+
+  // A sessão também pode nascer fora daqui: ao voltar do link de confirmação
+  // de e-mail, ou ao entrar/sair em outra aba.
+  useEffect(() => {
+    return aoMudarSessao(() => void carregarSessao());
   }, [carregarSessao]);
 
   // Localização na abertura: só com a permissão já concedida, nunca em background.
@@ -236,6 +247,7 @@ export default function App() {
     }
     setStage("onboarding");
     setMyProfile(null);
+    setPassoDoCadastro(null);
     setTab("discover");
     setFilters(INITIAL_FILTERS);
     setBlockedProfiles([]);
@@ -312,6 +324,7 @@ export default function App() {
         <OnboardingFlow
           onShowToast={showToast}
           onOpenLegal={setDocumentoLegal}
+          passoInicial={passoDoCadastro ?? undefined}
           onComplete={() => void carregarSessao()}
         />
       );

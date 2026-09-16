@@ -11,7 +11,7 @@ interface NameBirthdateScreenProps {
   onChangeName: (value: string) => void;
   onChangeBirthdate: (digits: string) => void;
   onChangeBio: (value: string) => void;
-  onBack: () => void;
+  onBack?: () => void;
   onNext: () => void;
 }
 

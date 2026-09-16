@@ -16,6 +16,7 @@ import { mensagemDeErro } from "../lib/errors";
 import { MAX_INTERESTS, MAX_ONBOARDING_PHOTOS } from "./constants";
 import { LoginFlow } from "./LoginFlow";
 import { AccountScreen, type DocumentoLegal } from "./screens/AccountScreen";
+import { EmailConfirmationScreen } from "./screens/EmailConfirmationScreen";
 import { GenderInterestCityScreen } from "./screens/GenderInterestCityScreen";
 import { IntentionInterestsScreen } from "./screens/IntentionInterestsScreen";
 import { LifestyleScreen } from "./screens/LifestyleScreen";
@@ -52,16 +53,30 @@ interface OnboardingFlowProps {
   onComplete: () => void;
   onShowToast: (message: string) => void;
   onOpenLegal: (documento: DocumentoLegal) => void;
+  /**
+   * Passo em que o cadastro recomeça. Usado quando a pessoa já tem conta mas
+   * não terminou o cadastro — depois de confirmar o e-mail, por exemplo:
+   * a conta já existe, então o passo de criá-la sai do caminho.
+   */
+  passoInicial?: OnboardingStep;
 }
 
-export function OnboardingFlow({ onComplete, onShowToast, onOpenLegal }: OnboardingFlowProps) {
-  const [state, setState] = useState<OnboardingState>(INITIAL_STATE);
+export function OnboardingFlow({
+  onComplete,
+  onShowToast,
+  onOpenLegal,
+  passoInicial,
+}: OnboardingFlowProps) {
+  const [state, setState] = useState<OnboardingState>(
+    passoInicial ? { ...INITIAL_STATE, step: passoInicial } : INITIAL_STATE,
+  );
   const [mode, setMode] = useState<"signup" | "login">("signup");
   const [fotos, setFotos] = useState<(FotoDoPerfil | null)[]>(
     Array.from({ length: MAX_ONBOARDING_PHOTOS }, () => null),
   );
   const [ocupado, setOcupado] = useState(false);
   const [erroDaConta, setErroDaConta] = useState<string | null>(null);
+  const [aguardandoEmail, setAguardandoEmail] = useState<string | null>(null);
 
   function goTo(step: OnboardingStep) {
     setState((prev) => ({ ...prev, step }));
@@ -72,7 +87,19 @@ export function OnboardingFlow({ onComplete, onShowToast, onOpenLegal }: Onboard
     setOcupado(true);
     setErroDaConta(null);
     try {
-      await cadastrar({ email: state.email, senha: state.password, telefone: state.phone });
+      const { precisaConfirmarEmail } = await cadastrar({
+        email: state.email,
+        senha: state.password,
+        telefone: state.phone,
+      });
+
+      if (precisaConfirmarEmail) {
+        // Sem sessão ainda: os consentimentos ficam para quando ela existir,
+        // no fim do cadastro. O app segue sozinho assim que o link for aberto.
+        setAguardandoEmail(state.email.trim());
+        return;
+      }
+
       await registrarConsentimentos(["termos", "diretrizes", "privacidade", "dados_sensiveis"]);
       goTo("name-birthdate");
     } catch (problema) {
@@ -121,6 +148,7 @@ export function OnboardingFlow({ onComplete, onShowToast, onOpenLegal }: Onboard
     if (ocupado) return;
     setOcupado(true);
     try {
+      await registrarConsentimentos(["termos", "diretrizes", "privacidade", "dados_sensiveis"]);
       await concluirCadastro(state);
       goTo("success");
     } catch (problema) {
@@ -128,6 +156,18 @@ export function OnboardingFlow({ onComplete, onShowToast, onOpenLegal }: Onboard
     } finally {
       setOcupado(false);
     }
+  }
+
+  if (aguardandoEmail) {
+    return (
+      <EmailConfirmationScreen
+        email={aguardandoEmail}
+        onBack={() => {
+          setAguardandoEmail(null);
+          goTo("account");
+        }}
+      />
+    );
   }
 
   if (mode === "login") {
@@ -181,7 +221,7 @@ export function OnboardingFlow({ onComplete, onShowToast, onOpenLegal }: Onboard
           onChangeName={(name) => setState((prev) => ({ ...prev, name }))}
           onChangeBirthdate={(birthdate) => setState((prev) => ({ ...prev, birthdate }))}
           onChangeBio={(bio) => setState((prev) => ({ ...prev, bio }))}
-          onBack={() => goTo("account")}
+          onBack={passoInicial ? undefined : () => goTo("account")}
           onNext={() => goTo("gender-interest-city")}
         />
       );

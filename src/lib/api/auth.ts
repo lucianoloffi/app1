@@ -9,7 +9,17 @@ export interface DadosDeCadastro {
 
 export const SENHA_MINIMA = 8;
 
-export async function cadastrar({ email, senha, telefone }: DadosDeCadastro): Promise<string> {
+export interface ResultadoDoCadastro {
+  id: string;
+  /** true quando o projeto exige confirmar o e-mail antes de liberar a sessão. */
+  precisaConfirmarEmail: boolean;
+}
+
+export async function cadastrar({
+  email,
+  senha,
+  telefone,
+}: DadosDeCadastro): Promise<ResultadoDoCadastro> {
   if (senha.length < SENHA_MINIMA) {
     throw new ErroDeApp(`A senha precisa de pelo menos ${SENHA_MINIMA} caracteres.`);
   }
@@ -23,10 +33,7 @@ export async function cadastrar({ email, senha, telefone }: DadosDeCadastro): Pr
 
   const id = data.user?.id;
   if (!id) throw new ErroDeApp("Não foi possível criar a conta agora.");
-  if (!data.session) {
-    throw new ErroDeApp("Confirme seu e-mail pelo link que enviamos e volte para continuar.");
-  }
-  return id;
+  return { id, precisaConfirmarEmail: !data.session };
 }
 
 export async function entrar(email: string, senha: string): Promise<void> {
