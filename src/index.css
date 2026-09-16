@@ -5,6 +5,13 @@
   box-sizing: border-box;
 }
 
+/* Respiro das bordas do aparelho (relógio do iPhone em cima, barra de gestos
+   embaixo). Em variável porque mais de uma camada precisa do mesmo valor. */
+:root {
+  --safe-top: env(safe-area-inset-top);
+  --safe-bottom: env(safe-area-inset-bottom);
+}
+
 html,
 body {
   margin: 0;
@@ -41,8 +48,8 @@ button {
   flex-direction: column;
   position: relative;
   overflow: hidden;
-  padding-top: env(safe-area-inset-top);
-  padding-bottom: env(safe-area-inset-bottom);
+  padding-top: var(--safe-top);
+  padding-bottom: var(--safe-bottom);
 }
 
 .app-shell__content {
@@ -64,6 +71,11 @@ button {
   display: flex;
   flex-direction: column;
   background: var(--color-bg);
+  /* A camada é absoluta, então cobre também a faixa de segurança do aparelho
+     (relógio e bateria no iPhone). Sem repetir o respiro aqui, o cabeçalho
+     do documento nasce embaixo do relógio. */
+  padding-top: var(--safe-top);
+  padding-bottom: var(--safe-bottom);
 }
 
 .app-loading {
