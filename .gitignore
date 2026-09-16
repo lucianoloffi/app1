@@ -30,3 +30,6 @@ lovi.zip
 .env
 .env.*
 !.env.example
+
+# Fotos dos perfis de teste (npm run popular -- --fotos=pasta)
+fotos-de-teste/

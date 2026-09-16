@@ -1,17 +1,22 @@
 /**
- * De onde saem as fotos dos perfis de teste. Dois modos:
+ * De onde saem as fotos dos perfis de teste. Três modos:
  *
- *   pexels  fotos reais do banco de imagens Pexels (licença livre), buscadas
- *           por gênero. Precisa de uma chave gratuita em
+ *   pasta   fotos suas, uma por pessoa, em fotos-de-teste/mulheres e
+ *           fotos-de-teste/homens. É o modo que dá o resultado mais realista.
+ *   pexels  fotos do banco de imagens Pexels (licença livre), buscadas por
+ *           gênero. Precisa de uma chave gratuita em
  *           https://www.pexels.com/api/ — leva um minuto e não pede cartão.
  *   cores   imagens geradas aqui mesmo: degradê e silhueta, sem rede e sem
  *           licença nenhuma. Feias, mas servem para ver a tela populada.
  *
- * Em ambos os casos as três fotos de um perfil são da MESMA pessoa (no Pexels,
- * três enquadramentos da mesma imagem). Três rostos diferentes no mesmo perfil
- * fariam o app parecer quebrado.
+ * Nos três casos as fotos de um perfil são da MESMA pessoa, em enquadramentos
+ * diferentes. Três rostos diferentes no mesmo perfil fariam o app parecer
+ * quebrado.
  */
+import { readdirSync, readFileSync } from "node:fs";
+import { extname, join } from "node:path";
 import { deflateSync } from "node:zlib";
+import jpeg from "jpeg-js";
 
 const BUSCA_POR_GENERO = {
   mulher: ["portrait of a woman smiling", "brazilian woman portrait", "woman portrait outdoors"],
@@ -180,11 +185,154 @@ function imagemDeCores(nome, indice) {
   return paraPng(largura, altura, pixels);
 }
 
+// ────────────────────────────── modo "pasta" ──────────────────────────────
+
+const EXTENSOES = new Set([".jpg", ".jpeg", ".png", ".webp"]);
+const SUBPASTA = { mulher: "mulheres", homem: "homens" };
+
+/**
+ * Lê fotos suas de fotos-de-teste/mulheres e fotos-de-teste/homens — um
+ * arquivo por pessoa. Se houver menos fotos que perfis, o script cria só os
+ * perfis que têm foto: repetir o mesmo rosto em dois perfis entrega o teste.
+ */
+export function reservaDaPasta(pasta) {
+  const arquivos = { mulher: [], homem: [] };
+
+  for (const genero of ["mulher", "homem"]) {
+    const caminho = join(pasta, SUBPASTA[genero]);
+    let nomes;
+    try {
+      nomes = readdirSync(caminho);
+    } catch {
+      throw new Error(
+        `Não achei a pasta ${caminho}.\n` +
+          `  Crie ${pasta}/mulheres e ${pasta}/homens e ponha uma foto por pessoa ` +
+          `(.jpg, .png ou .webp).`,
+      );
+    }
+    arquivos[genero] = nomes
+      .filter((nome) => EXTENSOES.has(extname(nome).toLowerCase()))
+      .sort()
+      .map((nome) => join(caminho, nome));
+  }
+
+  if (arquivos.mulher.length === 0 && arquivos.homem.length === 0) {
+    throw new Error(`Nenhuma imagem em ${pasta}/mulheres nem em ${pasta}/homens.`);
+  }
+
+  const usados = { mulher: 0, homem: 0 };
+  return {
+    disponivel: { mulher: arquivos.mulher.length, homem: arquivos.homem.length },
+    proxima: (genero) => arquivos[genero][usados[genero]++],
+  };
+}
+
+/** Média dos pixels da área de origem: dá um encolhimento limpo, sem serrilhado. */
+function recorta(imagem, area, larguraAlvo, alturaAlvo) {
+  const saida = Buffer.alloc(larguraAlvo * alturaAlvo * 4);
+  const passoX = area.largura / larguraAlvo;
+  const passoY = area.altura / alturaAlvo;
+
+  for (let y = 0; y < alturaAlvo; y++) {
+    const deY = area.y + Math.floor(y * passoY);
+    const ateY = Math.min(area.y + area.altura, area.y + Math.floor((y + 1) * passoY)) || deY + 1;
+    for (let x = 0; x < larguraAlvo; x++) {
+      const deX = area.x + Math.floor(x * passoX);
+      const ateX = Math.min(area.x + area.largura, area.x + Math.floor((x + 1) * passoX)) || deX + 1;
+
+      let r = 0;
+      let g = 0;
+      let b = 0;
+      let total = 0;
+      for (let oy = deY; oy < Math.max(ateY, deY + 1); oy++) {
+        for (let ox = deX; ox < Math.max(ateX, deX + 1); ox++) {
+          const origem = (oy * imagem.width + ox) * 4;
+          r += imagem.data[origem];
+          g += imagem.data[origem + 1];
+          b += imagem.data[origem + 2];
+          total++;
+        }
+      }
+      const destino = (y * larguraAlvo + x) * 4;
+      saida[destino] = r / total;
+      saida[destino + 1] = g / total;
+      saida[destino + 2] = b / total;
+      saida[destino + 3] = 255;
+    }
+  }
+  return saida;
+}
+
+/**
+ * Três enquadramentos da mesma foto: o retrato inteiro, um mais fechado no
+ * terço de cima (onde costuma estar o rosto) e um quadrado. Sem isso as três
+ * fotos do carrossel sairiam idênticas.
+ */
+const ENQUADRAMENTOS = [
+  { proporcao: 3 / 4, escala: 1, ancora: 0.5 },
+  { proporcao: 3 / 4, escala: 0.62, ancora: 0.26 },
+  { proporcao: 1, escala: 0.84, ancora: 0.4 },
+];
+
+function enquadra(imagem, indice) {
+  const { proporcao, escala, ancora } = ENQUADRAMENTOS[indice % ENQUADRAMENTOS.length];
+
+  // O maior retângulo com essa proporção que cabe na foto, reduzido pela escala.
+  let largura = Math.min(imagem.width, imagem.height * proporcao) * escala;
+  let altura = largura / proporcao;
+  if (altura > imagem.height) {
+    altura = imagem.height * escala;
+    largura = altura * proporcao;
+  }
+  largura = Math.max(1, Math.floor(largura));
+  altura = Math.max(1, Math.floor(altura));
+
+  const area = {
+    x: Math.round((imagem.width - largura) / 2),
+    y: Math.round(Math.min(Math.max((imagem.height - altura) * ancora, 0), imagem.height - altura)),
+    largura,
+    altura,
+  };
+
+  const larguraAlvo = Math.min(900, largura);
+  const alturaAlvo = Math.max(1, Math.round((larguraAlvo * altura) / largura));
+  return {
+    data: recorta(imagem, area, larguraAlvo, alturaAlvo),
+    width: larguraAlvo,
+    height: alturaAlvo,
+  };
+}
+
+function fotosDoArquivo(caminho) {
+  const bruto = readFileSync(caminho);
+  if (bruto.length > 5 * 1024 * 1024 && extname(caminho).toLowerCase() === ".png") {
+    throw new Error(`${caminho}: acima do limite de 5 MB do bucket.`);
+  }
+
+  // Só JPEG é recortado aqui — decodificar PNG e WEBP exigiria mais peso do
+  // que este script merece. Nos outros formatos a mesma imagem vai três vezes.
+  if (![".jpg", ".jpeg"].includes(extname(caminho).toLowerCase())) {
+    return Array.from({ length: FOTOS_POR_PERFIL }, () => ({
+      bytes: bruto,
+      tipo: extname(caminho).toLowerCase() === ".png" ? "image/png" : "image/webp",
+      extensao: extname(caminho).toLowerCase().slice(1),
+      semEnquadramento: true,
+    }));
+  }
+
+  const imagem = jpeg.decode(bruto, { useTArray: true, maxMemoryUsageInMB: 1024 });
+  return Array.from({ length: FOTOS_POR_PERFIL }, (_, indice) => ({
+    bytes: Buffer.from(jpeg.encode(enquadra(imagem, indice), 82).data),
+    tipo: "image/jpeg",
+    extensao: "jpg",
+  }));
+}
+
 // ────────────────────────────────── API ──────────────────────────────────
 
 /**
  * Devolve as 3 fotos de um perfil, já em bytes, prontas para o upload.
- * `proximaFoto` só é usada no modo pexels.
+ * `proximaFoto` entrega a foto daquele gênero nos modos pexels e pasta.
  */
 export async function fotosDoPerfil(modo, perfil, proximaFoto) {
   if (modo === "cores") {
@@ -193,6 +341,10 @@ export async function fotosDoPerfil(modo, perfil, proximaFoto) {
       tipo: "image/png",
       extensao: "png",
     }));
+  }
+
+  if (modo === "pasta") {
+    return fotosDoArquivo(proximaFoto(perfil.genero));
   }
 
   const foto = proximaFoto(perfil.genero);

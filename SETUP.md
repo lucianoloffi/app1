@@ -120,17 +120,40 @@ app e com o RLS ligado. Passe a chave só na hora de rodar, nunca no `.env`:
 SUPABASE_SERVICE_ROLE_KEY=cole_aqui npm run popular
 ```
 
-**Fotos.** Por padrão vêm do [Pexels](https://www.pexels.com/api/), que é banco
-de imagens de licença livre e dá uma chave gratuita na hora:
+**Fotos.** Três origens possíveis:
+
+`--fotos=pasta` — as suas, uma por pessoa, e é o que dá o resultado mais
+realista. Monte a pasta assim (ela está no `.gitignore`, então não vai para o
+repositório):
+
+```
+fotos-de-teste/
+  mulheres/   ana.jpg, camila.jpg, …
+  homens/     rodrigo.jpg, felipe.jpg, …
+```
+
+```bash
+SUPABASE_SERVICE_ROLE_KEY=cole_aqui npm run popular -- --fotos=pasta
+```
+
+Um arquivo por pessoa: o script gera os três enquadramentos (retrato inteiro,
+fechado no alto e quadrado) recortando a mesma foto. **A quantidade de perfis é
+a quantidade de fotos** — 6 fotos em `mulheres/` e 4 em `homens/` criam 6 e 4
+perfis. Para os 20, são 10 e 10. Use `.jpg`: só nele o recorte funciona (PNG e
+WEBP entram repetidos três vezes).
+
+`--fotos=pexels` (padrão) — banco de imagens de licença livre, com chave
+gratuita que sai na hora em [pexels.com/api](https://www.pexels.com/api/):
 
 ```bash
 PEXELS_API_KEY=cole_aqui SUPABASE_SERVICE_ROLE_KEY=cole_aqui npm run popular
 ```
 
-As três fotos de um perfil são três enquadramentos da mesma imagem — três
-rostos diferentes no mesmo perfil fariam o app parecer quebrado. Sem chave do
-Pexels, `npm run popular -- --fotos=cores` gera as imagens aqui mesmo (degradê
-com silhueta): feias, mas não dependem de rede nem de licença.
+`--fotos=cores` — imagens geradas pelo próprio script (degradê com silhueta).
+Feias, mas não dependem de rede, de chave nem de licença.
+
+Nos três casos as fotos de um perfil são da mesma pessoa: três rostos
+diferentes no mesmo perfil fariam o app parecer quebrado.
 
 **O que aparece na fila.** Quem acabou de criar conta começa com os filtros em
 25 km e 25–45 anos, e a intenção que escolheu no cadastro. Com isso, de
@@ -140,9 +163,10 @@ distância. É de propósito: serve para testar o filtro.
 
 **Antes de abrir o app para outras pessoas**, rode `npm run popular -- --limpar`.
 São contas de verdade no seu projeto, e o build publicado no GitHub Pages fala
-com o mesmo banco — para quem chega de fora elas parecem gente real. As fotos
-do Pexels são de pessoas reais, e a licença não cobre esse tipo de uso fora de
-teste.
+com o mesmo banco — para quem chega de fora elas parecem gente real. Vale
+principalmente para fotos de pessoas reais, suas ou do Pexels: nenhuma licença
+de banco de imagens cobre rosto de gente de verdade em perfil de app de namoro
+fora de teste.
 
 ## 8. Moderação (manual, por enquanto)
 

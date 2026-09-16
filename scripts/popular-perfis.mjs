@@ -7,7 +7,8 @@
  *   npm run popular -- --simular     mostra o que seria criado, sem tocar em nada
  *   npm run popular                  cria os perfis (precisa da service role)
  *   npm run popular -- --limpar      apaga os perfis de teste e as fotos deles
- *   npm run popular -- --fotos=cores usa imagens geradas aqui, sem chave do Pexels
+ *   npm run popular -- --fotos=pasta usa fotos suas de fotos-de-teste/
+ *   npm run popular -- --fotos=cores usa imagens geradas aqui, sem rede nenhuma
  *
  * Por que a service role: criar usuário no auth é a única coisa que a chave
  * anon não faz. Todo o resto — perfil, interesses, fotos, localização — o
@@ -22,7 +23,12 @@ import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { createClient } from "@supabase/supabase-js";
 import { PERFIS, apelido, coordenadaPara, nascimentoPara, telefonePara } from "./dados-de-teste.mjs";
-import { FOTOS_POR_PERFIL, fotosDoPerfil, reservaDeFotosDoPexels } from "./fotos-de-teste.mjs";
+import {
+  FOTOS_POR_PERFIL,
+  fotosDoPerfil,
+  reservaDaPasta,
+  reservaDeFotosDoPexels,
+} from "./fotos-de-teste.mjs";
 
 const DOMINIO_PADRAO = "lovi.test";
 const SENHA = "LoviTeste2026!";
@@ -37,6 +43,7 @@ const valorDe = (nome, padrao) =>
 const simular = temBandeira("simular");
 const limpar = temBandeira("limpar");
 const modoDeFoto = valorDe("fotos", "pexels");
+const pastaDeFotos = valorDe("pasta", "fotos-de-teste");
 const dominio = valorDe("dominio", DOMINIO_PADRAO);
 
 function encerra(mensagem) {
@@ -62,16 +69,34 @@ function leEnv() {
   return { ...valores, ...process.env };
 }
 
-if (!["pexels", "cores"].includes(modoDeFoto)) {
-  encerra(`--fotos aceita "pexels" ou "cores" (recebi "${modoDeFoto}").`);
+if (!["pexels", "pasta", "cores"].includes(modoDeFoto)) {
+  encerra(`--fotos aceita "pexels", "pasta" ou "cores" (recebi "${modoDeFoto}").`);
+}
+
+/**
+ * No modo pasta a quantidade de perfis é a quantidade de fotos: uma por
+ * pessoa. Repetir o mesmo rosto em dois perfis entregaria o teste na hora.
+ */
+function perfisComFotoNaPasta() {
+  let reserva;
+  try {
+    reserva = reservaDaPasta(pastaDeFotos);
+  } catch (problema) {
+    encerra(problema.message);
+  }
+
+  const restante = { ...reserva.disponivel };
+  const perfis = PERFIS.filter((perfil) => restante[perfil.genero]-- > 0);
+  return { perfis, reserva };
 }
 
 // ───────────────────────────────── simulação ─────────────────────────────────
 
 if (simular) {
-  console.log(`\n${PERFIS.length} perfis seriam criados (fotos: ${modoDeFoto}):\n`);
+  const escolhidos = modoDeFoto === "pasta" ? perfisComFotoNaPasta().perfis : PERFIS;
+  console.log(`\n${escolhidos.length} perfis seriam criados (fotos: ${modoDeFoto}):\n`);
   console.table(
-    PERFIS.map((perfil, indice) => ({
+    escolhidos.map((perfil, indice) => ({
       "e-mail": `${apelido(perfil.nome)}@${dominio}`,
       nome: perfil.nome,
       idade: perfil.idade,
@@ -85,7 +110,12 @@ if (simular) {
     })),
   );
   console.log(`  Senha de todos: ${SENHA}`);
-  console.log(`  Fotos por perfil: ${FOTOS_POR_PERFIL}\n`);
+  console.log(`  Fotos por perfil: ${FOTOS_POR_PERFIL}`);
+  if (modoDeFoto === "pasta") {
+    const { mulher, homem } = perfisComFotoNaPasta().reserva.disponivel;
+    console.log(`  Fotos em ${pastaDeFotos}: ${mulher} de mulher, ${homem} de homem`);
+  }
+  console.log("");
   process.exit(0);
 }
 
@@ -263,7 +293,7 @@ async function criaPerfil(perfil, indice, proximaFoto) {
   );
 
   await cliente.auth.signOut();
-  return { email, credito: fotos[0].creditoDe };
+  return { email, credito: fotos[0].creditoDe, semEnquadramento: fotos[0].semEnquadramento };
 }
 
 async function criaTudo() {
@@ -275,7 +305,20 @@ async function criaTudo() {
     );
   }
 
+  let perfisParaCriar = PERFIS;
   let proximaFoto = null;
+
+  if (modoDeFoto === "pasta") {
+    const escolha = perfisComFotoNaPasta();
+    perfisParaCriar = escolha.perfis;
+    proximaFoto = escolha.reserva.proxima;
+    const { mulher, homem } = escolha.reserva.disponivel;
+    console.log(`\n  ${mulher} foto(s) de mulher e ${homem} de homem em ${pastaDeFotos}`);
+    if (perfisParaCriar.length < PERFIS.length) {
+      console.log(`  Dos ${PERFIS.length} perfis, ${perfisParaCriar.length} têm foto e serão criados.`);
+    }
+  }
+
   if (modoDeFoto === "pexels") {
     const chave = env.PEXELS_API_KEY;
     if (!chave) {
@@ -290,14 +333,17 @@ async function criaTudo() {
     proximaFoto = await reservaDeFotosDoPexels(chave, porGenero);
   }
 
-  console.log(`\n  Criando ${PERFIS.length} perfis em ${url}\n`);
+  console.log(`\n  Criando ${perfisParaCriar.length} perfis em ${url}\n`);
   const creditos = new Set();
   let criados = 0;
+  let semEnquadramento = 0;
 
-  for (const [indice, perfil] of PERFIS.entries()) {
+  for (const [indice, perfil] of perfisParaCriar.entries()) {
     try {
-      const { email, credito } = await criaPerfil(perfil, indice, proximaFoto);
+      const resultado = await criaPerfil(perfil, indice, proximaFoto);
+      const { email, credito } = resultado;
       if (credito) creditos.add(credito);
+      if (resultado.semEnquadramento) semEnquadramento++;
       criados++;
       console.log(`  ✓ ${perfil.nome.padEnd(12)} ${perfil.genero.padEnd(7)} ${email}`);
     } catch (problema) {
@@ -306,7 +352,7 @@ async function criaTudo() {
   }
 
   console.log(`
-✓ ${criados} de ${PERFIS.length} perfis criados
+✓ ${criados} de ${perfisParaCriar.length} perfis criados
 
   Senha de todos: ${SENHA}
   Para apagar:    npm run popular -- --limpar
@@ -314,6 +360,12 @@ async function criaTudo() {
 
   if (creditos.size > 0) {
     console.log(`  Fotos: Pexels — ${[...creditos].sort().join(", ")}\n`);
+  }
+  if (semEnquadramento > 0) {
+    console.log(
+      `  ${semEnquadramento} perfil(is) ficaram com as 3 fotos iguais: só recorto JPEG.\n` +
+        "  Converta essas imagens para .jpg e rode de novo para ter enquadramentos diferentes.\n",
+    );
   }
 }
 
