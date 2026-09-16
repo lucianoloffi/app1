@@ -5,6 +5,7 @@ import { useChats } from "./chats/useChats";
 import { useDiscoverQueue } from "./discover/useDiscoverQueue";
 import { useToast } from "./hooks/useToast";
 import { sair } from "./lib/api/auth";
+import { erroDeConfiguracao } from "./lib/supabaseClient";
 import { carregarPerfilDoMatch } from "./lib/api/matches";
 import { tempoRelativo } from "./chats/tempo";
 import {
@@ -29,6 +30,7 @@ import {
 import { OnboardingFlow } from "./onboarding/OnboardingFlow";
 import { BlockedProfilesScreen, type BlockedProfile } from "./screens/BlockedProfilesScreen";
 import { ChatScreen } from "./screens/ChatScreen";
+import { ConfigErrorScreen } from "./screens/ConfigErrorScreen";
 import { ChatsScreen } from "./screens/ChatsScreen";
 import { DiscoverScreen } from "./screens/DiscoverScreen";
 import { EditProfileScreen } from "./screens/EditProfileScreen";
@@ -301,6 +303,8 @@ export default function App() {
 
   /** Tela sobreposta à navegação por abas; null = está nas abas. */
   const overlayScreen = (() => {
+    if (erroDeConfiguracao) return <ConfigErrorScreen message={erroDeConfiguracao} />;
+
     if (stage === "carregando") return <div className="app-loading" aria-label="Carregando" />;
 
     if (stage === "onboarding") {
