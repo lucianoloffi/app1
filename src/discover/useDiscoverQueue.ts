@@ -28,7 +28,6 @@ export function useDiscoverQueue({
   const [photoIndex, setPhotoIndex] = useState(0);
   const [swipeDirection, setSwipeDirection] = useState<SwipeDirection>(null);
   const [matchProfile, setMatchProfile] = useState<Profile | null>(null);
-  const [seenCount, setSeenCount] = useState(0);
   const [carregando, setCarregando] = useState(true);
   const [houvePerfis, setHouvePerfis] = useState(true);
   const isAnimating = useRef(false);
@@ -93,7 +92,6 @@ export function useDiscoverQueue({
       setQueue((prev) => prev.slice(1));
       setPhotoIndex(0);
       setSwipeDirection(null);
-      setSeenCount((prev) => prev + 1);
       isAnimating.current = false;
     }, SWIPE_ANIMATION_MS);
   }
@@ -124,7 +122,6 @@ export function useDiscoverQueue({
     photoIndex,
     swipeDirection,
     matchProfile,
-    seenCount,
     carregando,
     hasAnyMatch: houvePerfis,
     nextPhoto,

@@ -3,12 +3,14 @@ import type { MyProfile } from "../types";
 export interface Completeness {
   pct: number;
   hint: string;
+  /** O que ainda falta, em ordem de peso — alimenta o cartão do perfil. */
+  missing: string[];
 }
 
 const TOTAL_ITEMS = 16; // 10 campos + 6 slots de foto
 
 export function computeCompleteness(profile: MyProfile | null, photosCount: number): Completeness {
-  if (!profile) return { pct: 0, hint: "Faltam suas informações" };
+  if (!profile) return { pct: 0, hint: "Faltam suas informações", missing: [] };
 
   const lifestyleComplete = Boolean(
     profile.lifestyle.bebida && profile.lifestyle.atividade && profile.lifestyle.filhos,
@@ -39,5 +41,5 @@ export function computeCompleteness(profile: MyProfile | null, photosCount: numb
   if (!profile.relationshipStatus) missing.push("estado civil");
 
   const hint = pct >= 100 ? "Perfil completo" : `Faltam ${missing.slice(0, 2).join(" e ")}`;
-  return { pct, hint };
+  return { pct, hint, missing };
 }

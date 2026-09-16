@@ -16,18 +16,11 @@ const INTENTION_FILTER_LABEL: Record<Filters["intention"], string> = {
   amizade: "Amizade",
 };
 
-function pluralize(count: number, singular: string, plural: string) {
-  return count === 1 ? singular : plural;
-}
-
 const RING_RADIUS = 41;
 const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
 
 interface ProfileScreenProps {
   myProfile: MyProfile | null;
-  matchesCount: number;
-  conversationsCount: number;
-  seenCount: number;
   filters: Filters;
   verified: boolean;
   onOpenEdit: () => void;
@@ -39,9 +32,6 @@ interface ProfileScreenProps {
 
 export function ProfileScreen({
   myProfile,
-  matchesCount,
-  conversationsCount,
-  seenCount,
   filters,
   verified,
   onOpenEdit,
@@ -52,7 +42,7 @@ export function ProfileScreen({
 }: ProfileScreenProps) {
   const age = myProfile ? ageFromBirthdate(myProfile.birthdate) : null;
   const photosCount = myProfile?.photos.length ?? 0;
-  const { pct, hint } = computeCompleteness(myProfile, photosCount);
+  const { pct, hint, missing } = computeCompleteness(myProfile, photosCount);
   const dashOffset = RING_CIRCUMFERENCE * (1 - pct / 100);
 
   const filtersSummary = `${GENDER_FILTER_LABEL[filters.interestedIn]} · ${filters.minAge}–${filters.maxAge} anos · até ${filters.distanceKm} km · ${INTENTION_FILTER_LABEL[filters.intention]}`;
@@ -126,22 +116,36 @@ export function ProfileScreen({
       </button>
 
       <div className={styles.section}>
-        <div className={styles.metrics}>
-          <div className={styles.metricCard}>
-            <div className={styles.metricValue}>{matchesCount}</div>
-            <div className={styles.metricLabel}>matches</div>
-          </div>
-          <div className={styles.metricCard}>
-            <div className={styles.metricValue}>{conversationsCount}</div>
-            <div className={styles.metricLabel}>conversas</div>
-          </div>
-          <div className={styles.metricCard}>
-            <div className={styles.metricValue}>{seenCount}</div>
-            <div className={styles.metricLabel}>
-              {pluralize(seenCount, "perfil visto", "perfis vistos")}
-            </div>
-          </div>
-        </div>
+        {/* Some quando não falta nada: o cartão existe para ser resolvido. */}
+        {missing.length > 0 && (
+          <button type="button" className={styles.completeCard} onClick={onOpenEdit}>
+            <span className={styles.completeHeader}>
+              <span className={styles.completeIcon}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path
+                    d="M12 3.4l2.3 5 5.4.6-4 3.7 1.1 5.3-4.8-2.7-4.8 2.7L8.3 12.7l-4-3.7 5.4-.6z"
+                    fill="#fff"
+                    stroke="#5B34C9"
+                    strokeWidth={1.7}
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </span>
+              <span className={styles.completeMain}>
+                <span className={styles.completeTitle}>Complete seu perfil</span>
+                <span className={styles.completeSupport}>Toque para preencher o que falta</span>
+              </span>
+              <span className={styles.rowChevron}>›</span>
+            </span>
+            <span className={styles.completeChips}>
+              {missing.slice(0, 3).map((item) => (
+                <span key={item} className={styles.completeChip}>
+                  {item}
+                </span>
+              ))}
+            </span>
+          </button>
+        )}
 
         <button
           type="button"

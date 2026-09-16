@@ -306,7 +306,6 @@ export default function App() {
   }, [activeChatProfileId]);
 
   const totalUnread = chats.chats.reduce((sum, chat) => sum + chat.unread, 0);
-  const conversationsCount = chats.chats.filter((chat) => chat.messages.length > 1).length;
   const grantedPermissions = Object.values(permissions).filter(
     (value) => value === "granted",
   ).length;
@@ -635,9 +634,6 @@ export default function App() {
             {tab === "profile" && (
               <ProfileScreen
                 myProfile={myProfile}
-                matchesCount={chats.chats.length}
-                conversationsCount={conversationsCount}
-                seenCount={discover.seenCount}
                 filters={filters}
                 verified={verificado}
                 onOpenEdit={() => setEditingProfile(true)}

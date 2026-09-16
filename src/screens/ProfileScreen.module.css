@@ -111,28 +111,67 @@
   flex: none;
 }
 
-.metrics {
-  display: flex;
-  gap: 10px;
-}
-
-.metricCard {
-  flex: 1;
+.completeCard {
+  width: 100%;
+  border: 0;
   background: #fff;
   border-radius: 16px;
-  padding: 16px;
-  text-align: center;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  cursor: pointer;
+  text-align: left;
 }
 
-.metricValue {
-  font: 800 22px var(--font-ui);
-  color: var(--color-accent-2);
+.completeHeader {
+  display: flex;
+  align-items: center;
+  gap: 14px;
 }
 
-.metricLabel {
+.completeIcon {
+  flex: none;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: var(--color-accent-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.completeMain {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.completeTitle {
+  font: 600 15px var(--font-ui);
+  color: var(--color-ink);
+}
+
+.completeSupport {
   margin-top: 2px;
-  font: 500 12px var(--font-ui);
+  font: 400 13px var(--font-ui);
   color: var(--color-ink-40);
+}
+
+.completeChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.completeChip {
+  border: 1px solid var(--color-accent-line);
+  background: var(--color-accent-soft);
+  color: var(--color-accent-2);
+  border-radius: var(--radius-pill);
+  padding: 6px 12px;
+  font: 600 13px var(--font-ui);
 }
 
 .filtersCard {
