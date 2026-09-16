@@ -32,6 +32,18 @@
   font-weight: 400;
 }
 
+/* Campo que falhou na validação do servidor: a borda acompanha a mensagem
+   que aparece logo embaixo dele. */
+.inputInvalid {
+  composes: input;
+  border-color: #c8353c;
+}
+
+.inputInvalid:focus {
+  border-color: #c8353c;
+  box-shadow: 0 0 0 4px rgba(200, 53, 60, 0.14);
+}
+
 .textarea {
   composes: input;
   min-height: 96px;

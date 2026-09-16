@@ -12,7 +12,7 @@ import { cadastrar } from "../lib/api/auth";
 import { enviarFoto, removerFoto, type FotoDoPerfil } from "../lib/api/photos";
 import { concluirCadastro } from "../lib/api/profile";
 import { registrarConsentimentos } from "../lib/api/privacy";
-import { mensagemDeErro } from "../lib/errors";
+import { erroNoFormulario, mensagemDeErro, type CampoDeErro, type ErroNoFormulario } from "../lib/errors";
 import { MAX_INTERESTS, MAX_ONBOARDING_PHOTOS } from "./constants";
 import { LoginFlow } from "./LoginFlow";
 import { AccountScreen, type DocumentoLegal } from "./screens/AccountScreen";
@@ -75,11 +75,16 @@ export function OnboardingFlow({
     Array.from({ length: MAX_ONBOARDING_PHOTOS }, () => null),
   );
   const [ocupado, setOcupado] = useState(false);
-  const [erroDaConta, setErroDaConta] = useState<string | null>(null);
+  const [erroDaConta, setErroDaConta] = useState<ErroNoFormulario | null>(null);
   const [aguardandoEmail, setAguardandoEmail] = useState<string | null>(null);
 
   function goTo(step: OnboardingStep) {
     setState((prev) => ({ ...prev, step }));
+  }
+
+  /** Some com o erro do campo assim que a pessoa mexe nele. */
+  function limpaErroDoCampo(campo: CampoDeErro) {
+    setErroDaConta((prev) => (prev?.campo === campo ? null : prev));
   }
 
   async function criarConta() {
@@ -103,7 +108,7 @@ export function OnboardingFlow({
       await registrarConsentimentos(["termos", "diretrizes", "privacidade", "dados_sensiveis"]);
       goTo("name-birthdate");
     } catch (problema) {
-      setErroDaConta(mensagemDeErro(problema));
+      setErroDaConta(erroNoFormulario(problema));
     } finally {
       setOcupado(false);
     }
@@ -199,9 +204,18 @@ export function OnboardingFlow({
           acceptedSensitiveData={state.acceptedSensitiveData}
           loading={ocupado}
           error={erroDaConta}
-          onChangeEmail={(email) => setState((prev) => ({ ...prev, email }))}
-          onChangePassword={(password) => setState((prev) => ({ ...prev, password }))}
-          onChangePhone={(phone) => setState((prev) => ({ ...prev, phone }))}
+          onChangeEmail={(email) => {
+            limpaErroDoCampo("email");
+            setState((prev) => ({ ...prev, email }));
+          }}
+          onChangePassword={(password) => {
+            limpaErroDoCampo("senha");
+            setState((prev) => ({ ...prev, password }));
+          }}
+          onChangePhone={(phone) => {
+            limpaErroDoCampo("telefone");
+            setState((prev) => ({ ...prev, phone }));
+          }}
           onToggleTerms={() => setState((prev) => ({ ...prev, acceptedTerms: !prev.acceptedTerms }))}
           onToggleSensitiveData={() =>
             setState((prev) => ({ ...prev, acceptedSensitiveData: !prev.acceptedSensitiveData }))

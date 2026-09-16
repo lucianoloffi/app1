@@ -1,11 +1,30 @@
 /** Mensagens de erro em português, a partir do que o Supabase devolve. */
 
-const MENSAGENS: { teste: RegExp; texto: string }[] = [
-  { teste: /already registered|already been registered|user already exists/i, texto: "Este e-mail já está cadastrado." },
-  { teste: /password should be at least|weak.?password/i, texto: "A senha precisa de pelo menos 8 caracteres." },
+/** Campo do formulário a que um erro se refere, quando dá para saber. */
+export type CampoDeErro = "email" | "senha" | "telefone";
+
+export interface ErroNoFormulario {
+  texto: string;
+  /** Com campo, a mensagem aparece embaixo dele em vez de no fim da tela. */
+  campo: CampoDeErro | null;
+}
+
+/** Erro de aplicação já com texto pronto para a tela. */
+export class ErroDeApp extends Error {
+  readonly campo: CampoDeErro | null;
+
+  constructor(message: string, campo: CampoDeErro | null = null) {
+    super(message);
+    this.campo = campo;
+  }
+}
+
+const MENSAGENS: { teste: RegExp; texto: string; campo?: CampoDeErro }[] = [
+  { teste: /already registered|already been registered|user already exists/i, texto: "Este e-mail já está cadastrado.", campo: "email" },
+  { teste: /password should be at least|weak.?password/i, texto: "A senha precisa de pelo menos 8 caracteres.", campo: "senha" },
   { teste: /invalid login credentials/i, texto: "E-mail ou senha incorretos." },
-  { teste: /email not confirmed/i, texto: "Confirme seu e-mail antes de entrar." },
-  { teste: /invalid email/i, texto: "E-mail inválido." },
+  { teste: /email not confirmed/i, texto: "Confirme seu e-mail antes de entrar.", campo: "email" },
+  { teste: /invalid email/i, texto: "E-mail inválido.", campo: "email" },
   { teste: /18 anos/i, texto: "É preciso ter 18 anos ou mais para usar o Lovi." },
   { teste: /jwt expired|session.*(expired|missing)|refresh.?token/i, texto: "Sua sessão expirou. Entre de novo." },
   { teste: /failed to fetch|network|offline/i, texto: "Sem conexão. Tente de novo." },
@@ -14,7 +33,11 @@ const MENSAGENS: { teste: RegExp; texto: string }[] = [
   { teste: /mime type|not supported/i, texto: "Formato não suportado. Use JPG, PNG ou WEBP." },
 ];
 
-export function mensagemDeErro(erro: unknown): string {
+/** Traduz o erro e diz de que campo ele veio, quando dá para saber. */
+export function erroNoFormulario(erro: unknown): ErroNoFormulario {
+  // ErroDeApp já passou por aqui: o texto está pronto e o campo, se existe, veio junto.
+  if (erro instanceof ErroDeApp) return { texto: erro.message, campo: erro.campo };
+
   const bruto =
     erro instanceof Error
       ? erro.message
@@ -25,13 +48,17 @@ export function mensagemDeErro(erro: unknown): string {
           : "";
 
   const encontrada = MENSAGENS.find((item) => item.teste.test(bruto));
-  if (encontrada) return encontrada.texto;
-  return bruto.trim() || "Algo deu errado. Tente de novo.";
+  if (encontrada) return { texto: encontrada.texto, campo: encontrada.campo ?? null };
+  return { texto: bruto.trim() || "Algo deu errado. Tente de novo.", campo: null };
 }
 
-/** Erro de aplicação já com texto pronto para a tela. */
-export class ErroDeApp extends Error {}
+export function mensagemDeErro(erro: unknown): string {
+  return erroNoFormulario(erro).texto;
+}
 
 export function lancaSeErro(erro: unknown): void {
-  if (erro) throw new ErroDeApp(mensagemDeErro(erro));
+  if (erro) {
+    const { texto, campo } = erroNoFormulario(erro);
+    throw new ErroDeApp(texto, campo);
+  }
 }

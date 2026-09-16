@@ -21,7 +21,7 @@ export async function cadastrar({
   telefone,
 }: DadosDeCadastro): Promise<ResultadoDoCadastro> {
   if (senha.length < SENHA_MINIMA) {
-    throw new ErroDeApp(`A senha precisa de pelo menos ${SENHA_MINIMA} caracteres.`);
+    throw new ErroDeApp(`A senha precisa de pelo menos ${SENHA_MINIMA} caracteres.`, "senha");
   }
 
   const { data, error } = await supabase.auth.signUp({
@@ -56,7 +56,7 @@ export async function recuperarSenha(email: string): Promise<void> {
 
 export async function definirNovaSenha(senha: string): Promise<void> {
   if (senha.length < SENHA_MINIMA) {
-    throw new ErroDeApp(`A senha precisa de pelo menos ${SENHA_MINIMA} caracteres.`);
+    throw new ErroDeApp(`A senha precisa de pelo menos ${SENHA_MINIMA} caracteres.`, "senha");
   }
   const { error } = await supabase.auth.updateUser({ password: senha });
   lancaSeErro(error);

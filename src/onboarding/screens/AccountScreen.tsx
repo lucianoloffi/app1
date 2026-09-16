@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { OnboardingLayout } from "../OnboardingLayout";
 import { formatPhone, onlyDigits } from "../phoneFormat";
 import { SENHA_MINIMA } from "../../lib/api/auth";
+import type { ErroNoFormulario } from "../../lib/errors";
 import fieldStyles from "../fields.module.css";
 import styles from "./AccountScreen.module.css";
 
@@ -14,7 +15,7 @@ interface AccountScreenProps {
   acceptedTerms: boolean;
   acceptedSensitiveData: boolean;
   loading: boolean;
-  error: string | null;
+  error: ErroNoFormulario | null;
   onChangeEmail: (value: string) => void;
   onChangePassword: (value: string) => void;
   onChangePhone: (digits: string) => void;
@@ -64,6 +65,11 @@ export function AccountScreen({
     inputRef.current?.focus();
   }, []);
 
+  // O erro fica embaixo do campo que o causou; sem campo conhecido, vai para o fim da tela.
+  const erroDoCampo = (campo: NonNullable<ErroNoFormulario["campo"]>) =>
+    error?.campo === campo ? error.texto : null;
+  const erroGeral = error && !error.campo ? error.texto : null;
+
   const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim());
   const senhaValida = password.length >= SENHA_MINIMA;
   const telefoneValido = onlyDigits(phone).length >= 10;
@@ -85,26 +91,40 @@ export function AccountScreen({
         <span className={fieldStyles.label}>E-mail</span>
         <input
           ref={inputRef}
-          className={fieldStyles.input}
+          className={erroDoCampo("email") ? fieldStyles.inputInvalid : fieldStyles.input}
           type="email"
           inputMode="email"
           autoComplete="email"
           placeholder="voce@email.com"
           value={email}
+          aria-invalid={Boolean(erroDoCampo("email"))}
+          aria-describedby={erroDoCampo("email") ? "erro-email" : undefined}
           onChange={(e) => onChangeEmail(e.target.value)}
         />
+        {erroDoCampo("email") && (
+          <p id="erro-email" className={fieldStyles.error} role="alert">
+            {erroDoCampo("email")}
+          </p>
+        )}
       </div>
 
       <div className={fieldStyles.fieldGroup}>
-        <span className={fieldStyles.label}>Senha</span>
+        <span className={fieldStyles.label}>Crie uma senha</span>
         <input
-          className={fieldStyles.input}
+          className={erroDoCampo("senha") ? fieldStyles.inputInvalid : fieldStyles.input}
           type="password"
           autoComplete="new-password"
           placeholder={`Pelo menos ${SENHA_MINIMA} caracteres`}
           value={password}
+          aria-invalid={Boolean(erroDoCampo("senha"))}
+          aria-describedby={erroDoCampo("senha") ? "erro-senha" : undefined}
           onChange={(e) => onChangePassword(e.target.value)}
         />
+        {erroDoCampo("senha") && (
+          <p id="erro-senha" className={fieldStyles.error} role="alert">
+            {erroDoCampo("senha")}
+          </p>
+        )}
       </div>
 
       <div className={fieldStyles.fieldGroup}>
@@ -112,16 +132,24 @@ export function AccountScreen({
         <div className={styles.phoneRow}>
           <span className={styles.ddiBox}>+55</span>
           <input
-            className={`${fieldStyles.input} ${styles.phoneInput}`}
+            className={`${erroDoCampo("telefone") ? fieldStyles.inputInvalid : fieldStyles.input} ${styles.phoneInput}`}
             type="tel"
             inputMode="numeric"
             autoComplete="tel"
             placeholder="(47) 90000-0000"
             value={formatPhone(phone)}
+            aria-invalid={Boolean(erroDoCampo("telefone"))}
+            aria-describedby={erroDoCampo("telefone") ? "erro-telefone" : undefined}
             onChange={(e) => onChangePhone(onlyDigits(e.target.value))}
           />
         </div>
-        <p className={fieldStyles.note}>Seu número nunca aparece no perfil.</p>
+        {erroDoCampo("telefone") ? (
+          <p id="erro-telefone" className={fieldStyles.error} role="alert">
+            {erroDoCampo("telefone")}
+          </p>
+        ) : (
+          <p className={fieldStyles.note}>Seu número nunca aparece no perfil.</p>
+        )}
       </div>
 
       <div className={styles.consentGroup}>
@@ -177,9 +205,8 @@ export function AccountScreen({
           <span className={styles.consentMain}>
             <p className={styles.consentTitle}>Autorizo o tratamento dos meus dados sensíveis.</p>
             <p className={styles.consentText}>
-              São eles: sua preferência de interesse (que indica orientação sexual), sua cidade e
-              suas fotos. Sem eles o Lovi não funciona. Você pode revogar quando quiser, o que
-              encerra a conta.
+              Interesse (indica orientação sexual), cidade e fotos. Sem eles o Lovi não funciona.
+              Revogar, quando quiser, encerra a conta.
             </p>
             <span className={styles.legalLinks}>
               <span
@@ -204,7 +231,11 @@ export function AccountScreen({
         </button>
       </div>
 
-      {error && <p className={styles.errorText}>{error}</p>}
+      {erroGeral && (
+        <p className={styles.errorText} role="alert">
+          {erroGeral}
+        </p>
+      )}
     </OnboardingLayout>
   );
 }
