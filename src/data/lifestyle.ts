@@ -43,10 +43,10 @@ export const LIFE_GROUPS = [
 
 /** Ordem das chips no passo 8 do cadastro (sem "Prefiro não dizer"). */
 export const ONBOARDING_STATUS_OPTIONS: { value: RelationshipStatus; label: string }[] = (
-  ["solteiro", "divorciado", "viuvo", "separado", "namorando"] as RelationshipStatus[]
+  ["solteiro", "divorciado", "viuvo", "separado", "namorando", "casado"] as RelationshipStatus[]
 ).map((value) => ({ value, label: RELATIONSHIP_STATUS_LABEL[value] }));
 
 /** Ordem das opções na folha "Status de relacionamento" (Editar perfil). */
 export const STATUS_SHEET_OPTIONS: { value: RelationshipStatus; label: string }[] = (
-  ["solteiro", "namorando", "divorciado", "separado", "viuvo"] as RelationshipStatus[]
+  ["solteiro", "namorando", "casado", "divorciado", "separado", "viuvo"] as RelationshipStatus[]
 ).map((value) => ({ value, label: RELATIONSHIP_STATUS_LABEL[value] }));

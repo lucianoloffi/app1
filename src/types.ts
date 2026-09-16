@@ -17,6 +17,7 @@ export interface Lifestyle {
 export type RelationshipStatus =
   | "solteiro"
   | "namorando"
+  | "casado"
   | "divorciado"
   | "separado"
   | "viuvo";
@@ -158,6 +159,7 @@ export const KIDS_LABEL: Record<Kids, string> = {
 export const RELATIONSHIP_STATUS_LABEL: Record<RelationshipStatus, string> = {
   solteiro: "Solteiro(a)",
   namorando: "Namorando",
+  casado: "Casado(a)",
   divorciado: "Divorciado(a)",
   separado: "Separado(a)",
   viuvo: "Viúvo(a)",
