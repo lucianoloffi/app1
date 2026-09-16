@@ -57,7 +57,21 @@ que o Supabase já injeta automaticamente. Nada a cadastrar.
 
 ## 5. Variáveis do app
 
-Copie `.env.example` para `.env` e preencha com **Project Settings → API**:
+Copie a chave no painel (**Project Settings → API Keys**, aba *Legacy anon,
+service_role*, linha `anon public`, botão de copiar) e rode:
+
+```bash
+cd app1
+npm run configurar
+```
+
+O comando lê a chave da área de transferência, tira qualquer sujeira que
+tenha vindo junto e descobre o endereço do projeto pela própria chave.
+
+Colar a chave à mão funciona, mas é onde tudo costuma dar errado: são mais de
+200 caracteres em uma linha só, e basta um "…" de uma cópia truncada ou um
+espaço não separável para o navegador recusar todas as requisições com um erro
+que não explica nada. Se preferir escrever o `.env` na mão, ele é assim:
 
 ```
 VITE_SUPABASE_URL=https://SEU-PROJETO.supabase.co
