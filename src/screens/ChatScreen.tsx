@@ -37,6 +37,7 @@ export function ChatScreen({
   onShowToast,
 }: ChatScreenProps) {
   const [draft, setDraft] = useState("");
+  const jaEscrevi = chat.messages.some((mensagem) => mensagem.mine);
   const [menuOpen, setMenuOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
   const bodyRef = useRef<HTMLDivElement>(null);
@@ -243,20 +244,23 @@ export function ChatScreen({
         </div>
       ) : (
         <div className={styles.footer}>
-          <div className={styles.icebreakers}>
-            {icebreakersFor(relatedProfile?.interests ?? [], myInterests).map(
-              (suggestion) => (
-                <button
-                  key={suggestion}
-                  type="button"
-                  className={styles.icebreakerChip}
-                  onClick={() => setDraft(suggestion)}
-                >
-                  {suggestion}
-                </button>
-              ),
-            )}
-          </div>
+          {/* Sugestões só servem para quebrar o gelo: somem assim que escrevo. */}
+          {!jaEscrevi && (
+            <div className={styles.icebreakers}>
+              {icebreakersFor(relatedProfile?.interests ?? [], myInterests).map(
+                (suggestion) => (
+                  <button
+                    key={suggestion}
+                    type="button"
+                    className={styles.icebreakerChip}
+                    onClick={() => setDraft(suggestion)}
+                  >
+                    {suggestion}
+                  </button>
+                ),
+              )}
+            </div>
+          )}
 
           <div className={styles.inputRow}>
             <input
