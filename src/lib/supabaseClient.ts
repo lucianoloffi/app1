@@ -18,9 +18,24 @@ function limpa(valor: string | undefined): string {
  */
 function verifica(nome: string, valor: string): string | null {
   if (!valor) return `Falta ${nome} no arquivo .env (veja o .env.example).`;
-  if (!/^[\x20-\x7E]+$/.test(valor)) {
-    return `${nome} tem caractere inválido — provavelmente a chave foi copiada cortada, com "…" no fim. Copie o valor inteiro no painel do Supabase (Project Settings → API Keys) usando o botão de copiar.`;
+
+  const posicao = [...valor].findIndex((caractere) => {
+    const codigo = caractere.codePointAt(0) ?? 0;
+    return codigo < 0x20 || codigo > 0x7e;
+  });
+
+  if (posicao >= 0) {
+    const codigo = valor.codePointAt(posicao) ?? 0;
+    const hexa = codigo.toString(16).toUpperCase().padStart(4, "0");
+    const vizinhanca = valor.slice(Math.max(0, posicao - 12), posicao + 12);
+    return (
+      `${nome} tem um caractere inválido na posição ${posicao + 1} de ${valor.length} ` +
+      `(U+${hexa}), aqui: "…${vizinhanca}…". ` +
+      `Costuma ser o "…" de uma chave copiada cortada, uma aspa curva ou um espaço colado junto. ` +
+      `Copie o valor inteiro no painel do Supabase (Project Settings → API Keys), pelo botão de copiar.`
+    );
   }
+
   return null;
 }
 
