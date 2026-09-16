@@ -78,7 +78,7 @@ export default function App() {
   const [detailProfile, setDetailProfile] = useState<Profile | null>(null);
   const [detailChatId, setDetailChatId] = useState<string | null>(null);
   /** De onde o perfil aberto veio: define a barra de baixo e a volta. */
-  const [detailOrigin, setDetailOrigin] = useState<"discover" | "chat" | "chatList">("discover");
+  const [detailOrigin, setDetailOrigin] = useState<"discover" | "chat">("discover");
   const [chatProfile, setChatProfile] = useState<Profile | null>(null);
 
   const [editingProfile, setEditingProfile] = useState(false);
@@ -194,7 +194,7 @@ export default function App() {
   function openProfile(
     profile: Profile,
     chatId: string | null = null,
-    origin: "discover" | "chat" | "chatList" = "discover",
+    origin: "discover" | "chat" = "discover",
   ) {
     setDetailProfile(profile);
     setDetailChatId(chatId);
@@ -204,7 +204,7 @@ export default function App() {
   async function openProfileById(
     profileId: string,
     chatId: string | null = null,
-    origin: "discover" | "chat" | "chatList" = "discover",
+    origin: "discover" | "chat" = "discover",
   ) {
     try {
       const profile = await carregarPerfilDoMatch(profileId);
@@ -655,7 +655,6 @@ export default function App() {
                   chats.openChat(chatId);
                   setActiveChatId(chatId);
                 }}
-                onOpenProfile={(profileId, chatId) => void openProfileById(profileId, chatId, "chatList")}
               />
             )}
             {tab === "profile" && (

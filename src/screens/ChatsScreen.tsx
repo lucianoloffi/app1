@@ -5,10 +5,9 @@ import styles from "./ChatsScreen.module.css";
 interface ChatsScreenProps {
   chats: Chat[];
   onOpenChat: (chatId: string) => void;
-  onOpenProfile: (profileId: string, chatId: string) => void;
 }
 
-export function ChatsScreen({ chats, onOpenChat, onOpenProfile }: ChatsScreenProps) {
+export function ChatsScreen({ chats, onOpenChat }: ChatsScreenProps) {
   const railRef = useRef<HTMLDivElement>(null);
   const [hasMore, setHasMore] = useState(false);
 
@@ -122,15 +121,8 @@ export function ChatsScreen({ chats, onOpenChat, onOpenProfile }: ChatsScreenPro
             .join(" ");
           return (
             <button key={chat.id} type="button" className={rowClass} onClick={() => onOpenChat(chat.id)}>
-              <img
-                className={styles.avatar}
-                src={chat.photo}
-                alt={chat.name}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onOpenProfile(chat.profileId, chat.id);
-                }}
-              />
+              {/* O avatar leva para a conversa, como o resto da linha. */}
+              <img className={styles.avatar} src={chat.photo} alt={chat.name} />
               <div className={styles.rowMain}>
                 <div className={styles.rowName}>
                   {chat.name}
