@@ -465,11 +465,16 @@ export function avisosDasFotos(pasta) {
           useTArray: true,
           maxMemoryUsageInMB: 1024,
         });
+        // O recorte 3:4 fica com height*0.75 de largura. Só vale avisar quando
+        // sobra pouco da foto original: numa imagem quase quadrada o corte tira
+        // uma faixa estreita de cada lado e a pessoa centralizada passa inteira.
+        const aproveitamento = (height * 0.75) / width;
         const semLado = ancoraDoNome(caminho) === ANCORA_HORIZONTAL.centro;
-        if (width > height * 1.1 && semLado) {
+        if (aproveitamento < 0.5 && semLado) {
           avisos.push(
-            `${nome}: deitada (${width}x${height}) e sem -direita/-esquerda no nome — ` +
-              `se a pessoa não está no meio, o recorte corta o rosto.`,
+            `${nome}: bem larga (${width}x${height}) e sem -direita/-esquerda no nome — ` +
+              `o recorte fica com ${Math.round(aproveitamento * 100)}% da largura, ` +
+              `pelo meio. Confira se a pessoa está centralizada.`,
           );
         }
       } catch (problema) {
