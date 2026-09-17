@@ -1,6 +1,6 @@
 @keyframes toast-in {
   from {
-    transform: translateY(8px);
+    transform: translateY(-8px);
     opacity: 0;
   }
   to {
@@ -13,14 +13,16 @@
   position: absolute;
   left: 24px;
   right: 24px;
-  bottom: 110px;
+  top: calc(var(--status-bar-height) + 14px);
   z-index: 40;
-  background: var(--color-ink);
-  color: #fff;
+  background: var(--color-surface);
+  color: var(--color-ink);
+  border: 1px solid var(--color-line-2);
   font: 600 14px var(--font-ui);
   border-radius: 14px;
   padding: 13px 18px;
   text-align: center;
+  box-shadow: 0 12px 28px -12px rgba(15, 40, 25, 0.28);
   animation: toast-in 200ms var(--ease-standard) both;
   pointer-events: none;
 }
