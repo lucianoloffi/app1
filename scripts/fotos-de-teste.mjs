@@ -14,7 +14,7 @@
  * quebrado.
  */
 import { readdirSync, readFileSync } from "node:fs";
-import { extname, join } from "node:path";
+import { basename, extname, join } from "node:path";
 import { deflateSync } from "node:zlib";
 import jpeg from "jpeg-js";
 
@@ -325,7 +325,22 @@ const ENQUADRAMENTOS = [
   { proporcao: 1, escala: 0.84, ancora: 0.4 },
 ];
 
-function enquadra(imagem, indice) {
+/**
+ * Onde a pessoa está na largura da foto. Importa em foto deitada: recortar
+ * 3:4 sempre pelo meio corta o rosto de quem posou de lado. Vem do nome do
+ * arquivo — lucas-direita.jpg, bruno-esquerda.jpg — e o padrão é o meio.
+ */
+const ANCORA_HORIZONTAL = { esquerda: 0.25, centro: 0.5, direita: 0.75 };
+
+function ancoraDoNome(caminho) {
+  const nome = basename(caminho, extname(caminho)).toLowerCase();
+  for (const lado of ["esquerda", "direita"]) {
+    if (nome.endsWith(`-${lado}`)) return ANCORA_HORIZONTAL[lado];
+  }
+  return ANCORA_HORIZONTAL.centro;
+}
+
+function enquadra(imagem, indice, ancoraX = 0.5) {
   const { proporcao, escala, ancora } = ENQUADRAMENTOS[indice % ENQUADRAMENTOS.length];
 
   // O maior retângulo com essa proporção que cabe na foto, reduzido pela escala.
@@ -339,7 +354,7 @@ function enquadra(imagem, indice) {
   altura = Math.max(1, Math.floor(altura));
 
   const area = {
-    x: Math.round((imagem.width - largura) / 2),
+    x: Math.round(Math.min(Math.max((imagem.width - largura) * ancoraX, 0), imagem.width - largura)),
     y: Math.round(Math.min(Math.max((imagem.height - altura) * ancora, 0), imagem.height - altura)),
     largura,
     altura,
@@ -376,9 +391,14 @@ function fotosDoArquivo(caminho, variacao) {
     jpeg.decode(bruto, { useTArray: true, maxMemoryUsageInMB: 1024 }),
     variacao,
   );
+  // Espelhar leva a pessoa para o outro lado da foto, então a âncora vai junto.
+  const ancoraX = VARIACOES[variacao % VARIACOES.length].espelho
+    ? 1 - ancoraDoNome(caminho)
+    : ancoraDoNome(caminho);
+
   // O deslocamento troca qual enquadramento vira a capa do perfil.
   return Array.from({ length: FOTOS_POR_PERFIL }, (_, indice) => ({
-    bytes: Buffer.from(jpeg.encode(enquadra(imagem, indice + variacao), 82).data),
+    bytes: Buffer.from(jpeg.encode(enquadra(imagem, indice + variacao, ancoraX), 82).data),
     tipo: "image/jpeg",
     extensao: "jpg",
     repetida: variacao > 0,

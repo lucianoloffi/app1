@@ -142,6 +142,17 @@ a quantidade de fotos** — 6 fotos em `mulheres/` e 4 em `homens/` criam 6 e 4
 perfis. Use `.jpg`: só nele o recorte funciona (PNG e WEBP entram repetidos três
 vezes).
 
+**Foto deitada com a pessoa de lado** precisa dizer de que lado ela está, senão
+o recorte 3:4 sai pelo meio e corta o rosto. Diga no nome do arquivo:
+
+```
+bruno-direita.jpg     pessoa à direita do quadro
+lucas-esquerda.jpg    pessoa à esquerda
+marcelo.jpg           no meio (o padrão)
+```
+
+Foto em pé, com a pessoa no meio, não precisa de sufixo.
+
 Com menos fotos que perfis, `--repetir` fecha os 20 reaproveitando cada uma:
 
 ```bash
