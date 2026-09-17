@@ -60,9 +60,11 @@ export function AccountScreen({
   onNext,
 }: AccountScreenProps) {
   const inputRef = useRef<HTMLInputElement>(null);
-  // A senha só reclama depois que a pessoa saiu do campo: enquanto digita, o
-  // aviso embaixo do campo já diz o tamanho mínimo.
+  // Cada campo só reclama depois que a pessoa saiu dele: enquanto digita, o
+  // aviso embaixo do campo já diz o que se espera ali.
+  const [emailTocado, setEmailTocado] = useState(false);
   const [senhaTocada, setSenhaTocada] = useState(false);
+  const [telefoneTocado, setTelefoneTocado] = useState(false);
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -75,13 +77,25 @@ export function AccountScreen({
 
   const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim());
   const senhaValida = password.length >= SENHA_MINIMA;
-  // Erro do servidor primeiro; se não houver, a checagem local de tamanho.
+  const telefoneValido = onlyDigits(phone).length >= 10;
+
+  // Erro do servidor primeiro; se não houver, a checagem local do campo. O
+  // campo vazio nunca reclama: ele ainda não foi preenchido, só não foi usado.
+  const erroDoEmail =
+    erroDoCampo("email") ??
+    (emailTocado && email.trim().length > 0 && !emailValido
+      ? "Digite um e-mail válido, como voce@email.com."
+      : null);
   const erroDaSenha =
     erroDoCampo("senha") ??
     (senhaTocada && password.length > 0 && !senhaValida
       ? `A senha precisa de pelo menos ${SENHA_MINIMA} caracteres.`
       : null);
-  const telefoneValido = onlyDigits(phone).length >= 10;
+  const erroDoTelefone =
+    erroDoCampo("telefone") ??
+    (telefoneTocado && onlyDigits(phone).length > 0 && !telefoneValido
+      ? "Digite o número com DDD, como (47) 90000-0000."
+      : null);
   const isValid =
     emailValido && senhaValida && telefoneValido && acceptedTerms && acceptedSensitiveData;
 
@@ -100,19 +114,20 @@ export function AccountScreen({
         <span className={fieldStyles.label}>E-mail</span>
         <input
           ref={inputRef}
-          className={erroDoCampo("email") ? fieldStyles.inputInvalid : fieldStyles.input}
+          className={erroDoEmail ? fieldStyles.inputInvalid : fieldStyles.input}
           type="email"
           inputMode="email"
           autoComplete="email"
           placeholder="voce@email.com"
           value={email}
-          aria-invalid={Boolean(erroDoCampo("email"))}
-          aria-describedby={erroDoCampo("email") ? "erro-email" : undefined}
+          aria-invalid={Boolean(erroDoEmail)}
+          aria-describedby={erroDoEmail ? "erro-email" : undefined}
           onChange={(e) => onChangeEmail(e.target.value)}
+          onBlur={() => setEmailTocado(true)}
         />
-        {erroDoCampo("email") && (
+        {erroDoEmail && (
           <p id="erro-email" className={fieldStyles.error} role="alert">
-            {erroDoCampo("email")}
+            {erroDoEmail}
           </p>
         )}
       </div>
@@ -146,23 +161,26 @@ export function AccountScreen({
         <div className={styles.phoneRow}>
           <span className={styles.ddiBox}>+55</span>
           <input
-            className={`${erroDoCampo("telefone") ? fieldStyles.inputInvalid : fieldStyles.input} ${styles.phoneInput}`}
+            className={`${erroDoTelefone ? fieldStyles.inputInvalid : fieldStyles.input} ${styles.phoneInput}`}
             type="tel"
             inputMode="numeric"
             autoComplete="tel"
             placeholder="(47) 90000-0000"
             value={formatPhone(phone)}
-            aria-invalid={Boolean(erroDoCampo("telefone"))}
-            aria-describedby={erroDoCampo("telefone") ? "erro-telefone" : undefined}
+            aria-invalid={Boolean(erroDoTelefone)}
+            aria-describedby={erroDoTelefone ? "erro-telefone" : "dica-telefone"}
             onChange={(e) => onChangePhone(onlyDigits(e.target.value))}
+            onBlur={() => setTelefoneTocado(true)}
           />
         </div>
-        {erroDoCampo("telefone") ? (
+        {erroDoTelefone ? (
           <p id="erro-telefone" className={fieldStyles.error} role="alert">
-            {erroDoCampo("telefone")}
+            {erroDoTelefone}
           </p>
         ) : (
-          <p className={fieldStyles.note}>Seu número nunca aparece no perfil.</p>
+          <p id="dica-telefone" className={fieldStyles.note}>
+            Seu número nunca aparece no perfil.
+          </p>
         )}
       </div>
 
