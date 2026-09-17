@@ -41,7 +41,7 @@ export function PhotosScreen({
       progress={5}
       onBack={onBack}
       title="Suas fotos"
-      support="Escolha de 3 a 4. Perfis com 3 fotos recebem mais matches."
+      support="Escolha pelo menos 1. Perfis com 3 fotos recebem mais matches."
       contentGap={14}
       ctaLabel={busy ? "Enviando…" : "Continuar"}
       ctaDisabled={!isValid}

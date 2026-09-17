@@ -2,7 +2,6 @@ import { useState } from "react";
 import { InterestBottomSheet } from "../../components/InterestBottomSheet";
 import { SelectedInterests } from "../../components/SelectedInterests";
 import type { Intention } from "../../types";
-import { MIN_INTERESTS, selectedInterestsLabel } from "../constants";
 import { OnboardingLayout } from "../OnboardingLayout";
 import fieldStyles from "../fields.module.css";
 import styles from "./IntentionInterestsScreen.module.css";
@@ -33,7 +32,7 @@ export function IntentionInterestsScreen({
   onFinish,
 }: IntentionInterestsScreenProps) {
   const [sheetOpen, setSheetOpen] = useState(false);
-  const isValid = Boolean(intention) && interests.length >= MIN_INTERESTS;
+  const isValid = Boolean(intention);
 
   return (
     <OnboardingLayout
@@ -71,7 +70,7 @@ export function IntentionInterestsScreen({
       </div>
 
       <div className={fieldStyles.fieldGroup} style={{ marginTop: 16 }}>
-        <span className={fieldStyles.label}>{selectedInterestsLabel(interests.length)}</span>
+        <span className={fieldStyles.label}>Interesses · opcional</span>
         <SelectedInterests
           interests={interests}
           onRemove={onToggleInterest}

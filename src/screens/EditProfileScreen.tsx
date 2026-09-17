@@ -12,7 +12,7 @@ import {
   type FotoDoPerfil,
 } from "../lib/api/photos";
 import { mensagemDeErro } from "../lib/errors";
-import { MAX_PROFILE_PHOTOS, selectedInterestsLabel } from "../onboarding/constants";
+import { MAX_PROFILE_PHOTOS } from "../onboarding/constants";
 import { formatBirthdate, onlyDigits } from "../onboarding/phoneFormat";
 import type { Gender, Lifestyle, MyProfile, RelationshipStatus } from "../types";
 import { heightLabel } from "../types";
@@ -225,7 +225,7 @@ export function EditProfileScreen({ profile, onCancel, onSave, onShowToast }: Ed
         </div>
 
         <div className={styles.interestsGroup}>
-          <span className={styles.label}>{selectedInterestsLabel(interests.length)}</span>
+          <span className={styles.label}>Interesses</span>
           <SelectedInterests
             interests={interests}
             onRemove={(interest) =>

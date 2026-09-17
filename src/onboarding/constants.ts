@@ -72,12 +72,7 @@ export const INTEREST_OPTIONS = [
   "Jardinagem",
 ];
 
-export const MIN_INTERESTS = 3;
 export const MAX_INTERESTS = 6;
 export const MAX_ONBOARDING_PHOTOS = 4;
-export const MIN_ONBOARDING_PHOTOS = 3;
+export const MIN_ONBOARDING_PHOTOS = 1;
 export const MAX_PROFILE_PHOTOS = 6;
-
-export function selectedInterestsLabel(count: number): string {
-  return count < MIN_INTERESTS ? `Interesses · mínimo ${MIN_INTERESTS}` : "Interesses";
-}

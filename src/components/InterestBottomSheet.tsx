@@ -1,4 +1,4 @@
-import { INTEREST_OPTIONS, MAX_INTERESTS, MIN_INTERESTS } from "../onboarding/constants";
+import { INTEREST_OPTIONS, MAX_INTERESTS } from "../onboarding/constants";
 import { PillChip } from "./PillChip";
 import styles from "./InterestBottomSheet.module.css";
 
@@ -15,16 +15,12 @@ export function InterestBottomSheet({
   onOverMax,
   onClose,
 }: InterestBottomSheetProps) {
-  const missing = MIN_INTERESTS - interests.length;
-
   return (
     <div className={styles.overlay} role="dialog" aria-label="Seus interesses">
       <div className={styles.sheet}>
         <div className={styles.header}>
           <h2 className={styles.title}>Seus interesses</h2>
-          <span className={styles.counter}>
-            {missing > 0 ? `Escolha ${missing} para o mínimo` : ""}
-          </span>
+          <span className={styles.counter}>Escolha até {MAX_INTERESTS}</span>
         </div>
         <div className={styles.body}>
           {INTEREST_OPTIONS.map((interest) => {
