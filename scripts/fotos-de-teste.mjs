@@ -439,3 +439,43 @@ export async function fotosDoPerfil(modo, perfil, proximaFoto) {
   }
   return bytes;
 }
+
+/**
+ * Problemas que só aparecem olhando os arquivos: formato que não recorta e
+ * foto deitada sem dizer de que lado a pessoa está.
+ */
+export function avisosDasFotos(pasta) {
+  const avisos = [];
+  for (const genero of ["mulher", "homem"]) {
+    let nomes;
+    try {
+      nomes = readdirSync(join(pasta, SUBPASTA[genero]));
+    } catch {
+      continue;
+    }
+    for (const nome of nomes.filter((item) => EXTENSOES.has(extname(item).toLowerCase()))) {
+      const caminho = join(pasta, SUBPASTA[genero], nome);
+      const extensao = extname(nome).toLowerCase();
+      if (![".jpg", ".jpeg"].includes(extensao)) {
+        avisos.push(`${nome}: ${extensao} não é recortado — as 3 fotos sairão iguais.`);
+        continue;
+      }
+      try {
+        const { width, height } = jpeg.decode(readFileSync(caminho), {
+          useTArray: true,
+          maxMemoryUsageInMB: 1024,
+        });
+        const semLado = ancoraDoNome(caminho) === ANCORA_HORIZONTAL.centro;
+        if (width > height * 1.1 && semLado) {
+          avisos.push(
+            `${nome}: deitada (${width}x${height}) e sem -direita/-esquerda no nome — ` +
+              `se a pessoa não está no meio, o recorte corta o rosto.`,
+          );
+        }
+      } catch (problema) {
+        avisos.push(`${nome}: não consegui ler como JPEG (${problema.message}).`);
+      }
+    }
+  }
+  return avisos;
+}

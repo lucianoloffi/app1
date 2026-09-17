@@ -109,8 +109,15 @@ um com foto, bio, profissão, interesses, estilo de vida e localização.
 ```bash
 npm run popular -- --simular    # mostra os 20 perfis, sem tocar no banco
 npm run popular                 # cria (pede a service role e a chave do Pexels)
+npm run popular -- --conferir   # diz o que está no lugar e o que falta
 npm run popular -- --limpar     # apaga tudo o que o script criou
 ```
+
+Se algo não sair como esperado, `--conferir` é o primeiro comando a rodar: ele
+diz se as chaves são as certas (o engano mais comum é passar a anon no lugar da
+service role), quantos perfis existem, quantos ficaram com cadastro completo,
+interesses, fotos e localização, e o que há de errado na pasta de fotos. Ele
+imprime o papel de cada chave, nunca a chave.
 
 **Service role.** Criar usuário no `auth` é a única coisa que a chave anon não
 faz; o resto o script grava entrando como cada perfil, pelo mesmo caminho do

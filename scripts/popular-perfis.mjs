@@ -6,6 +6,7 @@
  *
  *   npm run popular -- --simular     mostra o que seria criado, sem tocar em nada
  *   npm run popular                  cria os perfis (precisa da service role)
+ *   npm run popular -- --conferir    diz o que está no lugar e o que falta
  *   npm run popular -- --limpar      apaga os perfis de teste e as fotos deles
  *   npm run popular -- --fotos=pasta usa fotos suas de fotos-de-teste/
  *   npm run popular -- --fotos=pasta --repetir  repete cada foto, variada,
@@ -28,6 +29,7 @@ import { PERFIS, apelido, coordenadaPara, nascimentoPara, telefonePara } from ".
 import {
   FOTOS_POR_PERFIL,
   fotosDoPerfil,
+  avisosDasFotos,
   reservaDaPasta,
   reservaDeFotosDoPexels,
 } from "./fotos-de-teste.mjs";
@@ -44,6 +46,7 @@ const valorDe = (nome, padrao) =>
 
 const simular = temBandeira("simular");
 const limpar = temBandeira("limpar");
+const conferir = temBandeira("conferir");
 const repetir = temBandeira("repetir");
 const modoDeFoto = valorDe("fotos", "pexels");
 const pastaDeFotos = valorDe("pasta", "fotos-de-teste");
@@ -141,10 +144,10 @@ const url = env.VITE_SUPABASE_URL;
 const chaveAnon = env.VITE_SUPABASE_ANON_KEY;
 const chaveServico = env.SUPABASE_SERVICE_ROLE_KEY;
 
-if (!url || !chaveAnon) {
+if ((!url || !chaveAnon) && !conferir) {
   encerra("Faltam VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY no .env. Rode: npm run configurar");
 }
-if (!chaveServico) {
+if (!chaveServico && !conferir) {
   encerra(
     "Falta a service role.\n" +
       "  Painel do Supabase → Project Settings → API Keys → service_role, e rode:\n" +
@@ -153,9 +156,12 @@ if (!chaveServico) {
   );
 }
 
-const admin = createClient(url, chaveServico, {
-  auth: { persistSession: false, autoRefreshToken: false },
-});
+const admin =
+  url && (chaveServico || chaveAnon)
+    ? createClient(url, chaveServico ?? chaveAnon, {
+        auth: { persistSession: false, autoRefreshToken: false },
+      })
+    : null;
 
 /** Um cliente por perfil, já logado — é assim que o RLS deixa gravar. */
 async function clienteDoPerfil(email) {
@@ -389,4 +395,98 @@ async function criaTudo() {
   }
 }
 
-await (limpar ? apagaTudo() : criaTudo());
+// ─────────────────────────────── diagnóstico ───────────────────────────────
+
+/** Papel declarado dentro da chave, sem imprimir a chave. */
+function papelDaChave(chave) {
+  if (!chave) return "ausente";
+  try {
+    const payload = JSON.parse(Buffer.from(chave.split(".")[1], "base64").toString("utf8"));
+    return payload.role ?? "sem papel";
+  } catch {
+    return chave.startsWith("sb_secret_")
+      ? "service_role (formato novo)"
+      : chave.startsWith("sb_publishable_")
+        ? "anon (formato novo)"
+        : "formato desconhecido";
+  }
+}
+
+async function confere() {
+  const linha = (rotulo, valor) => console.log(`  ${rotulo.padEnd(28)} ${valor}`);
+
+  console.log("\nAmbiente");
+  linha("VITE_SUPABASE_URL", url ?? "AUSENTE");
+  linha("VITE_SUPABASE_ANON_KEY", `${papelDaChave(chaveAnon)} (${chaveAnon?.length ?? 0} caracteres)`);
+  const papelServico = papelDaChave(chaveServico);
+  linha(
+    "SUPABASE_SERVICE_ROLE_KEY",
+    papelServico.startsWith("service_role")
+      ? `${papelServico} ✓`
+      : `${papelServico} ← precisa ser a service_role`,
+  );
+
+  if (!admin) {
+    console.log("\nProjeto");
+    console.log("  Sem endereço ou chave, não dá para consultar o projeto.");
+    console.log("  Rode 'npm run configurar' e passe a SUPABASE_SERVICE_ROLE_KEY.");
+    mostraPastaDeFotos();
+    return;
+  }
+
+  console.log("\nProjeto");
+  let contas = [];
+  try {
+    contas = await contasDeTeste();
+    linha(`contas @${dominio}`, String(contas.length));
+  } catch (problema) {
+    linha("acesso com a service role", `FALHOU — ${problema.message}`);
+    console.log("");
+    return;
+  }
+
+  if (contas.length > 0) {
+    const ids = contas.map((conta) => conta.id);
+    const [perfis, interesses, fotos] = await Promise.all([
+      admin.from("profiles").select("id, nome, onboarding_completo, localizacao").in("id", ids),
+      admin.from("profile_interests").select("user_id").in("user_id", ids),
+      admin.from("photos").select("user_id, status_moderacao").in("user_id", ids),
+    ]);
+    const conta = (linhas, campo) => new Set((linhas.data ?? []).map((item) => item[campo])).size;
+
+    linha("perfis com cadastro completo", `${(perfis.data ?? []).filter((item) => item.onboarding_completo).length} de ${contas.length}`);
+    linha("perfis com nome", String((perfis.data ?? []).filter((item) => item.nome).length));
+    linha("perfis com localização", String((perfis.data ?? []).filter((item) => item.localizacao).length));
+    linha("perfis com interesses", String(conta(interesses, "user_id")));
+    linha("perfis com fotos", String(conta(fotos, "user_id")));
+    linha("fotos aprovadas", String((fotos.data ?? []).filter((item) => item.status_moderacao === "aprovada").length));
+    if (perfis.error) linha("erro ao ler profiles", perfis.error.message);
+  } else {
+    linha("diagnóstico", "nenhuma conta de teste existe — o script não chegou a criar nada");
+  }
+
+  const { data: arquivos, error: erroBucket } = await admin.storage.from("fotos").list();
+  linha("bucket fotos", erroBucket ? `FALHOU — ${erroBucket.message}` : `${arquivos?.length ?? 0} pasta(s)`);
+
+  mostraPastaDeFotos();
+}
+
+function mostraPastaDeFotos() {
+  const linha = (rotulo, valor) => console.log(`  ${rotulo.padEnd(28)} ${valor}`);
+  console.log("\nPasta de fotos");
+  try {
+    const reserva = reservaDaPasta(pastaDeFotos, { repetir, limitePorGenero: PERFIS_POR_GENERO });
+    linha("mulheres/", `${reserva.disponivel.mulher} arquivo(s)`);
+    linha("homens/", `${reserva.disponivel.homem} arquivo(s)`);
+    for (const aviso of avisosDasFotos(pastaDeFotos)) console.log(`  ! ${aviso}`);
+  } catch (problema) {
+    linha("pasta", problema.message.split("\n")[0]);
+  }
+  console.log("");
+}
+
+try {
+  await (conferir ? confere() : limpar ? apagaTudo() : criaTudo());
+} catch (problema) {
+  encerra(`${problema.message}\n\n  Rode 'npm run popular -- --conferir' para ver o que está no lugar.`);
+}
