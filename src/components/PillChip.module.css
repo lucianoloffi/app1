@@ -40,3 +40,31 @@
   flex-wrap: wrap;
   gap: 8px;
 }
+
+/* Múltipla escolha: o chip ganha o círculo de marcação à esquerda. */
+.chipComCheck {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding-left: 9px;
+}
+
+.check {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1.6px solid var(--color-line);
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: transparent;
+}
+
+.checkOn {
+  composes: check;
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  color: #fff;
+}

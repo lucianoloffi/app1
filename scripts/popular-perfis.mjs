@@ -275,7 +275,7 @@ async function criaPerfil(perfil, indice, proximaFoto) {
         .from("profile_preferences")
         .update({
           interesse_em: perfil.buscaPor,
-          intencao_filtro: "todas",
+          intencao_filtro: ["serio", "conhecer", "amizade"],
           distancia_max_km: 100,
           idade_min: 18,
           idade_max: 60,

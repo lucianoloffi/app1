@@ -1,4 +1,4 @@
-import type { Filters, MyProfile } from "../types";
+import type { Filters, Intention, MyProfile } from "../types";
 import { ageFromBirthdate } from "../utils/age";
 import { computeCompleteness } from "../utils/completeness";
 import styles from "./ProfileScreen.module.css";
@@ -9,12 +9,17 @@ const GENDER_FILTER_LABEL: Record<Filters["interestedIn"], string> = {
   todos: "Todos",
 };
 
-const INTENTION_FILTER_LABEL: Record<Filters["intention"], string> = {
-  todas: "Todos",
+const INTENTION_FILTER_LABEL: Record<Intention, string> = {
   serio: "Relacionamento sério",
   conhecer: "Conhecer pessoas",
   amizade: "Amizade",
 };
+
+/** Com as três marcadas, listar uma a uma só alonga a linha sem dizer mais. */
+function resumoDeIntencoes(intencoes: Intention[]): string {
+  if (intencoes.length >= 3) return "Todas as intenções";
+  return intencoes.map((item) => INTENTION_FILTER_LABEL[item]).join(" e ");
+}
 
 const RING_RADIUS = 41;
 const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
@@ -45,7 +50,7 @@ export function ProfileScreen({
   const { pct, hint, missing } = computeCompleteness(myProfile, photosCount);
   const dashOffset = RING_CIRCUMFERENCE * (1 - pct / 100);
 
-  const filtersSummary = `${GENDER_FILTER_LABEL[filters.interestedIn]} · ${filters.minAge}–${filters.maxAge} anos · até ${filters.distanceKm} km · ${INTENTION_FILTER_LABEL[filters.intention]}`;
+  const filtersSummary = `${GENDER_FILTER_LABEL[filters.interestedIn]} · ${filters.minAge}–${filters.maxAge} anos · até ${filters.distanceKm} km · ${resumoDeIntencoes(filters.intentions)}`;
 
   return (
     <div className={styles.screen}>

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ScreenHeader } from "../components/ScreenHeader";
-import { PillChipRow } from "../components/PillChip";
+import { PillChipCheckRow, PillChipRow } from "../components/PillChip";
 import { RangeSlider } from "../components/RangeSlider";
 import type { Filters, FilterGender, Intention } from "../types";
 import styles from "./FiltersScreen.module.css";
@@ -11,11 +11,10 @@ const GENDER_OPTIONS: { value: FilterGender; label: string }[] = [
   { value: "todos", label: "Todos" },
 ];
 
-const INTENTION_OPTIONS: { value: Filters["intention"]; label: string }[] = [
+const INTENTION_OPTIONS: { value: Intention; label: string }[] = [
   { value: "serio", label: "Relacionamento sério" },
   { value: "conhecer", label: "Conhecer pessoas" },
   { value: "amizade", label: "Amizade" },
-  { value: "todas", label: "Todos" },
 ];
 
 const AGE_MIN = 18;
@@ -31,14 +30,27 @@ interface FiltersScreenProps {
   onShowToast: (message: string) => void;
 }
 
+function mesmasIntencoes(a: Intention[], b: Intention[]) {
+  return a.length === b.length && a.every((item) => b.includes(item));
+}
+
 function isEqual(a: Filters, b: Filters) {
   return (
-    a.intention === b.intention &&
+    mesmasIntencoes(a.intentions, b.intentions) &&
     a.interestedIn === b.interestedIn &&
     a.minAge === b.minAge &&
     a.maxAge === b.maxAge &&
     a.distanceKm === b.distanceKm
   );
+}
+
+/**
+ * Marca e desmarca, menos a última: sem nenhuma intenção a fila viria sempre
+ * vazia, e a pessoa não teria como ligar uma coisa à outra.
+ */
+function alterna(atuais: Intention[], valor: Intention): Intention[] {
+  if (!atuais.includes(valor)) return [...atuais, valor];
+  return atuais.length === 1 ? atuais : atuais.filter((item) => item !== valor);
 }
 
 export function FiltersScreen({
@@ -105,11 +117,12 @@ export function FiltersScreen({
 
           <div className={styles.fieldGroup}>
             <span className={styles.label}>Intenção</span>
-            <PillChipRow
+            <span className={styles.hint}>Selecione uma ou mais opções</span>
+            <PillChipCheckRow
               options={INTENTION_OPTIONS}
-              selected={draft.intention}
-              onSelect={(intention: Intention | "todas") =>
-                setDraft((prev) => ({ ...prev, intention }))
+              selected={draft.intentions}
+              onToggle={(intention) =>
+                setDraft((prev) => ({ ...prev, intentions: alterna(prev.intentions, intention) }))
               }
             />
           </div>

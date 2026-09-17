@@ -53,7 +53,7 @@ import type { Filters, MyProfile, OnboardingStep, Profile, Tab } from "./types";
 type Stage = "carregando" | "onboarding" | "main";
 
 const INITIAL_FILTERS: Filters = {
-  intention: "todas",
+  intentions: ["serio", "conhecer", "amizade"],
   distanceKm: 25,
   minAge: 25,
   maxAge: 45,

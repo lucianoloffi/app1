@@ -120,7 +120,8 @@ export interface MyProfile {
 }
 
 export interface Filters {
-  intention: Intention | "todas";
+  /** Intenções aceitas na fila. Nunca vazia: sem nenhuma, não viria ninguém. */
+  intentions: Intention[];
   distanceKm: number;
   minAge: number;
   maxAge: number;

@@ -17,7 +17,13 @@ No painel, **SQL Editor** → **New query**. Cole e execute **na ordem**, um arq
 3. `supabase/migrations/20260915_0003_functions.sql` — funções de leitura e escrita
 4. `supabase/migrations/20260915_0004_storage_realtime.sql` — buckets e realtime
 5. `supabase/migrations/20260915_0005_seed_cities.sql` — as 13 cidades e suas coordenadas
+6. `supabase/migrations/20260916_0006_fix_leitura_fotos.sql` — terceiros passam a ver as fotos aprovadas
+7. `supabase/migrations/20260916_0007_status_casado.sql` — "casado" entre os estados civis
+8. `supabase/migrations/20260917_0008_intencao_filtro_multipla.sql` — intenção do filtro vira múltipla escolha
 
+> Sempre que chegar uma migration nova, rode a que falta — pela data no nome dá
+> para saber onde você parou. Todas são seguras de rodar de novo.
+>
 > O arquivo 1 cria um trigger em `auth.users`. Se o SQL Editor recusar por
 > permissão, execute-o pelo **Supabase CLI** (`supabase db push`) com a service role.
 

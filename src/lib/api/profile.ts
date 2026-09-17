@@ -1,7 +1,25 @@
-import type { Filters, MyProfile, OnboardingState } from "../../types";
+import type { Filters, Intention, MyProfile, OnboardingState } from "../../types";
 import { supabase } from "../supabaseClient";
 import { ErroDeApp, lancaSeErro } from "../errors";
 import { minhasFotos } from "./photos";
+
+/**
+ * O cadastro começa aceitando as três: filtrar logo de saída esconderia
+ * perfis que a pessoa nem sabe que existem.
+ */
+export const TODAS_AS_INTENCOES: Intention[] = ["serio", "conhecer", "amizade"];
+
+/**
+ * Lista vazia deixaria a fila sempre sem ninguém, e o banco recusa. Uma linha
+ * antiga ainda pode trazer a intenção única de antes da múltipla escolha.
+ */
+function intencoesOuPadrao(valor: unknown): Intention[] {
+  const lista = Array.isArray(valor) ? valor : typeof valor === "string" ? [valor] : [];
+  const validas = lista.filter((item): item is Intention =>
+    TODAS_AS_INTENCOES.includes(item as Intention),
+  );
+  return validas.length > 0 ? validas : TODAS_AS_INTENCOES;
+}
 
 /** dd/mm/aaaa (como as telas guardam) → aaaa-mm-dd (como o banco guarda). */
 export function paraDataISO(digitos: string): string | null {
@@ -72,7 +90,7 @@ export async function carregarMeuPerfil(): Promise<MeuPerfilCompleto | null> {
       approximateLocation: perfil.localizacao_aproximada,
     },
     filtros: {
-      intention: prefs?.intencao_filtro ?? "todas",
+      intentions: intencoesOuPadrao(prefs?.intencao_filtro),
       distanceKm: prefs?.distancia_max_km ?? 25,
       minAge: prefs?.idade_min ?? 25,
       maxAge: prefs?.idade_max ?? 45,
@@ -153,7 +171,7 @@ export async function concluirCadastro(estado: OnboardingState): Promise<void> {
     .from("profile_preferences")
     .update({
       interesse_em: estado.interestedIn,
-      intencao_filtro: estado.intention ?? "todas",
+      intencao_filtro: TODAS_AS_INTENCOES,
     })
     .eq("user_id", id);
   lancaSeErro(erroPrefs);
@@ -171,7 +189,7 @@ export async function salvarFiltros(filtros: Filters): Promise<void> {
     .from("profile_preferences")
     .update({
       interesse_em: filtros.interestedIn,
-      intencao_filtro: filtros.intention,
+      intencao_filtro: intencoesOuPadrao(filtros.intentions),
       distancia_max_km: filtros.distanceKm,
       idade_min: filtros.minAge,
       idade_max: filtros.maxAge,
