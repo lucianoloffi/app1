@@ -8,6 +8,8 @@
  *   npm run popular                  cria os perfis (precisa da service role)
  *   npm run popular -- --limpar      apaga os perfis de teste e as fotos deles
  *   npm run popular -- --fotos=pasta usa fotos suas de fotos-de-teste/
+ *   npm run popular -- --fotos=pasta --repetir  repete cada foto, variada,
+ *                                    para chegar aos 20 perfis com menos fotos
  *   npm run popular -- --fotos=cores usa imagens geradas aqui, sem rede nenhuma
  *
  * Por que a service role: criar usuário no auth é a única coisa que a chave
@@ -42,6 +44,7 @@ const valorDe = (nome, padrao) =>
 
 const simular = temBandeira("simular");
 const limpar = temBandeira("limpar");
+const repetir = temBandeira("repetir");
 const modoDeFoto = valorDe("fotos", "pexels");
 const pastaDeFotos = valorDe("pasta", "fotos-de-teste");
 const dominio = valorDe("dominio", DOMINIO_PADRAO);
@@ -73,19 +76,25 @@ if (!["pexels", "pasta", "cores"].includes(modoDeFoto)) {
   encerra(`--fotos aceita "pexels", "pasta" ou "cores" (recebi "${modoDeFoto}").`);
 }
 
+const PERFIS_POR_GENERO = {
+  mulher: PERFIS.filter((perfil) => perfil.genero === "mulher").length,
+  homem: PERFIS.filter((perfil) => perfil.genero === "homem").length,
+};
+
 /**
- * No modo pasta a quantidade de perfis é a quantidade de fotos: uma por
- * pessoa. Repetir o mesmo rosto em dois perfis entregaria o teste na hora.
+ * No modo pasta a quantidade de perfis é a quantidade de fotos — uma por
+ * pessoa —, a não ser com --repetir, que preenche os 20 reaproveitando cada
+ * foto em uma variação.
  */
 function perfisComFotoNaPasta() {
   let reserva;
   try {
-    reserva = reservaDaPasta(pastaDeFotos);
+    reserva = reservaDaPasta(pastaDeFotos, { repetir, limitePorGenero: PERFIS_POR_GENERO });
   } catch (problema) {
     encerra(problema.message);
   }
 
-  const restante = { ...reserva.disponivel };
+  const restante = { ...reserva.cobertura };
   const perfis = PERFIS.filter((perfil) => restante[perfil.genero]-- > 0);
   return { perfis, reserva };
 }
@@ -112,8 +121,14 @@ if (simular) {
   console.log(`  Senha de todos: ${SENHA}`);
   console.log(`  Fotos por perfil: ${FOTOS_POR_PERFIL}`);
   if (modoDeFoto === "pasta") {
-    const { mulher, homem } = perfisComFotoNaPasta().reserva.disponivel;
-    console.log(`  Fotos em ${pastaDeFotos}: ${mulher} de mulher, ${homem} de homem`);
+    const { disponivel, cobertura } = perfisComFotoNaPasta().reserva;
+    console.log(
+      `  Fotos em ${pastaDeFotos}: ${disponivel.mulher} de mulher, ${disponivel.homem} de homem` +
+        (repetir ? " (cada uma repetida, variada, até fechar os perfis)" : ""),
+    );
+    if (!repetir && (cobertura.mulher < PERFIS_POR_GENERO.mulher || cobertura.homem < PERFIS_POR_GENERO.homem)) {
+      console.log("  Para chegar aos 20 com essas fotos, acrescente --repetir.");
+    }
   }
   console.log("");
   process.exit(0);
@@ -314,8 +329,13 @@ async function criaTudo() {
     proximaFoto = escolha.reserva.proxima;
     const { mulher, homem } = escolha.reserva.disponivel;
     console.log(`\n  ${mulher} foto(s) de mulher e ${homem} de homem em ${pastaDeFotos}`);
-    if (perfisParaCriar.length < PERFIS.length) {
-      console.log(`  Dos ${PERFIS.length} perfis, ${perfisParaCriar.length} têm foto e serão criados.`);
+    if (repetir) {
+      console.log("  Cada foto repete em mais de um perfil, espelhada e com o tom trocado.");
+    } else if (perfisParaCriar.length < PERFIS.length) {
+      console.log(
+        `  Dos ${PERFIS.length} perfis, ${perfisParaCriar.length} têm foto e serão criados.\n` +
+          "  Para chegar aos 20 com essas fotos, acrescente --repetir.",
+      );
     }
   }
 

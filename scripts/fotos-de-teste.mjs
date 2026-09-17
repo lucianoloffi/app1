@@ -191,11 +191,14 @@ const EXTENSOES = new Set([".jpg", ".jpeg", ".png", ".webp"]);
 const SUBPASTA = { mulher: "mulheres", homem: "homens" };
 
 /**
- * Lê fotos suas de fotos-de-teste/mulheres e fotos-de-teste/homens — um
- * arquivo por pessoa. Se houver menos fotos que perfis, o script cria só os
- * perfis que têm foto: repetir o mesmo rosto em dois perfis entrega o teste.
+ * Lê fotos suas de fotos-de-teste/mulheres e fotos-de-teste/homens.
+ *
+ * Sem `repetir`, é um arquivo por pessoa e o script cria só os perfis que têm
+ * foto. Com `repetir`, a mesma foto atende mais de um perfil, cada vez com uma
+ * variação (espelhada, tom diferente, outro enquadramento na capa) — serve
+ * para encher a fila, mas é o mesmo rosto: lado a lado dá para perceber.
  */
-export function reservaDaPasta(pasta) {
+export function reservaDaPasta(pasta, { repetir = false, limitePorGenero = {} } = {}) {
   const arquivos = { mulher: [], homem: [] };
 
   for (const genero of ["mulher", "homem"]) {
@@ -220,11 +223,59 @@ export function reservaDaPasta(pasta) {
     throw new Error(`Nenhuma imagem em ${pasta}/mulheres nem em ${pasta}/homens.`);
   }
 
+  const disponivel = { mulher: arquivos.mulher.length, homem: arquivos.homem.length };
+  const cobertura = {};
+  for (const genero of ["mulher", "homem"]) {
+    const limite = limitePorGenero[genero] ?? disponivel[genero];
+    cobertura[genero] =
+      disponivel[genero] === 0 ? 0 : repetir ? limite : Math.min(disponivel[genero], limite);
+  }
+
   const usados = { mulher: 0, homem: 0 };
   return {
-    disponivel: { mulher: arquivos.mulher.length, homem: arquivos.homem.length },
-    proxima: (genero) => arquivos[genero][usados[genero]++],
+    disponivel,
+    cobertura,
+    /** Devolve o arquivo e em que volta ele está — a volta vira a variação. */
+    proxima(genero) {
+      const lista = arquivos[genero];
+      const indice = usados[genero]++;
+      return {
+        caminho: lista[indice % lista.length],
+        variacao: Math.floor(indice / lista.length),
+      };
+    },
   };
+}
+
+/**
+ * O que muda de uma volta para a outra. Espelhar é o que mais disfarça: o
+ * rosto vira para o outro lado e a foto deixa de parecer a mesma de relance.
+ */
+const VARIACOES = [
+  { espelho: false, ganho: [1, 1, 1], brilho: 0 },
+  { espelho: true, ganho: [1.07, 1, 0.9], brilho: 8 },
+  { espelho: false, ganho: [0.92, 0.99, 1.1], brilho: -6 },
+  { espelho: true, ganho: [1.02, 1.02, 1.04], brilho: 16 },
+];
+
+/** Espelho e ajuste de tom, aplicados uma vez antes de recortar. */
+function aplicaVariacao(imagem, indice) {
+  const { espelho, ganho, brilho } = VARIACOES[indice % VARIACOES.length];
+  if (!espelho && brilho === 0 && ganho.every((valor) => valor === 1)) return imagem;
+
+  const data = Buffer.alloc(imagem.data.length);
+  for (let y = 0; y < imagem.height; y++) {
+    for (let x = 0; x < imagem.width; x++) {
+      const origem = (y * imagem.width + (espelho ? imagem.width - 1 - x : x)) * 4;
+      const destino = (y * imagem.width + x) * 4;
+      for (let canal = 0; canal < 3; canal++) {
+        const valor = imagem.data[origem + canal] * ganho[canal] + brilho;
+        data[destino + canal] = valor < 0 ? 0 : valor > 255 ? 255 : valor;
+      }
+      data[destino + 3] = 255;
+    }
+  }
+  return { data, width: imagem.width, height: imagem.height };
 }
 
 /** Média dos pixels da área de origem: dá um encolhimento limpo, sem serrilhado. */
@@ -303,7 +354,7 @@ function enquadra(imagem, indice) {
   };
 }
 
-function fotosDoArquivo(caminho) {
+function fotosDoArquivo(caminho, variacao) {
   const bruto = readFileSync(caminho);
   if (bruto.length > 5 * 1024 * 1024 && extname(caminho).toLowerCase() === ".png") {
     throw new Error(`${caminho}: acima do limite de 5 MB do bucket.`);
@@ -317,14 +368,20 @@ function fotosDoArquivo(caminho) {
       tipo: extname(caminho).toLowerCase() === ".png" ? "image/png" : "image/webp",
       extensao: extname(caminho).toLowerCase().slice(1),
       semEnquadramento: true,
+      repetida: variacao > 0,
     }));
   }
 
-  const imagem = jpeg.decode(bruto, { useTArray: true, maxMemoryUsageInMB: 1024 });
+  const imagem = aplicaVariacao(
+    jpeg.decode(bruto, { useTArray: true, maxMemoryUsageInMB: 1024 }),
+    variacao,
+  );
+  // O deslocamento troca qual enquadramento vira a capa do perfil.
   return Array.from({ length: FOTOS_POR_PERFIL }, (_, indice) => ({
-    bytes: Buffer.from(jpeg.encode(enquadra(imagem, indice), 82).data),
+    bytes: Buffer.from(jpeg.encode(enquadra(imagem, indice + variacao), 82).data),
     tipo: "image/jpeg",
     extensao: "jpg",
+    repetida: variacao > 0,
   }));
 }
 
@@ -344,7 +401,8 @@ export async function fotosDoPerfil(modo, perfil, proximaFoto) {
   }
 
   if (modo === "pasta") {
-    return fotosDoArquivo(proximaFoto(perfil.genero));
+    const { caminho, variacao } = proximaFoto(perfil.genero);
+    return fotosDoArquivo(caminho, variacao);
   }
 
   const foto = proximaFoto(perfil.genero);

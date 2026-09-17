@@ -139,8 +139,19 @@ SUPABASE_SERVICE_ROLE_KEY=cole_aqui npm run popular -- --fotos=pasta
 Um arquivo por pessoa: o script gera os três enquadramentos (retrato inteiro,
 fechado no alto e quadrado) recortando a mesma foto. **A quantidade de perfis é
 a quantidade de fotos** — 6 fotos em `mulheres/` e 4 em `homens/` criam 6 e 4
-perfis. Para os 20, são 10 e 10. Use `.jpg`: só nele o recorte funciona (PNG e
-WEBP entram repetidos três vezes).
+perfis. Use `.jpg`: só nele o recorte funciona (PNG e WEBP entram repetidos três
+vezes).
+
+Com menos fotos que perfis, `--repetir` fecha os 20 reaproveitando cada uma:
+
+```bash
+SUPABASE_SERVICE_ROLE_KEY=cole_aqui npm run popular -- --fotos=pasta --repetir
+```
+
+Na segunda volta a foto sai espelhada, com o tom mais quente e com outro
+enquadramento na capa — de relance não parece a mesma imagem. Mas continua
+sendo o mesmo rosto: em duas telas lado a lado dá para perceber. Com 5 fotos de
+cada lado saem os 20 perfis, cada rosto aparecendo duas vezes.
 
 `--fotos=pexels` (padrão) — banco de imagens de licença livre, com chave
 gratuita que sai na hora em [pexels.com/api](https://www.pexels.com/api/):
