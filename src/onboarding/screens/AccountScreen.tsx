@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { OnboardingLayout } from "../OnboardingLayout";
 import { formatPhone, onlyDigits } from "../phoneFormat";
 import { SENHA_MINIMA } from "../../lib/api/auth";
@@ -60,6 +60,9 @@ export function AccountScreen({
   onNext,
 }: AccountScreenProps) {
   const inputRef = useRef<HTMLInputElement>(null);
+  // A senha só reclama depois que a pessoa saiu do campo: enquanto digita, o
+  // aviso embaixo do campo já diz o tamanho mínimo.
+  const [senhaTocada, setSenhaTocada] = useState(false);
 
   useEffect(() => {
     inputRef.current?.focus();
@@ -72,6 +75,12 @@ export function AccountScreen({
 
   const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim());
   const senhaValida = password.length >= SENHA_MINIMA;
+  // Erro do servidor primeiro; se não houver, a checagem local de tamanho.
+  const erroDaSenha =
+    erroDoCampo("senha") ??
+    (senhaTocada && password.length > 0 && !senhaValida
+      ? `A senha precisa de pelo menos ${SENHA_MINIMA} caracteres.`
+      : null);
   const telefoneValido = onlyDigits(phone).length >= 10;
   const isValid =
     emailValido && senhaValida && telefoneValido && acceptedTerms && acceptedSensitiveData;
@@ -111,18 +120,23 @@ export function AccountScreen({
       <div className={fieldStyles.fieldGroup}>
         <span className={fieldStyles.label}>Crie uma senha</span>
         <input
-          className={erroDoCampo("senha") ? fieldStyles.inputInvalid : fieldStyles.input}
+          className={erroDaSenha ? fieldStyles.inputInvalid : fieldStyles.input}
           type="password"
           autoComplete="new-password"
           placeholder={`Pelo menos ${SENHA_MINIMA} caracteres`}
           value={password}
-          aria-invalid={Boolean(erroDoCampo("senha"))}
-          aria-describedby={erroDoCampo("senha") ? "erro-senha" : undefined}
+          aria-invalid={Boolean(erroDaSenha)}
+          aria-describedby={erroDaSenha ? "erro-senha" : "dica-senha"}
           onChange={(e) => onChangePassword(e.target.value)}
+          onBlur={() => setSenhaTocada(true)}
         />
-        {erroDoCampo("senha") && (
+        {erroDaSenha ? (
           <p id="erro-senha" className={fieldStyles.error} role="alert">
-            {erroDoCampo("senha")}
+            {erroDaSenha}
+          </p>
+        ) : (
+          <p id="dica-senha" className={fieldStyles.note}>
+            Pelo menos {SENHA_MINIMA} caracteres.
           </p>
         )}
       </div>
