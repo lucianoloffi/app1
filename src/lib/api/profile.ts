@@ -200,10 +200,9 @@ export async function salvarFiltros(filtros: Filters): Promise<void> {
 
 export async function atualizarTelefone(telefone: string): Promise<void> {
   const id = await meuId();
-  const { error } = await supabase
-    .from("profiles")
-    .update({ telefone, telefone_verificado: false })
-    .eq("id", id);
+  // Só o telefone: telefone_verificado não é escrevível pelo cliente. O trigger
+  // profiles_telefone_reverifica zera a verificação sempre que o número muda.
+  const { error } = await supabase.from("profiles").update({ telefone }).eq("id", id);
   lancaSeErro(error);
 }
 

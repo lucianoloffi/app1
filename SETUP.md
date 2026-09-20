@@ -20,6 +20,8 @@ No painel, **SQL Editor** → **New query**. Cole e execute **na ordem**, um arq
 6. `supabase/migrations/20260916_0006_fix_leitura_fotos.sql` — terceiros passam a ver as fotos aprovadas
 7. `supabase/migrations/20260916_0007_status_casado.sql` — "casado" entre os estados civis
 8. `supabase/migrations/20260917_0008_intencao_filtro_multipla.sql` — intenção do filtro vira múltipla escolha
+9. `supabase/migrations/20260917_0009_onboarding_minimo_opcional.sql` — fotos e interesses opcionais no cadastro
+10. `supabase/migrations/20260920_0010_colunas_so_do_servidor.sql` — o app deixa de escrever colunas de status (verificação, moderação, denúncia, mensagens); a verificação passa a ser pedida pelo RPC `solicitar_verificacao`
 
 > Sempre que chegar uma migration nova, rode a que falta — pela data no nome dá
 > para saber onde você parou. Todas são seguras de rodar de novo.
@@ -211,6 +213,11 @@ fora de teste.
   Para aprovar, mude `verificacoes.status` e `profiles.verificacao_status`
   para `'aprovada'`. O selo só aparece depois disso.
 - **Denúncias**: `reports`, com `status` `aberta` → `em_analise` → `resolvida`.
+
+> O Table Editor e o SQL Editor rodam com o papel administrativo do painel, que
+> a migration 0010 não limita — moderar por aqui continua funcionando. O que
+> mudou é que o app (papel `authenticated`) não consegue mais escrever esses
+> campos, nem pela API.
 
 ## 9. O que já foi testado
 

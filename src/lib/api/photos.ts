@@ -156,12 +156,10 @@ export async function enviarSelfieDeVerificacao(arquivo: File): Promise<void> {
     .upload(path, blob, { contentType: "image/jpeg", upsert: false });
   lancaSeErro(erroUpload);
 
-  const { error } = await supabase.from("verificacoes").insert({ user_id: userId, selfie_path: path });
+  // Não grava direto em verificacoes/profiles: o cliente não tem permissão de
+  // escrever o status. Antes eram duas chamadas soltas, e dava para inserir a
+  // verificação já "aprovada" pela API. O RPC cria o pedido pendente e marca o
+  // perfil na mesma transação, e só aceita selfie da própria pasta.
+  const { error } = await supabase.rpc("solicitar_verificacao", { p_selfie_path: path });
   lancaSeErro(error);
-
-  const { error: erroPerfil } = await supabase
-    .from("profiles")
-    .update({ verificacao_status: "pendente" })
-    .eq("id", userId);
-  lancaSeErro(erroPerfil);
 }

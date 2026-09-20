@@ -39,7 +39,12 @@ o `.gitignore` já cobre, mas não deixe sobrando.
   padrão depois de toda chamada. **Telas nunca mostram texto cru do Supabase.**
 - **`supabase/migrations/`** — schema, RLS e funções. A lógica sensível (fila de
   descoberta, swipes, matches) mora em funções `security definer` no banco, não em
-  queries no cliente. RLS é "só o dono" em todas as tabelas.
+  queries no cliente. RLS é "só o dono" em todas as tabelas — mas a RLS só decide
+  *linhas*. Quem decide *colunas* são os privilégios de coluna (migration `0010`): o
+  cliente só escreve as colunas listadas em `grant insert/update (...)`, e coluna nova
+  nasce somente-leitura até haver um grant explícito. Status de verificação, de
+  moderação e de denúncia são do servidor; o cliente pede por RPC
+  (`solicitar_verificacao`) e a moderação escreve com service role.
 - **`supabase/functions/`** — Edge Functions para o que a chave anon não pode fazer
   (ex.: `delete-account`, que apaga usuário do auth e arquivos do storage). O id do
   usuário vem sempre do JWT, nunca do corpo da requisição.
@@ -70,6 +75,10 @@ constante, para mensagem e validação não divergirem.
 
 **Migrations** são versionadas por data + sequência (`20260917_0009_nome.sql`) e
 nunca editadas depois de aplicadas. Mudou de ideia? Nova migration.
+Ao criar coluna numa tabela que o cliente escreve (`profiles`, `photos`, `reports`,
+`consents`, `messages`), decida se o cliente pode escrevê-la: se sim, `grant update
+(coluna)` ou `grant insert (coluna)` na mesma migration; sem grant, a API recusa com
+`permission denied` — o que é o certo para colunas de status.
 
 **Commits** em português, no imperativo, descrevendo o efeito para quem usa o app
 ("Avisar na hora que a senha é curta demais", "Fazer a lupa das Conversas buscar de
@@ -119,8 +128,15 @@ Em ordem de importância:
    navegador), coluna `profiles.status_moderacao` ('ativo','suspenso','banido')
    separada do `visivel` atual (que é escolha do usuário e seria devolvida por ele),
    `reports.analisado_por` + resolução, e tabela `admin_actions` para auditoria.
-2. **Auditar a RLS** antes de abrir para público — nunca foi revisada com foco em
-   segurança. Alvo: `supabase/migrations/*_rls.sql` e as funções `security definer`.
+   Cuidado com nomes: `photos.status_moderacao` ('pendente','aprovada','rejeitada',
+   default `'aprovada'`, e é ele que libera a foto para terceiros) e
+   `profiles.verificacao_status` já existem, com vocabulários diferentes do de
+   `profiles.status_moderacao`. Colunas de status novas já nascem protegidas pela
+   migration `0010`: o cliente não as escreve.
+2. **Auditar a RLS** antes de abrir para público. A escrita por coluna já foi
+   revisada e fechada na migration `0010` (reproduzida e testada num Postgres local).
+   Falta o resto: funções `security definer` (`search_path`, validações), policies do
+   storage e as de leitura. Alvo: `supabase/migrations/*_rls.sql` e as funções.
 3. **Atualizar o `README.md`**, que está desatualizado (cita `src/data/mockProfiles.ts`,
    que não existe mais, e descreve o projeto como protótipo com fotos do
    `i.pravatar.cc`).
