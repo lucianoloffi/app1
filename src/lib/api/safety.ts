@@ -58,16 +58,24 @@ export async function listarBloqueados(): Promise<PerfilBloqueado[]> {
  * copia a conversa para dentro da denúncia, no mesmo instante (migration
  * 0015). Antes a prova sumia — desfazer o match apaga as mensagens em cascata,
  * e quem assediou podia apagar a conversa depois de ser denunciado.
+ *
+ * Denunciar também bloqueia (0018), no servidor: é uma coisa só, e não duas
+ * chamadas que podem falhar pela metade.
+ *
+ * Devolve `nova: false` quando já havia uma denúncia sua contra essa pessoa
+ * esperando decisão — nesse caso nada foi aberto, e a tela avisa em vez de
+ * agradecer por uma denúncia que não existe.
  */
 export async function denunciar(
   userId: string,
   motivo: string,
   descricao?: string,
-): Promise<void> {
-  const { error } = await supabase.rpc("denunciar", {
+): Promise<{ nova: boolean }> {
+  const { data, error } = await supabase.rpc("denunciar", {
     p_denunciado: userId,
     p_motivo: motivo,
     p_descricao: descricao ?? null,
   });
   lancaSeErro(error);
+  return { nova: (data as { nova?: boolean } | null)?.nova !== false };
 }

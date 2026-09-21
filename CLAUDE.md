@@ -77,7 +77,15 @@ o `.gitignore` já cobre, mas não deixe sobrando.
   não apaga mais as denúncias contra a pessoa. Toda decisão fica em
   `admin_actions`. Sem service role e sem Edge Function: nada sai do Postgres.
   No app, `src/lib/moderacao.ts` lê o próprio status do perfil e `App.tsx` mostra a
-  `ModerationBlockedScreen` antes de qualquer outra tela — e desliga a fila, as
+  `ModerationBlockedScreen` antes de qualquer outra tela. Quem já estava com o app
+  aberto quando foi sancionado não via nada mudar até recarregar, então `App.tsx`
+  relê o status (consulta de uma linha, `carregarSituacaoDeModeracao`) em três
+  momentos: ao voltar para o app, em qualquer erro da fila ou das conversas, e quando
+  a fila vem vazia — para quem está sob sanção o servidor devolve fila vazia **sem
+  erro**, e sem esse gatilho a pessoa veria "acabaram os perfis" e nenhuma explicação.
+  Derrubar a sessão foi descartado: exige service role, ela entraria de novo (o login
+  não sabe de moderação) e cairia na mesma tela — só que sem entender o que houve, e
+  a App Store exige motivo e caminho de contestação visíveis — e desliga a fila, as
   conversas, a localização e o registro de atividade: quem está bloqueado não conta
   como usuário ativo nos números do painel.
   A `0017` fechou o outro lado, que a `0015` esqueceu: sanção que só morde quem foi
@@ -86,9 +94,18 @@ o `.gitignore` já cobre, mas não deixe sobrando.
   apagado) e `sancao_no_match` substituiu `estou_sob_sancao` na policy `messages_envia`,
   para pegar os dois lados. Na mesma migration, denunciar passou a tirar o perfil da
   fila de quem denunciou, para sempre: antes a denúncia só mostrava um aviso e o
-  perfil continuava ali, curtível. **Denunciar não é bloquear** — a conversa continua,
-  e do lado de quem foi denunciado nada muda, senão o sumiço entregaria quem
-  denunciou.
+  perfil continuava ali, curtível.
+  Na `0018` a regra virou **denunciar bloqueia**, em qualquer lugar de onde se
+  denuncie, e o bloqueio é feito pelo próprio RPC `denunciar` (uma chamada só, não
+  duas que falham pela metade). A regra anterior ("denunciar não bloqueia, a conversa
+  continua") durou uma tarde: testando com duas contas, denunciar pelo chat deixava a
+  conversa aberta e os dois escrevendo. Junto veio o índice
+  `reports_uma_aberta_por_par` — dava para abrir a mesma denúncia repetidas vezes e
+  encher a fila de cópias. Para quem foi denunciado nada revela a denúncia: vê
+  exatamente o que veria num bloqueio comum. Ao fechar a conversa denunciada no app,
+  **nunca** usar `removeChat` — ele chama `desfazer_match`, que apaga as mensagens,
+  justo as que viraram prova; recarregar a lista basta, porque `meus_matches` já pula
+  par com bloqueio.
   **Não confundir** `profiles.status_moderacao` com `photos.status_moderacao`
   ('pendente','aprovada','rejeitada'), com `profiles.verificacao_status` nem
   com `profiles.visivel` — esta última é escolha da própria pessoa, e por isso

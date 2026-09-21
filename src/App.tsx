@@ -13,6 +13,7 @@ import { tempoRelativo } from "./chats/tempo";
 import {
   atualizarTelefone,
   carregarMeuPerfil,
+  carregarSituacaoDeModeracao,
   definirMostrarDistancia,
   definirVisibilidade,
   salvarFiltros,
@@ -109,20 +110,58 @@ export default function App() {
 
   const { message: toastMessage, showToast } = useToast();
 
+  /**
+   * Relê o que a moderação decidiu. Sem isto, quem já estava com o app aberto
+   * quando foi suspenso não via nada mudar: o banco recusava curtir e escrever,
+   * mas a tela continuava a mesma até alguém recarregar a página.
+   */
+  const conferirModeracao = useCallback(async () => {
+    try {
+      const situacao = await carregarSituacaoDeModeracao();
+      if (!situacao) return;
+      setMyProfile((prev) =>
+        prev &&
+        (prev.moderationStatus !== situacao.status ||
+          (prev.suspendedUntil ?? null) !== situacao.suspensaoTerminaEm)
+          ? {
+              ...prev,
+              moderationStatus: situacao.status,
+              suspendedUntil: situacao.suspensaoTerminaEm,
+            }
+          : prev,
+      );
+    } catch {
+      /* sem rede, por exemplo: a próxima volta ao app tenta de novo */
+    }
+  }, []);
+
+  /**
+   * Toda falha da fila ou das conversas pode ser a moderação tendo bloqueado a
+   * conta agora: o banco recusa antes de a tela saber. A consulta é de uma
+   * linha só, e quando não é isso não muda nada.
+   */
+  const aoFalhar = useCallback(
+    (mensagem: string) => {
+      showToast(mensagem);
+      void conferirModeracao();
+    },
+    [showToast, conferirModeracao],
+  );
+
   /** Suspensão ou banimento em vigor; null = conta livre. */
   const sancao = situacaoDeModeracao(myProfile);
   // Com a conta bloqueada não vale carregar fila nem conversas: a tela por cima
   // é o aviso, e o banco recusaria curtir e escrever de qualquer jeito.
   const appLiberado = stage === "main" && !sancao;
 
-  const chats = useChats({ ativo: appLiberado, onError: showToast });
+  const chats = useChats({ ativo: appLiberado, onError: aoFalhar });
   const discover = useDiscoverQueue({
     ativo: appLiberado,
     versaoDosFiltros,
     onMatch: () => void chats.recarregar(),
     onLikeWithoutMatch: (profile) =>
       showToast(`Você curtiu ${profile.name.split(" ")[0]}. Avisamos se ela curtir de volta.`),
-    onError: showToast,
+    onError: aoFalhar,
   });
 
   const carregarSessao = useCallback(async () => {
@@ -183,6 +222,15 @@ export default function App() {
     void carregarAjustes().then(setAjustes);
   }, [appLiberado]);
 
+  // Fila vazia tanto pode ser "acabaram os perfis" quanto a conta ter sido
+  // bloqueada agora: para quem está sob sanção o servidor devolve fila vazia,
+  // sem erro nenhum. Sem esta checagem, ela veria "não há mais perfis" e
+  // nenhuma explicação, até tentar curtir alguém ou sair e voltar ao app.
+  useEffect(() => {
+    if (!appLiberado || discover.carregando || discover.hasAnyMatch) return;
+    void conferirModeracao();
+  }, [appLiberado, discover.carregando, discover.hasAnyMatch, conferirModeracao]);
+
   // Conta como uso ao entrar no app e ao voltar para ele (trocar de aba ou de
   // aplicativo e voltar). Quem deixa o app aberto de um dia para o outro
   // também conta no dia seguinte, na próxima vez que olhar a tela. Quem está
@@ -191,11 +239,15 @@ export default function App() {
     if (!appLiberado) return;
     void registrarAtividade();
     const aoVoltar = () => {
-      if (document.visibilityState === "visible") void registrarAtividade();
+      if (document.visibilityState !== "visible") return;
+      void registrarAtividade();
+      // Suspensão e banimento acontecem com o app já aberto: é aqui que a
+      // pessoa descobre, sem precisar tentar curtir alguém para o app reagir.
+      void conferirModeracao();
     };
     document.addEventListener("visibilitychange", aoVoltar);
     return () => document.removeEventListener("visibilitychange", aoVoltar);
-  }, [appLiberado]);
+  }, [appLiberado, conferirModeracao]);
 
   async function abrirBloqueados() {
     setBlockedOpen(true);
@@ -254,15 +306,31 @@ export default function App() {
 
   async function denunciarPerfil(profileId: string, motivo: string) {
     try {
-      await denunciar(profileId, motivo);
-      showToast("Denúncia enviada. Este perfil não aparece mais para você.");
-      // Antes daqui só saía o aviso, e o perfil continuava na fila, ainda
-      // curtível: denunciar parecia não ter feito nada. Sair da fila não é
-      // bloquear — a conversa, se existir, continua, e quem quiser cortar o
-      // contato usa o botão de bloquear.
+      const { nova } = await denunciar(profileId, motivo);
+      showToast(
+        nova
+          ? "Denúncia enviada. A pessoa foi bloqueada e não fala mais com você."
+          : "Você já denunciou esta pessoa. A denúncia segue em análise.",
+      );
+
+      // Denunciar bloqueia (migration 0018). O servidor já cuidou disso, então
+      // aqui é só tirar da frente o que ficou na tela: a fila, a conversa
+      // aberta e o perfil, se estiver por cima. Sem isso a conversa continuava
+      // aberta depois da denúncia, os dois seguiam escrevendo, e dava para
+      // denunciar a mesma pessoa de novo e de novo.
       discover.removeFromQueue(profileId);
+
+      const conversa = chats.chats.find((chat) => chat.profileId === profileId);
+      if (conversa && activeChatId === conversa.id) {
+        chats.fecharChat();
+        setActiveChatId(null);
+      }
+      // Recarrega em vez de tirar da lista à mão: meus_matches já não devolve
+      // par com bloqueio. E nada de removeChat aqui — ele desfaz o match, o
+      // que APAGA as mensagens, justo as que viraram prova.
+      void chats.recarregar();
+
       if (detailProfile?.id === profileId) {
-        if (detailOrigin === "chat" && detailChatId) setActiveChatId(detailChatId);
         setDetailProfile(null);
         setDetailChatId(null);
       }

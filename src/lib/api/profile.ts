@@ -1,4 +1,10 @@
-import type { Filters, Intention, MyProfile, OnboardingState } from "../../types";
+import type {
+  Filters,
+  Intention,
+  ModerationStatus,
+  MyProfile,
+  OnboardingState,
+} from "../../types";
 import { supabase } from "../supabaseClient";
 import { ErroDeApp, lancaSeErro } from "../errors";
 import { minhasFotos } from "./photos";
@@ -100,6 +106,34 @@ export async function carregarMeuPerfil(): Promise<MeuPerfilCompleto | null> {
     },
     cadastroCompleto: Boolean(perfil.onboarding_completo),
     temLocalizacao: perfil.localizacao !== null && perfil.localizacao !== undefined,
+  };
+}
+
+/**
+ * Só o que a moderação decidiu sobre a própria conta — uma linha, duas colunas.
+ * Existe separado de carregarMeuPerfil porque é chamado toda vez que o app
+ * volta para a frente: carregar o perfil inteiro (preferências, interesses,
+ * fotos e URLs assinadas) a cada retorno seria caro à toa.
+ */
+export async function carregarSituacaoDeModeracao(): Promise<{
+  status: ModerationStatus;
+  suspensaoTerminaEm: string | null;
+} | null> {
+  const { data: sessao } = await supabase.auth.getUser();
+  const usuario = sessao.user;
+  if (!usuario) return null;
+
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("status_moderacao, suspensao_termina_em")
+    .eq("id", usuario.id)
+    .maybeSingle();
+  lancaSeErro(error);
+  if (!data) return null;
+
+  return {
+    status: (data.status_moderacao ?? "ativo") as ModerationStatus,
+    suspensaoTerminaEm: data.suspensao_termina_em ?? null,
   };
 }
 

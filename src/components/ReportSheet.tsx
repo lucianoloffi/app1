@@ -21,7 +21,8 @@ export function ReportSheet({ name, onSelectReason, onCancel }: ReportSheetProps
         <div className={styles.heading}>
           <h2 className={styles.title}>Denunciar {name}</h2>
           <p className={styles.support}>
-            A denúncia é anônima. Nossa equipe analisa em até 24 horas.
+            A denúncia é anônima e bloqueia {name}: vocês deixam de se ver e de
+            conversar. Nossa equipe analisa em até 24 horas.
           </p>
         </div>
 
