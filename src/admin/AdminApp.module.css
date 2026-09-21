@@ -1,0 +1,53 @@
+.carregando {
+  margin: 0;
+  padding: 48px;
+  text-align: center;
+  font: 600 15px var(--font-ui);
+  color: var(--color-ink-60);
+}
+
+.avisoTela {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.aviso {
+  width: 100%;
+  max-width: 420px;
+  background: var(--color-surface);
+  border-radius: var(--radius-card-lg);
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.marca {
+  font: 900 22px var(--font-display);
+  color: var(--color-accent);
+}
+
+.avisoTitulo {
+  margin: 8px 0 0;
+  font: 800 22px var(--font-ui);
+}
+
+.avisoTexto {
+  margin: 0;
+  font: 400 15px/1.5 var(--font-ui);
+  color: var(--color-ink-60);
+}
+
+.avisoBotao {
+  margin-top: 8px;
+  height: 48px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--color-ink);
+  color: #fff;
+  font: 700 15px var(--font-ui);
+  cursor: pointer;
+}

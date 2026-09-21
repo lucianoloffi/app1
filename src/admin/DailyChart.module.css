@@ -1,0 +1,31 @@
+.grafico {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.grade {
+  stroke: var(--color-line-3);
+  stroke-width: 1;
+}
+
+.rotulo {
+  font: 500 12px var(--font-ui);
+  fill: var(--color-ink-60);
+}
+
+.linhaAtivos,
+.linhaNovos {
+  fill: none;
+  stroke-width: 3;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.linhaAtivos {
+  stroke: var(--color-accent);
+}
+
+.linhaNovos {
+  stroke: var(--color-coral);
+}

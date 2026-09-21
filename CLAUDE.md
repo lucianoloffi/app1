@@ -50,6 +50,12 @@ o `.gitignore` já cobre, mas não deixe sobrando.
   ninguém enxerga a foto do outro — a checagem "passa" ou "falha" em silêncio. Nesses
   casos a policy chama uma função `security definer` que devolve só sim/não
   (`foto_visivel`, `bloqueio_no_match`). Aconteceu duas vezes (0006 e 0011).
+- **Painel admin** (`admin/index.html` + `src/admin/`): segunda página do mesmo build
+  (`vite.config.ts`, `build.rollupOptions.input`), publicada em `/app1/admin/`, com
+  bundle próprio — nada do painel vai para o app. Usa a mesma camada `src/lib/api/`
+  (`admin.ts`) e o mesmo login. Quem decide o acesso é o banco: `is_admin()` (lê
+  `auth.users.raw_app_meta_data.papel`, vale na hora) dentro de cada função do painel,
+  que devolve só números somados. Esconder o endereço não protege nada.
 - **Registros para o painel admin** (migration `0013`): `atividade_diaria` (um registro
   por pessoa por dia de uso, gravado pelo RPC `registrar_atividade`, que o app chama ao
   entrar e ao voltar para a frente), `historico_matches` (não some quando o match é
@@ -151,8 +157,10 @@ Em ordem de importância:
    % de ativos com match, conversas iniciadas, gráfico de 30 dias, 5 cidades com mais
    usuários com % de homens/mulheres/outros, seleção de período — e moderação numa
    fila só, com Arquivar / Suspender 7 dias / Banir). Os registros já existem
-   (`0013`); falta o acesso de admin e o app do painel. O painel completo (funil,
-   retenção D7, ranking de 10 cidades, contas excluídas) vem depois.
+   (`0013`) e a tela de Números está pronta (`0014` e `src/admin/`). Falta a
+   Moderação: cópia da conversa na denúncia, fila única, ações e o aviso no app para
+   quem for suspenso ou banido. O painel completo (funil, retenção D7, ranking de 10
+   cidades, contas excluídas) vem depois.
    **Moderação/admin.** Hoje `reports.status` e `verificacoes.status` são gravados e
    nunca lidos: denúncia entra e fica parada. Plano decidido: app admin **separado**
    do app do usuário (não uma rota escondida — o bundle público é lido por qualquer

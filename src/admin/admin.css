@@ -1,0 +1,26 @@
+/* Base do painel admin. Não importa o index.css do app: lá o #root tem a
+   largura de um celular (430px) e o body não rola; o painel é de computador. */
+@import "../styles/tokens.css";
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  min-height: 100vh;
+  background: var(--color-bg);
+  font-family: var(--font-ui);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input {
+  font-family: inherit;
+}

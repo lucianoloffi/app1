@@ -1,0 +1,90 @@
+.tela {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.cartao {
+  width: 100%;
+  max-width: 400px;
+  background: var(--color-surface);
+  border-radius: var(--radius-card-lg);
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.cabecalho {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.marca {
+  font: 900 30px var(--font-display);
+  color: var(--color-accent);
+}
+
+.marcaAdmin {
+  font: 700 12px var(--font-ui);
+  color: var(--color-ink-60);
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+}
+
+.apoio {
+  margin: 0;
+  font: 400 15px var(--font-ui);
+  color: var(--color-ink-60);
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.rotulo {
+  font: 600 14px var(--font-ui);
+}
+
+.entrada {
+  height: 48px;
+  border: 1px solid var(--color-line-2);
+  border-radius: var(--radius-field);
+  padding: 0 14px;
+  font: 400 15px var(--font-ui);
+  color: var(--color-ink);
+  outline: none;
+}
+
+.entrada:focus {
+  border-color: var(--color-accent);
+}
+
+.erro {
+  margin: 0;
+  font: 600 14px var(--font-ui);
+  color: #b3261e;
+}
+
+.botao {
+  height: 50px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--color-accent);
+  color: #fff;
+  font: 700 16px var(--font-ui);
+  cursor: pointer;
+  box-shadow: var(--shadow-btn-primary);
+}
+
+.botao:disabled {
+  opacity: 0.5;
+  cursor: default;
+  box-shadow: none;
+}

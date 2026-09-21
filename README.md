@@ -49,6 +49,8 @@ Não há testes automatizados. Antes de qualquer push: `npm run lint` e
 - `supabase/migrations/` — schema, RLS e funções, versionados por data e
   sequência e nunca editados depois de aplicados
 - `supabase/functions/delete-account/` — Edge Function de exclusão de conta
+- `admin/index.html` e `src/admin/` — painel admin, em `/app1/admin/` (acesso e
+  como marcar um administrador: [`SETUP.md`](SETUP.md), seção Painel admin)
 - `scripts/` — utilitários locais (configurar `.env`, popular perfis de teste)
 
 ## Deploy

@@ -25,6 +25,7 @@ No painel, **SQL Editor** → **New query**. Cole e execute **na ordem**, um arq
 11. `supabase/migrations/20260921_0011_bloqueio_e_fotos.sql` — bloqueio não pode mais ser desfeito pelo bloqueado; fotos só abrem para quem pode ver o perfil; foto aprovada não troca de imagem
 12. `supabase/migrations/20260921_0012_recuperar_telefone.sql` — devolve o telefone a quem o perdeu no fim do cadastro e tira dos avisos do Security Advisor as três funções de gatilho
 13. `supabase/migrations/20260921_0013_registros_para_o_painel.sql` — começa a registrar dias de uso, histórico de matches, marcos de cada pessoa e contas excluídas, para o painel admin
+14. `supabase/migrations/20260921_0014_painel_numeros.sql` — quem é administrador (`is_admin`) e a consulta da tela de Números do painel admin
 
 > Sempre que chegar uma migration nova, rode a que falta — pela data no nome dá
 > para saber onde você parou. Todas são seguras de rodar de novo.
@@ -257,3 +258,28 @@ imagem de uma foto aprovada (sobrescrevendo, ou apagando e reenviando com o mesm
 mensagem com mais de 2000 caracteres. Segue funcionando: curtir, dar match, conversar,
 desfazer match, ver fotos na fila, nas conversas (mesmo de perfil oculto) e na lista de
 bloqueados, enviar e apagar fotos.
+
+## Painel admin
+
+O painel fica em `https://<usuário>.github.io/app1/admin/` (no ar, publicado junto
+com o app) e em `http://localhost:5173/app1/admin/` rodando `npm run dev`. Entra-se
+com uma conta do próprio Lovi, mas só abre para contas marcadas como administradoras.
+
+Para marcar uma conta, rode no SQL Editor, trocando o e-mail:
+
+```sql
+update auth.users
+   set raw_app_meta_data = raw_app_meta_data || '{"papel": "admin"}'::jsonb
+ where email = 'seu-email@exemplo.com';
+```
+
+Vale na hora, sem sair e entrar de novo. Para desmarcar:
+
+```sql
+update auth.users
+   set raw_app_meta_data = raw_app_meta_data - 'papel'
+ where email = 'seu-email@exemplo.com';
+```
+
+A marcação fica em `app_metadata`, que só o servidor altera — nunca em
+`user_metadata`, que o próprio usuário consegue mudar pela API.
