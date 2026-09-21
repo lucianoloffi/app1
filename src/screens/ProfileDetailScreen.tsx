@@ -65,7 +65,10 @@ export function ProfileDetailScreen({
     lifeRows.push({ label: "Altura", value: heightLabel(profile.height) });
   }
 
-  const thumbnails = [profile.photos[1] ?? profile.photos[0], profile.photos[2] ?? profile.photos[0]];
+  // Todas as fotos depois da principal, uma embaixo da outra. Antes eram sempre
+  // duas miniaturas: quem tinha 6 fotos mostrava só 3, e quem tinha 1 aparecia
+  // com a mesma foto repetida três vezes.
+  const morePhotos = profile.photos.slice(1);
 
   return (
     <div className={styles.screen}>
@@ -134,17 +137,19 @@ export function ProfileDetailScreen({
             </div>
           )}
 
-          <div className={styles.thumbGrid}>
-            {thumbnails.map((photo, index) => (
-              <img
-                key={index}
-                className={styles.thumb}
-                src={photo}
-                alt={`Mais uma foto de ${profile.name}`}
-                style={{ objectPosition: index === 0 ? "center 55%" : "center 80%" }}
-              />
-            ))}
-          </div>
+          {morePhotos.length > 0 && (
+            <div className={styles.photoList}>
+              {morePhotos.map((photo, index) => (
+                <img
+                  key={photo}
+                  className={styles.morePhoto}
+                  src={photo}
+                  alt={`Foto ${index + 2} de ${profile.name}`}
+                  loading="lazy"
+                />
+              ))}
+            </div>
+          )}
 
           <button type="button" className={styles.reportLink} onClick={() => setReportOpen(true)}>
             Denunciar este perfil

@@ -146,17 +146,21 @@
   border: 1px solid #c9aef9;
 }
 
-.thumbGrid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
+.photoList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.thumb {
-  height: 104px;
+/* Retrato 4:5, na largura toda: é o formato em que a maioria das fotos de
+   celular cabe sem cortar o rosto. O enquadramento puxa para cima pelo mesmo
+   motivo da foto principal. */
+.morePhoto {
+  width: 100%;
+  aspect-ratio: 4 / 5;
   border-radius: 16px;
   object-fit: cover;
-  width: 100%;
+  object-position: center 25%;
   display: block;
   background: #dfe3de;
 }
