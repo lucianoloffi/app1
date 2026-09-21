@@ -255,7 +255,17 @@ export default function App() {
   async function denunciarPerfil(profileId: string, motivo: string) {
     try {
       await denunciar(profileId, motivo);
-      showToast("Denúncia enviada. Obrigado por avisar.");
+      showToast("Denúncia enviada. Este perfil não aparece mais para você.");
+      // Antes daqui só saía o aviso, e o perfil continuava na fila, ainda
+      // curtível: denunciar parecia não ter feito nada. Sair da fila não é
+      // bloquear — a conversa, se existir, continua, e quem quiser cortar o
+      // contato usa o botão de bloquear.
+      discover.removeFromQueue(profileId);
+      if (detailProfile?.id === profileId) {
+        if (detailOrigin === "chat" && detailChatId) setActiveChatId(detailChatId);
+        setDetailProfile(null);
+        setDetailChatId(null);
+      }
     } catch (problema) {
       showToast(mensagemDeErro(problema));
     }

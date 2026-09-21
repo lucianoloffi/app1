@@ -28,6 +28,7 @@ No painel, **SQL Editor** → **New query**. Cole e execute **na ordem**, um arq
 14. `supabase/migrations/20260921_0014_painel_numeros.sql` — quem é administrador (`is_admin`) e a consulta da tela de Números do painel admin
 15. `supabase/migrations/20260921_0015_moderacao.sql` — suspender e banir contas, denúncia que guarda cópia da conversa e sobrevive à exclusão da conta, fila e ações da tela de Moderação
 16. `supabase/migrations/20260921_0016_denuncia_so_por_rpc.sql` — tira do app a escrita direta em `reports`; **aplique só depois** de o app novo estar no ar (veja a nota abaixo)
+17. `supabase/migrations/20260921_0017_sancao_do_lado_de_quem_olha.sql` — denunciar tira o perfil da fila de quem denunciou; suspenso ou banido some das conversas dos outros enquanto durar
 
 > **Ordem da 15 e da 16.** A 15 só adiciona e pode ser aplicada a qualquer
 > momento — quanto antes, melhor. A 16 tira uma permissão que o app antigo usa

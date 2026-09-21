@@ -80,6 +80,15 @@ o `.gitignore` já cobre, mas não deixe sobrando.
   `ModerationBlockedScreen` antes de qualquer outra tela — e desliga a fila, as
   conversas, a localização e o registro de atividade: quem está bloqueado não conta
   como usuário ativo nos números do painel.
+  A `0017` fechou o outro lado, que a `0015` esqueceu: sanção que só morde quem foi
+  sancionado não aparece para mais ninguém. Agora `meus_matches` e `perfil_do_match`
+  escondem quem está suspenso ou banido (volta sozinho quando o prazo vence — nada é
+  apagado) e `sancao_no_match` substituiu `estou_sob_sancao` na policy `messages_envia`,
+  para pegar os dois lados. Na mesma migration, denunciar passou a tirar o perfil da
+  fila de quem denunciou, para sempre: antes a denúncia só mostrava um aviso e o
+  perfil continuava ali, curtível. **Denunciar não é bloquear** — a conversa continua,
+  e do lado de quem foi denunciado nada muda, senão o sumiço entregaria quem
+  denunciou.
   **Não confundir** `profiles.status_moderacao` com `photos.status_moderacao`
   ('pendente','aprovada','rejeitada'), com `profiles.verificacao_status` nem
   com `profiles.visivel` — esta última é escolha da própria pessoa, e por isso

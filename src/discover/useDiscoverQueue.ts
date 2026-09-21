@@ -132,6 +132,22 @@ export function useDiscoverQueue({
       setMatchProfile(null);
       completeAdvance();
     },
+    /**
+     * Tira um perfil da fila sem registrar curtida nem dispensa — é o que
+     * acontece ao denunciar. O servidor também deixa de trazê-lo (migration
+     * 0017); aqui ele some na hora, sem esperar a fila ser refeita.
+     */
+    removeFromQueue: (profileId: string) => {
+      // Com um card já saindo, mexer na fila agora faria ela pular dois: o
+      // timeout da animação ainda vai cortar o primeiro. O servidor não traz
+      // o denunciado de volta, então esperar a próxima carga não perde nada.
+      if (isAnimating.current) return;
+      if (current?.id === profileId) {
+        completeAdvance();
+        return;
+      }
+      setQueue((prev) => prev.filter((item) => item.id !== profileId));
+    },
     /** Desfazer match devolve o perfil logo atrás do card atual. */
     restoreToQueue: (profile: Profile) => {
       setQueue((prev) => {
