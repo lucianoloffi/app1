@@ -31,6 +31,7 @@ No painel, **SQL Editor** → **New query**. Cole e execute **na ordem**, um arq
 17. `supabase/migrations/20260921_0017_sancao_do_lado_de_quem_olha.sql` — denunciar tira o perfil da fila de quem denunciou; suspenso ou banido some das conversas dos outros enquanto durar
 18. `supabase/migrations/20260921_0018_denuncia_bloqueia_e_nao_repete.sql` — denunciar passa a bloquear, e não dá para abrir duas denúncias contra a mesma pessoa esperando decisão
 19. `supabase/migrations/20260921_0019_cidade_mais_proxima.sql` — o cadastro passa a sugerir a cidade pela localização (raio de 100 km)
+20. `supabase/migrations/20260921_0020_fila_vazia_por_distancia.sql` — a tela de fila vazia passa a saber se o problema é o filtro ou a falta de gente na região
 
 > **Ordem da 15 e da 16.** A 15 só adiciona e pode ser aplicada a qualquer
 > momento — quanto antes, melhor. A 16 tira uma permissão que o app antigo usa

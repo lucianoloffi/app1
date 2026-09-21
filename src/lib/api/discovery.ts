@@ -24,3 +24,16 @@ export async function listarCidades(): Promise<string[]> {
   lancaSeErro(error);
   return (data ?? []).map((linha) => linha.nome);
 }
+
+/**
+ * Distância, em km, até a pessoa mais próxima que passa em todos os filtros
+ * MENOS o de distância. null = não há ninguém nem ignorando a distância.
+ *
+ * Serve para a tela de fila vazia dizer a verdade: sem isso ela sempre culpava
+ * os filtros, e quem estava longe da região mexia neles à toa (migration 0020).
+ */
+export async function distanciaDoMaisProximo(): Promise<number | null> {
+  const { data, error } = await supabase.rpc("distancia_do_mais_proximo");
+  lancaSeErro(error);
+  return data === null || data === undefined ? null : Number(data);
+}

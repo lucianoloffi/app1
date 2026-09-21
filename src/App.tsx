@@ -8,6 +8,7 @@ import { esquecerAtividadeRegistrada, registrarAtividade } from "./lib/api/ativi
 import { aoMudarSessao, sair } from "./lib/api/auth";
 import { erroDeConfiguracao } from "./lib/supabaseClient";
 import { situacaoDeModeracao } from "./lib/moderacao";
+import { distanciaDoMaisProximo } from "./lib/api/discovery";
 import { carregarPerfilDoMatch } from "./lib/api/matches";
 import { tempoRelativo } from "./chats/tempo";
 import {
@@ -107,6 +108,8 @@ export default function App() {
   const [temLocalizacao, setTemLocalizacao] = useState(true);
   const [permissaoLocal, setPermissaoLocal] = useState<EstadoDaPermissao>("perguntar");
   const [localGateAberto, setLocalGateAberto] = useState(false);
+  /** km até a pessoa mais próxima fora do raio; null = ninguém, ou ainda não perguntamos. */
+  const [distanciaDoMaisProximoKm, setDistanciaDoMaisProximoKm] = useState<number | null>(null);
 
   const { message: toastMessage, showToast } = useToast();
 
@@ -199,6 +202,10 @@ export default function App() {
   // Localização na abertura: só com a permissão já concedida, nunca em background.
   useEffect(() => {
     if (!appLiberado) return;
+    // Quem escolheu usar a cidade não tem o GPS devolvido por baixo: a escolha
+    // sumiria no próximo abrir, sem a pessoa entender por quê. Para voltar ao
+    // GPS existe o interruptor em Ajustes › Permissões.
+    if (myProfile?.approximateLocation) return;
     void (async () => {
       const resultado = await atualizarLocalizacaoNaAbertura();
       setPermissaoLocal(resultado.estado);
@@ -229,6 +236,12 @@ export default function App() {
   useEffect(() => {
     if (!appLiberado || discover.carregando || discover.hasAnyMatch) return;
     void conferirModeracao();
+    // Fila vazia tem duas causas bem diferentes, e a tela precisa saber qual:
+    // filtro apertado, ou não há ninguém do Lovi perto. Sem isto ela sempre
+    // culpava o filtro, e quem estava longe mexia nele à toa.
+    void distanciaDoMaisProximo()
+      .then(setDistanciaDoMaisProximoKm)
+      .catch(() => setDistanciaDoMaisProximoKm(null));
   }, [appLiberado, discover.carregando, discover.hasAnyMatch, conferirModeracao]);
 
   // Conta como uso ao entrar no app e ao voltar para ele (trocar de aba ou de
@@ -334,6 +347,26 @@ export default function App() {
         setDetailProfile(null);
         setDetailChatId(null);
       }
+    } catch (problema) {
+      showToast(mensagemDeErro(problema));
+    }
+  }
+
+  /**
+   * Troca a posição pelo centro da cidade do perfil. Oferecido quando o GPS
+   * deixou a pessoa longe de todo mundo — viagem, ou cadastro fora da região.
+   * Sem isso não havia volta: a tela que oferece a cidade só aparece para quem
+   * ainda não tem posição, e desligar a permissão não apaga a coordenada.
+   */
+  async function usarCidadeComoPosicao() {
+    const cidade = myProfile?.city ?? "";
+    if (!cidade) return;
+    try {
+      await usarCidadeComoLocalizacao(cidade);
+      setMyProfile((prev) => (prev ? { ...prev, approximateLocation: true } : prev));
+      setDistanciaDoMaisProximoKm(null);
+      setVersaoDosFiltros((valor) => valor + 1);
+      showToast(`Usando ${cidade}. Seu card mostra a cidade no lugar da distância.`);
     } catch (problema) {
       showToast(mensagemDeErro(problema));
     }
@@ -747,6 +780,10 @@ export default function App() {
                 hasAnyMatch={discover.hasAnyMatch}
                 offline={offlineSim}
                 filters={filters}
+                distanciaDoMaisProximoKm={distanciaDoMaisProximoKm}
+                city={myProfile?.city ?? ""}
+                usandoCidade={myProfile?.approximateLocation ?? false}
+                onUseCity={() => void usarCidadeComoPosicao()}
                 photoIndex={discover.photoIndex}
                 swipeDirection={discover.swipeDirection}
                 onNextPhoto={discover.nextPhoto}

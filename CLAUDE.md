@@ -42,6 +42,17 @@ o `.gitignore` já cobre, mas não deixe sobrando.
   geolocalização por IP: no Brasil o IP costuma resolver para a capital ou para São
   Paulo, exigiria serviço externo e entrada nova na política de privacidade, e o app
   já pede o GPS de qualquer forma.
+- **Fila vazia longe da região.** A fila filtra por distância, então quem está fora
+  do Sul (ou viajando) recebe fila vazia. A tela culpava sempre o filtro, e mexer
+  nele não resolvia nada. `distancia_do_mais_proximo` (migration `0020`) diz a que
+  distância está a pessoa mais próxima que passa em todos os outros filtros: dentro
+  de `DISTANCIA_MAX_KM` a tela manda ajustar o filtro; além dele, avisa que o app
+  ainda não chegou ali e oferece trocar a posição pelo centro da cidade do perfil.
+  Sem esse botão não havia volta: a tela que oferece a cidade só aparece para quem
+  ainda não tem posição gravada, e desligar a permissão não apaga a coordenada. Por
+  isso também, `atualizarLocalizacaoNaAbertura` **não roda** para quem está em modo
+  cidade (`approximateLocation`) — senão o GPS devolveria a posição no próximo abrir
+  e a escolha sumiria sozinha. Para voltar ao GPS existe Ajustes › Permissões.
 - **`src/lib/storage.ts` e `src/lib/geo.ts`** — abstrações finas sobre localStorage e
   geolocalização, pelo mesmo motivo (viram `@capacitor/preferences` e
   `@capacitor/geolocation` sem tocar no resto).

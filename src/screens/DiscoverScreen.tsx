@@ -3,6 +3,7 @@ import { Logo } from "../components/Logo";
 import { CloseIcon, HeartIcon } from "../components/icons/ActionIcons";
 import { ReportSheet } from "../components/ReportSheet";
 import { INTENTION_LABEL, type Filters, type Profile, type SwipeDirection } from "../types";
+import { DISTANCIA_MAX_KM } from "../lib/filtros";
 import styles from "./DiscoverScreen.module.css";
 import perfisVistos from "../assets/perfis-vistos.jpg";
 import semPerfis from "../assets/sem-perfis.jpg";
@@ -15,6 +16,13 @@ interface DiscoverScreenProps {
   hasAnyMatch: boolean;
   offline: boolean;
   filters: Filters;
+  /** Distância até a pessoa mais próxima fora do raio; null = ninguém, nem longe. */
+  distanciaDoMaisProximoKm: number | null;
+  /** Cidade do perfil, oferecida como posição quando o GPS deixou a pessoa longe. */
+  city: string;
+  /** false = a posição é o GPS, e trocar pela cidade ainda é uma opção. */
+  usandoCidade: boolean;
+  onUseCity: () => void;
   photoIndex: number;
   swipeDirection: SwipeDirection;
   onNextPhoto: () => void;
@@ -35,6 +43,10 @@ export function DiscoverScreen({
   hasAnyMatch,
   offline,
   filters,
+  distanciaDoMaisProximoKm,
+  city,
+  usandoCidade,
+  onUseCity,
   photoIndex,
   swipeDirection,
   onNextPhoto,
@@ -61,6 +73,21 @@ export function DiscoverScreen({
   }, [current, commonInterests]);
 
   const emptyByFilter = !current && !hasAnyMatch && !carregando;
+  /**
+   * Existe gente, mas toda ela mais longe do que o filtro permite — então o
+   * problema é a distância, não o filtro. Só vale quando passa do raio
+   * escolhido: assim o número nunca fala de alguém que a fila já mostraria.
+   */
+  const foraDeAlcance =
+    distanciaDoMaisProximoKm !== null && distanciaDoMaisProximoKm > filters.distanceKm;
+  /**
+   * Está longe, mas dentro do que o filtro consegue alcançar: aí mexer no
+   * filtro resolve mesmo, e mandar "o app está chegando na sua região" seria
+   * desanimar alguém que está a um ajuste de ver gente.
+   */
+  const alcancavelPeloFiltro =
+    foraDeAlcance && (distanciaDoMaisProximoKm as number) <= DISTANCIA_MAX_KM;
+  const podeUsarCidade = !usandoCidade && city.trim().length > 0;
 
   return (
     <div className={styles.screen}>
@@ -290,14 +317,43 @@ export function DiscoverScreen({
       ) : emptyByFilter ? (
         <div className={styles.emptyWrap}>
           <img className={styles.emptyArt} src={semPerfis} alt="" aria-hidden="true" />
-          <p className={styles.emptyTitle}>Poucos perfis por aqui</p>
-          <p className={styles.emptySupport}>
-            Seus filtros estão bem estreitos: até {filters.distanceKm} km e {filters.minAge}–
-            {filters.maxAge} anos. Ampliar a distância ou a faixa de idade traz mais gente.
-          </p>
-          <button type="button" className={styles.primaryButton} onClick={onOpenFilters}>
-            Ajustar filtros
-          </button>
+          {foraDeAlcance ? (
+            <>
+              {/* Mexer no filtro não resolve: não há ninguém perto. Dizer
+                  "seus filtros estão estreitos" aqui manda a pessoa ajustar
+                  uma coisa que não é o problema. */}
+              <p className={styles.emptyTitle}>Ninguém por perto ainda</p>
+              <p className={styles.emptySupport}>
+                A pessoa mais próxima do Lovi está a{" "}
+                {distanciaDoMaisProximoKm?.toLocaleString("pt-BR")} km de você.{" "}
+                {alcancavelPeloFiltro
+                  ? "Aumentar a distância nos filtros traz ela para a sua fila."
+                  : "O app ainda está chegando na sua região."}
+              </p>
+              {alcancavelPeloFiltro ? (
+                <button type="button" className={styles.primaryButton} onClick={onOpenFilters}>
+                  Ajustar filtros
+                </button>
+              ) : (
+                podeUsarCidade && (
+                  <button type="button" className={styles.primaryButton} onClick={onUseCity}>
+                    Usar {city} como minha localização
+                  </button>
+                )
+              )}
+            </>
+          ) : (
+            <>
+              <p className={styles.emptyTitle}>Poucos perfis por aqui</p>
+              <p className={styles.emptySupport}>
+                Seus filtros estão bem estreitos: até {filters.distanceKm} km e {filters.minAge}–
+                {filters.maxAge} anos. Ampliar a distância ou a faixa de idade traz mais gente.
+              </p>
+              <button type="button" className={styles.primaryButton} onClick={onOpenFilters}>
+                Ajustar filtros
+              </button>
+            </>
+          )}
         </div>
       ) : (
         <div className={styles.emptyWrap}>
