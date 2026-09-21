@@ -208,3 +208,12 @@
   flex-direction: column;
   gap: 16px;
 }
+
+/* Aviso embaixo do campo de cidade. Fica sempre à vista enquanto a cidade não
+   for uma da lista: o botão Concluído continua clicável de propósito, para o
+   botão apagado não ser a única pista de que falta algo. */
+.fieldNote {
+  margin: 0;
+  font: 500 13px/1.4 var(--font-ui);
+  color: #8a1c15;
+}

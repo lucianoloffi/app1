@@ -1,8 +1,9 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
+import { CityPicker } from "../../components/CityPicker";
+import { cidadeValida } from "../constants";
 import { PillChipRow } from "../../components/PillChip";
 import { sugerirCidadePelaLocalizacao, suportaLocalizacao } from "../../lib/geo";
 import type { FilterGender, Gender } from "../../types";
-import { CITY_OPTIONS } from "../constants";
 import { OnboardingLayout } from "../OnboardingLayout";
 import fieldStyles from "../fields.module.css";
 import styles from "./GenderInterestCityScreen.module.css";
@@ -58,7 +59,6 @@ export function GenderInterestCityScreen({
   onBack,
   onNext,
 }: GenderInterestCityScreenProps) {
-  const [suggestionsOpen, setSuggestionsOpen] = useState(false);
   const [busca, setBusca] = useState<BuscaDeCidade>("inicial");
 
   async function usarMinhaLocalizacao() {
@@ -66,7 +66,6 @@ export function GenderInterestCityScreen({
     const { estado, cidade } = await sugerirCidadePelaLocalizacao();
     if (cidade) {
       onChangeCity(cidade.nome);
-      setSuggestionsOpen(false);
       setBusca("ok");
       return;
     }
@@ -75,13 +74,7 @@ export function GenderInterestCityScreen({
 
   // A cidade é uma lista fechada: ela alimenta o fallback de localização
   // (centro do município) quando a pessoa não libera o GPS.
-  const suggestions = useMemo(() => {
-    const query = city.trim().toLowerCase();
-    if (!query || CITY_OPTIONS.includes(city)) return CITY_OPTIONS.slice(0, 4);
-    return CITY_OPTIONS.filter((option) => option.toLowerCase().includes(query)).slice(0, 4);
-  }, [city]);
-
-  const cidadeEscolhida = CITY_OPTIONS.includes(city);
+  const cidadeEscolhida = cidadeValida(city);
   const isValid = Boolean(gender) && Boolean(interestedIn) && cidadeEscolhida;
 
   return (
@@ -135,40 +128,16 @@ export function GenderInterestCityScreen({
           </button>
         )}
 
-        <input
-          className={fieldStyles.input}
-          type="text"
-          placeholder="Escolha sua cidade"
+        <CityPicker
           value={city}
-          onChange={(e) => {
-            onChangeCity(e.target.value);
-            setSuggestionsOpen(true);
-          }}
-          onFocus={() => setSuggestionsOpen(true)}
-          onBlur={() => window.setTimeout(() => setSuggestionsOpen(false), 120)}
+          onChange={onChangeCity}
+          inputClassName={fieldStyles.input}
+          placeholder="Escolha sua cidade"
         />
         {!cidadeEscolhida && city.trim().length > 0 ? (
           <p className={fieldStyles.note}>Escolha uma das cidades da lista.</p>
         ) : (
           <p className={fieldStyles.note}>{NOTA_DA_BUSCA[busca]}</p>
-        )}
-        {suggestionsOpen && suggestions.length > 0 && (
-          <div className={styles.suggestions}>
-            {suggestions.map((option) => (
-              <button
-                key={option}
-                type="button"
-                className={styles.suggestionItem}
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={() => {
-                  onChangeCity(option);
-                  setSuggestionsOpen(false);
-                }}
-              >
-                {option}
-              </button>
-            ))}
-          </div>
         )}
       </div>
     </OnboardingLayout>

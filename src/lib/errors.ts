@@ -1,7 +1,7 @@
 /** Mensagens de erro em português, a partir do que o Supabase devolve. */
 
 /** Campo do formulário a que um erro se refere, quando dá para saber. */
-export type CampoDeErro = "email" | "senha" | "telefone";
+export type CampoDeErro = "email" | "senha" | "telefone" | "cidade";
 
 export interface ErroNoFormulario {
   texto: string;
@@ -31,6 +31,14 @@ const MENSAGENS: { teste: RegExp; texto: string; campo?: CampoDeErro }[] = [
   { teste: /rate limit|too many requests/i, texto: "Muitas tentativas. Aguarde um minuto." },
   { teste: /file size|payload too large/i, texto: "A imagem é grande demais. Escolha outra." },
   { teste: /mime type|not supported/i, texto: "Formato não suportado. Use JPG, PNG ou WEBP." },
+
+  // Erros que o Postgres devolve em inglês e em jargão. Sem estas linhas eles
+  // apareciam crus na tela: apagar a cidade e salvar o perfil mostrava
+  // "violates foreign key constraint profiles_cidade_fkey" para quem usa o app.
+  { teste: /profiles_cidade_fkey/i, texto: "Escolha uma das cidades da lista.", campo: "cidade" },
+  { teste: /duplicate key|unique constraint/i, texto: "Esse valor já está em uso." },
+  { teste: /violates row-level security|permission denied/i, texto: "Você não tem permissão para fazer isso." },
+  { teste: /violates .*constraint|invalid input|not-null/i, texto: "Algum campo está com um valor que não dá para salvar. Confira e tente de novo." },
 ];
 
 /** Traduz o erro e diz de que campo ele veio, quando dá para saber. */

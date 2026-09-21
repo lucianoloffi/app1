@@ -18,6 +18,8 @@ import type { Gender, Lifestyle, MyProfile, RelationshipStatus } from "../types"
 import { heightLabel } from "../types";
 import { PhotosManageScreen } from "./PhotosManageScreen";
 import styles from "./EditProfileScreen.module.css";
+import { CityPicker } from "../components/CityPicker";
+import { cidadeValida } from "../onboarding/constants";
 
 const GENDER_OPTIONS: { value: Gender; label: string }[] = [
   { value: "homem", label: "Homem" },
@@ -86,7 +88,13 @@ export function EditProfileScreen({ profile, onCancel, onSave, onShowToast }: Ed
     MAX_PROFILE_PHOTOS,
   );
 
+  const podeSalvar = cidadeValida(city);
+
   function handleSave() {
+    if (!podeSalvar) {
+      onShowToast("Escolha uma das cidades da lista antes de salvar.");
+      return;
+    }
     onSave({
       name,
       city,
@@ -162,7 +170,17 @@ export function EditProfileScreen({ profile, onCancel, onSave, onShowToast }: Ed
 
         <div className={styles.fieldGroup}>
           <span className={styles.label}>Localidade</span>
-          <input className={styles.input} value={city} onChange={(e) => setCity(e.target.value)} />
+          <CityPicker
+            value={city}
+            onChange={setCity}
+            inputClassName={styles.input}
+            placeholder="Escolha sua cidade"
+          />
+          {!cidadeValida(city) && (
+            <p className={styles.fieldNote} role="alert">
+              Escolha uma das cidades da lista.
+            </p>
+          )}
         </div>
 
         <div className={styles.fieldRow}>

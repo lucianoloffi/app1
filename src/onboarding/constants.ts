@@ -33,6 +33,15 @@ export const CITY_OPTIONS = [
   "Araquari, SC",
 ];
 
+/**
+ * A cidade precisa ser uma da lista: `profiles.cidade` é chave estrangeira de
+ * `cities`, e é de lá que sai o centro do município usado quando a pessoa não
+ * libera o GPS. Valor fora da lista o banco recusa.
+ */
+export function cidadeValida(valor: string): boolean {
+  return CITY_OPTIONS.includes(valor);
+}
+
 export const INTEREST_OPTIONS = [
   "Praia",
   "Corrida",
