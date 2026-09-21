@@ -167,14 +167,13 @@
   gap: 8px;
 }
 
-.emptyFilterIcon {
-  width: 96px;
-  height: 96px;
-  border-radius: var(--radius-pill);
-  background: var(--color-accent-soft);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+/* Ilustração do estado vazio. A arte já vem com o fundo branco da tela, então
+   não precisa de recorte nem de transparência — encostar uma na outra basta. */
+.emptyArt {
+  width: 100%;
+  max-width: 260px;
+  height: auto;
+  display: block;
 }
 
 .cardMenuButton {

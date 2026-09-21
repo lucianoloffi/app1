@@ -4,6 +4,7 @@ import { CloseIcon, HeartIcon } from "../components/icons/ActionIcons";
 import { ReportSheet } from "../components/ReportSheet";
 import { INTENTION_LABEL, type Filters, type Profile, type SwipeDirection } from "../types";
 import styles from "./DiscoverScreen.module.css";
+import semPerfis from "../assets/sem-perfis.jpg";
 
 interface DiscoverScreenProps {
   current: Profile | null;
@@ -287,16 +288,7 @@ export function DiscoverScreen({
         </div>
       ) : emptyByFilter ? (
         <div className={styles.emptyWrap}>
-          <div className={styles.emptyFilterIcon}>
-            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path
-                d="M4 6h16M7 12h10M10 18h4"
-                stroke="#8B5CF6"
-                strokeWidth={2.4}
-                strokeLinecap="round"
-              />
-            </svg>
-          </div>
+          <img className={styles.emptyArt} src={semPerfis} alt="" aria-hidden="true" />
           <p className={styles.emptyTitle}>Poucos perfis por aqui</p>
           <p className={styles.emptySupport}>
             Seus filtros estão bem estreitos: até {filters.distanceKm} km e {filters.minAge}–

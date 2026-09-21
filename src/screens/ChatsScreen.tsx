@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { Chat } from "../types";
 import styles from "./ChatsScreen.module.css";
+import semConversas from "../assets/sem-conversas.jpg";
 
 interface ChatsScreenProps {
   chats: Chat[];
@@ -163,6 +164,7 @@ export function ChatsScreen({ chats, onOpenChat }: ChatsScreenProps) {
             </>
           ) : (
             <>
+              <img className={styles.emptyArt} src={semConversas} alt="" aria-hidden="true" />
               <p className={styles.emptyTitle}>Nenhuma conversa ainda</p>
               <p className={styles.emptySupport}>
                 Curta perfis na aba Descobrir. Quando houver match, a conversa aparece aqui.

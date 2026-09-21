@@ -251,6 +251,17 @@
   text-align: center;
 }
 
+/* Ilustração do estado vazio. Mesma ideia da tela Descobrir: a arte já vem com
+   o fundo branco da tela. A margem existe porque o gap do emptyWrap (8px) é
+   apertado demais entre o desenho e o texto. */
+.emptyArt {
+  width: 100%;
+  max-width: 220px;
+  height: auto;
+  display: block;
+  margin-bottom: 12px;
+}
+
 .emptyTitle {
   margin: 0;
   font: 700 16px var(--font-ui);
