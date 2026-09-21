@@ -29,6 +29,13 @@ export async function listarMensagens(matchId: string): Promise<ChatMessage[]> {
   }));
 }
 
+/**
+ * Tamanho máximo de uma mensagem. O banco recusa acima disso (constraint
+ * mensagem_tamanho, migration 0011); o campo do chat para de aceitar texto no
+ * mesmo ponto, em vez de a pessoa digitar e só descobrir ao enviar.
+ */
+export const TAMANHO_MAXIMO_MENSAGEM = 2000;
+
 export async function enviarMensagem(matchId: string, texto: string): Promise<ChatMessage> {
   const { data: sessao } = await supabase.auth.getUser();
   const meuId = sessao.user?.id;

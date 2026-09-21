@@ -156,9 +156,14 @@
   max-width: 78%;
 }
 
+/* pre-wrap: a quebra de linha digitada aparece no balão (sem isso, as linhas
+   se juntavam numa só). overflow-wrap: palavra muito comprida, como um link,
+   quebra em vez de vazar para fora do balão. */
 .bubble {
   padding: 13px 16px;
   font: 400 15px/1.45 var(--font-ui);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
   background: #fff;
   border-radius: 18px 18px 18px 4px;
 }
@@ -212,19 +217,30 @@
   cursor: pointer;
 }
 
+/* flex-end: quando o campo cresce, o botão de enviar fica embaixo, na altura
+   da última linha, como no WhatsApp. */
 .inputRow {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   gap: 12px;
 }
 
+/* Uma linha: 20px de texto + 14px em cima e embaixo = 48px, a altura do botão
+   de enviar. Quatro linhas: 4 × 20 + 28 = 108px, o teto (acima disso, rola).
+   Raio de 24px, e não pill: com uma linha dá no mesmo, e com várias o campo
+   continua um retângulo arredondado em vez de virar uma cápsula. */
 .input {
   flex: 1;
+  min-width: 0;
+  box-sizing: border-box;
+  max-height: 108px;
+  overflow-y: auto;
+  resize: none;
   background: var(--color-bg);
   border: 0;
-  border-radius: var(--radius-pill);
+  border-radius: 24px;
   padding: 14px 18px;
-  font: 400 15px var(--font-ui);
+  font: 400 15px/20px var(--font-ui);
   color: var(--color-ink);
   outline: none;
 }

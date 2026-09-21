@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { icebreakersFor } from "../chats/icebreakers";
 import { ReportSheet } from "../components/ReportSheet";
+import { TAMANHO_MAXIMO_MENSAGEM } from "../lib/api/messages";
 import type { Chat, Profile } from "../types";
 import styles from "./ChatScreen.module.css";
 
@@ -41,6 +42,19 @@ export function ChatScreen({
   const [menuOpen, setMenuOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
   const bodyRef = useRef<HTMLDivElement>(null);
+  const campoRef = useRef<HTMLTextAreaElement>(null);
+
+  // O campo cresce com o texto até 4 linhas, como no WhatsApp; dali em diante
+  // rola por dentro. Antes era um input de uma linha só: texto maior sumia
+  // para a esquerda e não dava para reler o que se estava escrevendo.
+  useLayoutEffect(() => {
+    const campo = campoRef.current;
+    if (!campo) return;
+    campo.style.height = "auto";
+    // O teto de 4 linhas é o max-height do CSS: altura maior que ele é cortada
+    // lá, e o resto rola dentro do campo.
+    campo.style.height = `${campo.scrollHeight}px`;
+  }, [draft]);
 
   useEffect(() => {
     bodyRef.current?.scrollTo({ top: bodyRef.current.scrollHeight });
@@ -263,14 +277,22 @@ export function ChatScreen({
           )}
 
           <div className={styles.inputRow}>
-            <input
+            <textarea
+              ref={campoRef}
               className={styles.input}
-              type="text"
+              rows={1}
+              maxLength={TAMANHO_MAXIMO_MENSAGEM}
               placeholder="Escreva sua mensagem aqui"
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === "Enter") handleSend(draft);
+                // Enter envia, como antes; Shift+Enter pula linha (no teclado
+                // físico, igual ao WhatsApp Web). isComposing: no meio de um
+                // acento ou de uma sugestão do teclado, Enter só confirma.
+                if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
+                  e.preventDefault();
+                  handleSend(draft);
+                }
               }}
             />
             <button
