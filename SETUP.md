@@ -20,7 +20,7 @@ No painel, **SQL Editor** → **New query**. Cole e execute **na ordem**, um arq
 6. `supabase/migrations/20260916_0006_fix_leitura_fotos.sql` — terceiros passam a ver as fotos aprovadas
 7. `supabase/migrations/20260916_0007_status_casado.sql` — "casado" entre os estados civis
 8. `supabase/migrations/20260917_0008_intencao_filtro_multipla.sql` — intenção do filtro vira múltipla escolha
-9. `supabase/migrations/20260917_0009_onboarding_minimo_opcional.sql` — fotos e interesses opcionais no cadastro
+9. `supabase/migrations/20260917_0009_onboarding_minimo_opcional.sql` — cadastro passa a exigir só 1 foto e nenhum interesse (antes eram 3 e 3)
 10. `supabase/migrations/20260920_0010_colunas_so_do_servidor.sql` — o app deixa de escrever colunas de status (verificação, moderação, denúncia, mensagens); a verificação passa a ser pedida pelo RPC `solicitar_verificacao`
 
 > Sempre que chegar uma migration nova, rode a que falta — pela data no nome dá
@@ -221,13 +221,13 @@ fora de teste.
 
 ## 9. O que já foi testado
 
-As cinco migrations foram aplicadas em um PostgreSQL 16 local (com stubs no
-lugar do PostGIS e do schema `auth`) antes da entrega. Confirmado:
+As migrations 0001 a 0005 foram aplicadas em um PostgreSQL 16 local (com stubs
+no lugar do PostGIS e do schema `auth`) antes da entrega. Confirmado:
 
 - os três registros (perfil, preferências, ajustes) nascem junto com o usuário
 - o gate de 18 anos e a imutabilidade da data de nascimento barram o update
-- "cadastro completo" só passa com nome, nascimento, gênero, cidade, intenção,
-  3 interesses e 3 fotos
+- "cadastro completo" só passa com nome, nascimento, gênero, cidade, intenção e
+  ao menos 1 foto (até a migration 0009 eram 3 interesses e 3 fotos)
 - curtida unilateral não cria match; curtida mútua cria com `user_a < user_b`
 - bloquear desativa o match
 - desfazer match apaga os dois swipes e o perfil volta para a fila
@@ -239,3 +239,10 @@ lugar do PostGIS e do schema `auth`) antes da entrega. Confirmado:
   swipe ou preferência de outra pessoa
 - não dá para escrever em conversa finalizada nem em match desfeito
 - a exportação de dados traz o perfil e não traz a coordenada
+
+A migration 0010 foi testada em um PostgreSQL 16 com PostGIS local, com os papéis
+do Supabase (`anon`, `authenticated`, `service_role`) simulados. Treze tentativas de
+uma pessoa logada escrever colunas que são do servidor (status de verificação,
+moderação e denúncia, texto e remetente de mensagem recebida, data de
+consentimento) passavam antes e são recusadas depois; as operações que o app faz
+seguem funcionando e o `service_role` continua com acesso total.

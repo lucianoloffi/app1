@@ -104,12 +104,22 @@ Nunca deixe o botão desabilitado ser a única pista de que algo está errado.
 
 ## Deploy
 
-GitHub Pages, **manual**: `workflow_dispatch` do `deploy-pages.yml` a partir da
-branch `fase1-supabase`. O gatilho `on.push` do workflow ainda aponta para a branch
-antiga `claude/stoic-faraday-twwgpu`, então push nenhum publica sozinho — corrigir
-isso está nas pendências.
+GitHub Pages pelo `deploy-pages.yml`. Push na `fase1-supabase` publica sozinho,
+exceto quando só mudam `supabase/**` ou arquivos `.md` (não há bundle novo). Também
+dá para rodar à mão: Actions → Deploy to GitHub Pages → Run workflow.
 
-Branch principal: **`fase1-supabase`**.
+As migrations continuam **manuais** (SQL Editor do Supabase): o push não as aplica.
+Quando cliente e migration dependem um do outro, o push publica o cliente em cerca de
+um minuto. Se a migration só adiciona (coluna, função), aplique-a **antes** do push. Se
+ela tira permissão ou algo que o cliente antigo usa (como a `0010`), aplique-a logo
+**depois** do deploy e saiba que o fluxo afetado falha nessa janela curta.
+
+O workflow fixa `ubuntu-24.04` (o `ubuntu-latest` passa a ser o Ubuntu 26 em
+19/10/2026) e Node 22 (o 20 saiu de suporte em 30/04/2026). Migrar para o Ubuntu 26
+é uma decisão a testar, não algo a deixar o calendário decidir.
+
+Branch principal: **`fase1-supabase`**, também a branch padrão no GitHub (o botão
+Run workflow só aparece quando o workflow existe na branch padrão).
 
 As variáveis `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY` viram texto no bundle no
 momento do build; ficam em Settings → Secrets and variables → Actions. Isso é o
@@ -137,24 +147,23 @@ Em ordem de importância:
    revisada e fechada na migration `0010` (reproduzida e testada num Postgres local).
    Falta o resto: funções `security definer` (`search_path`, validações), policies do
    storage e as de leitura. Alvo: `supabase/migrations/*_rls.sql` e as funções.
-3. **Atualizar o `README.md`**, que está desatualizado (cita `src/data/mockProfiles.ts`,
-   que não existe mais, e descreve o projeto como protótipo com fotos do
-   `i.pravatar.cc`).
-4. **Corrigir o gatilho do `deploy-pages.yml`** para `fase1-supabase`.
-5. **iOS via Capacitor.** Depois do empacotamento vêm: plugins nativos (Preferences,
+3. **iOS via Capacitor.** Depois do empacotamento vêm: plugins nativos (Preferences,
    Geolocation, Camera) com as strings de permissão no `Info.plist`, deep link para a
    confirmação de e-mail (hoje o `redirectTo` usa `window.location.origin`), push via
    APNs, e as exigências da App Store para app de namoro (18+, moderação com resposta
    em 24h, exclusão de conta no app — essa já existe).
-6. **Limpar branches já mescladas** no repositório.
+4. **Limpar branches já mescladas** no repositório (as `claude/*`).
 
 ## Pontos de atenção
 
 - **Sem testes automatizados.** Em um app com RLS, matches e exclusão de conta, isso
   é frágil. Nada impede uma regra de validação de voltar a ficar silenciosa.
-- **`LEGAL_UPDATED_AT` em `src/legal/versions.ts` está com data futura** (2026-09-25).
-  Confirmar se é entrada em vigor programada ou engano — o valor aparece para o
-  usuário.
+- **Data dos documentos legais: 25/09/2026, mas eles foram escritos em 15/09.** A data
+  entrou no commit "Adicionar documentos legais (LGPD) v1.0" (15/09) sem explicação,
+  e os três `.md` dizem "Última atualização: 25 de setembro de 2026" — o que só faz
+  sentido se for uma data de publicação programada. `LEGAL_UPDATED_AT` não é lida por
+  nenhum código; o que o usuário vê é o texto dos `.md`, e o consentimento registra
+  só a `versao` ("1.0"). Decidir a data antes de abrir ao público.
 - **Validação no cliente é UX, não segurança.** O mínimo de senha real é o do Supabase
   Auth; o cliente só antecipa a mensagem.
 - **Dado sensível.** Interesse (indica orientação sexual), cidade, fotos e telefone
