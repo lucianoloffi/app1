@@ -53,20 +53,21 @@ export async function listarBloqueados(): Promise<PerfilBloqueado[]> {
   }));
 }
 
+/**
+ * Abre a denúncia pelo RPC, e não escrevendo em `reports`: é o servidor que
+ * copia a conversa para dentro da denúncia, no mesmo instante (migration
+ * 0015). Antes a prova sumia — desfazer o match apaga as mensagens em cascata,
+ * e quem assediou podia apagar a conversa depois de ser denunciado.
+ */
 export async function denunciar(
   userId: string,
   motivo: string,
   descricao?: string,
 ): Promise<void> {
-  const { data: sessao } = await supabase.auth.getUser();
-  const meuId = sessao.user?.id;
-  if (!meuId) throw new ErroDeApp("Sua sessão expirou. Entre de novo.");
-
-  const { error } = await supabase.from("reports").insert({
-    denunciante_id: meuId,
-    denunciado_id: userId,
-    motivo,
-    descricao: descricao ?? null,
+  const { error } = await supabase.rpc("denunciar", {
+    p_denunciado: userId,
+    p_motivo: motivo,
+    p_descricao: descricao ?? null,
   });
   lancaSeErro(error);
 }

@@ -97,6 +97,12 @@ export interface OnboardingState {
 
 export type VerificationStatus = "nao_solicitada" | "pendente" | "aprovada" | "rejeitada";
 
+/**
+ * Decisão da moderação sobre a conta. Não confundir com `visible`, que é a
+ * escolha da própria pessoa de aparecer ou não na fila.
+ */
+export type ModerationStatus = "ativo" | "suspenso" | "banido";
+
 export interface MyProfile {
   name: string;
   city: string;
@@ -116,6 +122,9 @@ export interface MyProfile {
   visible?: boolean;
   showDistance?: boolean;
   verificationStatus?: VerificationStatus;
+  moderationStatus?: ModerationStatus;
+  /** Fim da suspensão, em ISO. null quando não há prazo (ou não há suspensão). */
+  suspendedUntil?: string | null;
   approximateLocation?: boolean;
 }
 

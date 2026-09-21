@@ -1,7 +1,7 @@
 # Diretrizes de Comunidade — Lovi
 
 **Última atualização:** 25 de setembro de 2026
-**Versão:** 1.0
+**Versão:** 1.1
 
 O Lovi existe para as pessoas se conhecerem com respeito e segurança. Estas
 diretrizes valem para perfis, fotos e conversas. Quem não as segue perde o
@@ -68,6 +68,10 @@ Todo perfil e toda conversa têm a opção de **denunciar** e **bloquear**.
 Analisamos todas as denúncias. Denúncias graves são tratadas com prioridade, e
 podemos remover conteúdo ou suspender contas durante a análise.
 
+Ao denunciar, guardamos junto uma cópia da conversa entre vocês dois, para que
+a prova não desapareça se a conversa for apagada depois. Só a moderação vê essa
+cópia. Está explicado na Política de Privacidade.
+
 Denunciar é anônimo: a pessoa denunciada não sabe quem a denunciou.
 
 ---
@@ -89,6 +93,11 @@ possível para colaborar dentro da lei.
 Dependendo da gravidade, podemos: remover conteúdo, ocultar seu perfil,
 suspender temporariamente ou banir a conta em definitivo. Contas banidas não
 podem ser recriadas.
+
+Se sua conta for suspensa ou encerrada, você é avisado ao abrir o app, com a
+data em que a suspensão termina. Achou que houve engano? Escreva para
+lucianoloffi@gmail.com contando o que aconteceu — toda decisão pode ser
+revista.
 
 ---
 

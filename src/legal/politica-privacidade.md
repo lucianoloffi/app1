@@ -1,7 +1,7 @@
 # Política de Privacidade — Lovi
 
 **Última atualização:** 25 de setembro de 2026
-**Versão:** 1.0
+**Versão:** 1.1
 
 Esta política explica quais dados o Lovi coleta, por que coleta e o que você
 pode fazer a respeito. Ela segue a Lei Geral de Proteção de Dados (Lei
@@ -74,6 +74,7 @@ já que sem esses dados o serviço não funciona.
 | Fotos | Compor seu perfil | Consentimento específico |
 | Mensagens | Permitir conversas entre matches | Execução de contrato |
 | Denúncias e bloqueios | Segurança da comunidade e moderação | Legítimo interesse |
+| Cópia da conversa anexada a uma denúncia | Analisar a denúncia e proteger quem foi alvo | Legítimo interesse |
 | Dados técnicos e logs | Segurança, prevenção a fraude e correção de erros | Legítimo interesse |
 
 ---
@@ -94,6 +95,34 @@ Outros usuários **nunca** veem:
 - Suas preferências de busca
 - Quem você curtiu ou descurtiu
 - Quem você bloqueou ou denunciou
+
+---
+
+## 6.1. O que a moderação vê
+
+Quando alguém denuncia um perfil, nossa equipe de moderação precisa ver o
+suficiente para decidir. Nessa análise, e **somente** nela, temos acesso a:
+
+- O perfil denunciado por inteiro, incluindo **todas as fotos**, mesmo as que
+  estão ocultas ou já foram reprovadas
+- O motivo e a descrição escritos por quem denunciou
+- Uma **cópia das mensagens trocadas entre as duas pessoas**, feita no momento
+  em que a denúncia é aberta
+
+Essa cópia existe porque a prova costuma sumir: desfazer o match apaga a
+conversa, e quem cometeu o abuso podia apagá-la depois de ser denunciado. A
+cópia fica presa à denúncia e **não muda** se a conversa for apagada em
+seguida.
+
+A moderação **não** vê seu telefone, seu e-mail, suas coordenadas, suas
+preferências de busca nem conversas suas com outras pessoas — só a conversa
+que faz parte daquela denúncia.
+
+Quem denuncia continua anônimo: a pessoa denunciada nunca sabe quem a
+denunciou.
+
+Se a decisão for suspender ou encerrar sua conta, você é avisado dentro do
+app e pode contestar pelo e-mail de contato desta política.
 
 ---
 
@@ -123,8 +152,14 @@ proteção de dados, conforme o art. 33 da LGPD.
 - **Após a exclusão da conta:** os dados de perfil, fotos, curtidas e mensagens
   são apagados em até 30 dias
 - **Exceções:** registros de acesso são mantidos por 6 meses (art. 15 do Marco
-  Civil da Internet), e denúncias e registros de banimento são mantidos pelo
-  tempo necessário à segurança da comunidade
+  Civil da Internet), e denúncias, cópias de conversa anexadas a elas e
+  registros de suspensão e banimento são mantidos pelo tempo necessário à
+  segurança da comunidade
+- **Denúncia contra você:** a denúncia e a cópia da conversa **continuam
+  guardadas mesmo se você excluir sua conta**. Sem isso, apagar a conta seria o
+  caminho para sumir com a prova de um abuso. O que fica é o texto das
+  mensagens daquela conversa, o motivo da denúncia e o nome que estava no
+  perfil — nada mais do seu cadastro
 
 ---
 

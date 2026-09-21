@@ -7,6 +7,7 @@ import { useToast } from "./hooks/useToast";
 import { esquecerAtividadeRegistrada, registrarAtividade } from "./lib/api/atividade";
 import { aoMudarSessao, sair } from "./lib/api/auth";
 import { erroDeConfiguracao } from "./lib/supabaseClient";
+import { situacaoDeModeracao } from "./lib/moderacao";
 import { carregarPerfilDoMatch } from "./lib/api/matches";
 import { tempoRelativo } from "./chats/tempo";
 import {
@@ -39,6 +40,7 @@ import { FiltersScreen } from "./screens/FiltersScreen";
 import { LegalScreen, type DocumentoLegal } from "./screens/LegalScreen";
 import { LocationBlockedScreen } from "./screens/LocationBlockedScreen";
 import { MatchOverlay } from "./screens/MatchOverlay";
+import { ModerationBlockedScreen } from "./screens/ModerationBlockedScreen";
 import {
   PermissionsScreen,
   type PermissionKey,
@@ -107,9 +109,15 @@ export default function App() {
 
   const { message: toastMessage, showToast } = useToast();
 
-  const chats = useChats({ ativo: stage === "main", onError: showToast });
+  /** Suspensão ou banimento em vigor; null = conta livre. */
+  const sancao = situacaoDeModeracao(myProfile);
+  // Com a conta bloqueada não vale carregar fila nem conversas: a tela por cima
+  // é o aviso, e o banco recusaria curtir e escrever de qualquer jeito.
+  const appLiberado = stage === "main" && !sancao;
+
+  const chats = useChats({ ativo: appLiberado, onError: showToast });
   const discover = useDiscoverQueue({
-    ativo: stage === "main",
+    ativo: appLiberado,
     versaoDosFiltros,
     onMatch: () => void chats.recarregar(),
     onLikeWithoutMatch: (profile) =>
@@ -151,7 +159,7 @@ export default function App() {
 
   // Localização na abertura: só com a permissão já concedida, nunca em background.
   useEffect(() => {
-    if (stage !== "main") return;
+    if (!appLiberado) return;
     void (async () => {
       const resultado = await atualizarLocalizacaoNaAbertura();
       setPermissaoLocal(resultado.estado);
@@ -168,25 +176,26 @@ export default function App() {
     })();
     // A checagem roda uma vez por entrada no app.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [stage]);
+  }, [appLiberado]);
 
   useEffect(() => {
-    if (stage !== "main") return;
+    if (!appLiberado) return;
     void carregarAjustes().then(setAjustes);
-  }, [stage]);
+  }, [appLiberado]);
 
   // Conta como uso ao entrar no app e ao voltar para ele (trocar de aba ou de
   // aplicativo e voltar). Quem deixa o app aberto de um dia para o outro
-  // também conta no dia seguinte, na próxima vez que olhar a tela.
+  // também conta no dia seguinte, na próxima vez que olhar a tela. Quem está
+  // suspenso ou banido não conta: só vê o aviso, não usa o app.
   useEffect(() => {
-    if (stage !== "main") return;
+    if (!appLiberado) return;
     void registrarAtividade();
     const aoVoltar = () => {
       if (document.visibilityState === "visible") void registrarAtividade();
     };
     document.addEventListener("visibilitychange", aoVoltar);
     return () => document.removeEventListener("visibilitychange", aoVoltar);
-  }, [stage]);
+  }, [appLiberado]);
 
   async function abrirBloqueados() {
     setBlockedOpen(true);
@@ -351,6 +360,19 @@ export default function App() {
           onOpenLegal={setDocumentoLegal}
           passoInicial={passoDoCadastro ?? undefined}
           onComplete={() => void carregarSessao()}
+        />
+      );
+    }
+
+    // Antes de qualquer outra tela: quem está suspenso ou banido não é levado a
+    // liberar a localização nem a completar nada — o app não vai destravar.
+    if (sancao) {
+      return (
+        <ModerationBlockedScreen
+          situacao={sancao}
+          onOpenGuidelines={() => setDocumentoLegal("diretrizes")}
+          onRecheck={() => carregarSessao()}
+          onLogout={() => void logout()}
         />
       );
     }

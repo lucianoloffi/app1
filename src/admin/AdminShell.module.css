@@ -1,0 +1,94 @@
+.tela {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.topo {
+  height: 76px;
+  flex: none;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-line);
+  padding: 0 40px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.marca {
+  font: 900 28px var(--font-display);
+  color: var(--color-accent);
+}
+
+.marcaAdmin {
+  font: 700 12px var(--font-ui);
+  color: var(--color-ink-60);
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+}
+
+.abas {
+  display: flex;
+  gap: 6px;
+  margin-left: 16px;
+}
+
+.aba {
+  height: 44px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: none;
+  color: var(--color-ink-60);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font: 600 15px var(--font-ui);
+  cursor: pointer;
+}
+
+.aba:hover {
+  background: var(--color-line-3);
+}
+
+.abaAtiva,
+.abaAtiva:hover {
+  background: var(--color-accent-soft);
+  color: var(--color-accent-2);
+  font-weight: 700;
+}
+
+/* Denúncias esperando decisão. Coral, e não roxo: é a cor que o app usa para
+   o que pede ação, e a aba ativa já é roxa. */
+.contador {
+  min-width: 22px;
+  height: 22px;
+  padding: 0 7px;
+  border-radius: var(--radius-pill);
+  background: var(--color-coral);
+  color: #fff;
+  font: 800 12px var(--font-ui);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.conta {
+  margin-left: auto;
+  font: 600 14px var(--font-ui);
+  color: var(--color-ink-60);
+}
+
+.sair {
+  height: 40px;
+  padding: 0 16px;
+  border: 1px solid var(--color-line-2);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  font: 600 14px var(--font-ui);
+  color: var(--color-ink);
+  cursor: pointer;
+}

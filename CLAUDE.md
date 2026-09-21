@@ -63,6 +63,27 @@ o `.gitignore` já cobre, mas não deixe sobrando.
   `contas_excluidas` (só a contagem por dia). Todas só do servidor: RLS sem policy e
   sem permissão para o app; gatilhos `security definer` escrevem. Excluir a conta apaga
   os registros da pessoa. "Dia" é o de São Paulo (`dia_local`).
+- **Moderação** (migrations `0013`→`0016`): `profiles.status_moderacao`
+  ('ativo','suspenso','banido') + `suspensao_termina_em`, escritos só pelo RPC
+  `moderar` (que confere `is_admin()`). A suspensão **vence sozinha**: a função
+  `sob_sancao(status, termina_em)` trata prazo vencido como conta ativa, então
+  não há nada a rodar no vencimento. A sanção morde em três lugares no banco —
+  `fila_descobrir` (some da fila dos outros e não recebe fila), `registrar_swipe`
+  e a policy `messages_envia` — porque a tela do app é aviso, não tranca.
+  A denúncia entra pelo RPC `denunciar`, que copia as 200 últimas mensagens da
+  conversa para `report_mensagens` no mesmo instante: desfazer o match apaga as
+  mensagens, e quem assediou sumia com a prova. `reports.denunciado_id` virou
+  `on delete set null` (com `denunciado_nome` copiado), então excluir a conta
+  não apaga mais as denúncias contra a pessoa. Toda decisão fica em
+  `admin_actions`. Sem service role e sem Edge Function: nada sai do Postgres.
+  No app, `src/lib/moderacao.ts` lê o próprio status do perfil e `App.tsx` mostra a
+  `ModerationBlockedScreen` antes de qualquer outra tela — e desliga a fila, as
+  conversas, a localização e o registro de atividade: quem está bloqueado não conta
+  como usuário ativo nos números do painel.
+  **Não confundir** `profiles.status_moderacao` com `photos.status_moderacao`
+  ('pendente','aprovada','rejeitada'), com `profiles.verificacao_status` nem
+  com `profiles.visivel` — esta última é escolha da própria pessoa, e por isso
+  banir não mexe nela.
 - **`supabase/functions/`** — Edge Functions para o que a chave anon não pode fazer
   (ex.: `delete-account`, que apaga usuário do auth e arquivos do storage). O id do
   usuário vem sempre do JWT, nunca do corpo da requisição.
@@ -153,41 +174,33 @@ esperado (a chave anon é pública por design) — quem protege os dados é a RL
 
 Em ordem de importância:
 
-1. **Painel admin V0** (desenho aprovado: números — novos usuários, usuários ativos,
-   % de ativos com match, conversas iniciadas, gráfico de 30 dias, 5 cidades com mais
-   usuários com % de homens/mulheres/outros, seleção de período — e moderação numa
-   fila só, com Arquivar / Suspender 7 dias / Banir). Os registros já existem
-   (`0013`) e a tela de Números está pronta (`0014` e `src/admin/`). Falta a
-   Moderação: cópia da conversa na denúncia, fila única, ações e o aviso no app para
-   quem for suspenso ou banido. O painel completo (funil, retenção D7, ranking de 10
-   cidades, contas excluídas) vem depois.
-   **Moderação/admin.** Hoje `reports.status` e `verificacoes.status` são gravados e
-   nunca lidos: denúncia entra e fica parada. Plano decidido: app admin **separado**
-   do app do usuário (não uma rota escondida — o bundle público é lido por qualquer
-   um), papel de admin em `app_metadata` (nunca `user_metadata`, que o próprio
-   usuário edita), função SQL `is_admin()` + políticas RLS de admin, ações
-   destrutivas via Edge Function com service role (**nunca** service role no
-   navegador), coluna `profiles.status_moderacao` ('ativo','suspenso','banido')
-   separada do `visivel` atual (que é escolha do usuário e seria devolvida por ele),
-   `reports.analisado_por` + resolução, e tabela `admin_actions` para auditoria.
-   Cuidado com nomes: `photos.status_moderacao` ('pendente','aprovada','rejeitada',
-   default `'aprovada'`, e é ele que libera a foto para terceiros) e
-   `profiles.verificacao_status` já existem, com vocabulários diferentes do de
-   `profiles.status_moderacao`. Colunas de status novas já nascem protegidas pela
-   migration `0010`: o cliente não as escreve.
-2. **Guardar provas de assédio** (decidir junto com a moderação). Auditoria de 20/09:
-   `desfazer_match` apaga todas as mensagens da conversa (cascade do match), e excluir a
-   conta apaga as denúncias feitas contra a pessoa (`reports.denunciado_id` em cascade).
-   Quem assediou pode sumir com as provas. Pede decisão de produto e de LGPD: o que
-   reter, por quanto tempo e com que base legal (e entrar na política de privacidade).
-   O resto da auditoria de RLS foi feito e fechado nas migrations `0010` e `0011`.
-3. **iOS via Capacitor.** Depois do empacotamento vêm: plugins nativos (Preferences,
+1. **Moderação de fotos e de verificação no painel.** As duas entregas do painel
+   admin V0 estão no ar: Números (`0014`) e Moderação de denúncias (`0015`/`0016`).
+   O que sobrou de moderação ainda é feito à mão no Table Editor:
+   `photos.status_moderacao` (rejeitar uma foto) e `verificacoes.status` +
+   `profiles.verificacao_status` (aprovar o selo de verificado). Nenhum dos dois tem
+   tela. A fila de verificação é a mais urgente das duas: hoje quem pede o selo fica
+   em 'pendente' para sempre, e a selfie no bucket `verificacoes` não é vista por
+   ninguém. Quando for feita, reaproveitar o desenho da fila de denúncias
+   (`painel_moderacao` + `moderar` + `admin_actions`) e lembrar que a policy de
+   leitura do bucket `verificacoes` ainda **não** libera o admin — a de `fotos`
+   libera (`is_admin()` na `fotos_le`), a de verificação precisaria do mesmo.
+2. **Painel admin completo:** funil, retenção D7, ranking de 10 cidades e contas
+   excluídas. Os registros já existem desde a `0013`; falta só consultar e desenhar.
+3. **Provas de assédio: o que ainda falta.** A denúncia já guarda cópia da conversa
+   e sobrevive à exclusão da conta do denunciado (`0015`). O que continua em aberto:
+   `desfazer_match` apaga as mensagens de conversas que **nunca** foram denunciadas,
+   e a cópia pega só as 200 últimas mensagens. Também não há prazo de descarte
+   automático — a decisão de 21/09 foi guardar sem prazo fixo, enquanto houver conta
+   envolvida, e está escrita na política de privacidade (seção 8). Se um dia virar
+   prazo fixo, vai precisar de agendamento no banco (pg_cron), que hoje não existe.
+4. **iOS via Capacitor.** Depois do empacotamento vêm: plugins nativos (Preferences,
    Geolocation, Camera) com as strings de permissão no `Info.plist`, deep link para a
    confirmação de e-mail (hoje o `redirectTo` usa `window.location.origin`), push via
    APNs, e as exigências da App Store para app de namoro (18+, moderação com resposta
    em 24h, exclusão de conta no app — essa já existe).
-4. **Limpar branches já mescladas** no repositório (as `claude/*`).
-5. **Detalhes da auditoria que ficaram para depois:** a Edge Function `delete-account`
+5. **Limpar branches já mescladas** no repositório (as `claude/*`).
+6. **Detalhes da auditoria que ficaram para depois:** a Edge Function `delete-account`
    lista no máximo 100 arquivos por pasta (quem pediu muitas verificações deixa selfies
    para trás) e precisa de novo deploy quando for corrigida; `nome`, `bio`, `profissao`
    e interesses não têm limite de tamanho no banco (colocar junto com a nota do limite
@@ -207,6 +220,12 @@ Em ordem de importância:
   `LEGAL_UPDATED_AT` não é lida por nenhum código; o que o usuário vê é o texto dos
   `.md`, e o consentimento registra só a `versao`. Antes de lançar, os **textos** (não
   só a data) precisam de revisão jurídica: o app trata dado sensível sob a LGPD.
+- **Privacidade e diretrizes estão na versão 1.1** desde 21/09 (a moderação: cópia da
+  conversa na denúncia, o que o admin enxerga, e a denúncia que sobrevive à exclusão
+  da conta). **Não existe fluxo de reconsentimento**: quem aceitou antes tem `1.0`
+  gravado em `consents` e nunca vê o texto novo. Pré-lançamento isso passa; antes de
+  abrir ao público, decidir se é preciso pedir o aceite de novo — e aí a tela de
+  reconsentimento é trabalho novo.
 - **Validação no cliente é UX, não segurança.** O mínimo de senha real é o do Supabase
   Auth; o cliente só antecipa a mensagem.
 - **Dado sensível.** Interesse (indica orientação sexual), cidade, fotos e telefone

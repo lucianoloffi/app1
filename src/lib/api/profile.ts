@@ -87,6 +87,8 @@ export async function carregarMeuPerfil(): Promise<MeuPerfilCompleto | null> {
       visible: perfil.visivel,
       showDistance: perfil.mostrar_distancia,
       verificationStatus: perfil.verificacao_status,
+      moderationStatus: perfil.status_moderacao ?? "ativo",
+      suspendedUntil: perfil.suspensao_termina_em ?? null,
       approximateLocation: perfil.localizacao_aproximada,
     },
     filtros: {

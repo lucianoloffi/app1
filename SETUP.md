@@ -26,6 +26,14 @@ No painel, **SQL Editor** → **New query**. Cole e execute **na ordem**, um arq
 12. `supabase/migrations/20260921_0012_recuperar_telefone.sql` — devolve o telefone a quem o perdeu no fim do cadastro e tira dos avisos do Security Advisor as três funções de gatilho
 13. `supabase/migrations/20260921_0013_registros_para_o_painel.sql` — começa a registrar dias de uso, histórico de matches, marcos de cada pessoa e contas excluídas, para o painel admin
 14. `supabase/migrations/20260921_0014_painel_numeros.sql` — quem é administrador (`is_admin`) e a consulta da tela de Números do painel admin
+15. `supabase/migrations/20260921_0015_moderacao.sql` — suspender e banir contas, denúncia que guarda cópia da conversa e sobrevive à exclusão da conta, fila e ações da tela de Moderação
+16. `supabase/migrations/20260921_0016_denuncia_so_por_rpc.sql` — tira do app a escrita direta em `reports`; **aplique só depois** de o app novo estar no ar (veja a nota abaixo)
+
+> **Ordem da 15 e da 16.** A 15 só adiciona e pode ser aplicada a qualquer
+> momento — quanto antes, melhor. A 16 tira uma permissão que o app antigo usa
+> (gravar denúncia direto na tabela), então ela vai **depois** do deploy do app
+> novo. Entre as duas, os dois caminhos funcionam e nada quebra; o que uma
+> denúncia aberta pelo app antigo perde é a cópia da conversa.
 
 > Sempre que chegar uma migration nova, rode a que falta — pela data no nome dá
 > para saber onde você parou. Todas são seguras de rodar de novo.
@@ -209,14 +217,32 @@ principalmente para fotos de pessoas reais, suas ou do Pexels: nenhuma licença
 de banco de imagens cobre rosto de gente de verdade em perfil de app de namoro
 fora de teste.
 
-## 8. Moderação (manual, por enquanto)
+## 8. Moderação
 
+- **Denúncias**: na aba **Moderação** do painel admin (a partir da migration
+  0015). Cada denúncia chega com o perfil, as fotos e a cópia da conversa, e
+  tem três botões: Arquivar, Suspender 7 dias e Banir. Suspender ou banir
+  resolve de uma vez todas as denúncias abertas contra aquela pessoa. A aba
+  **Resolvidas** guarda o histórico e permite **Reativar conta** — banimento
+  não é porta de mão única.
 - **Fotos**: nascem com `status_moderacao = 'aprovada'`. Para tirar uma foto do
   ar, mude para `'rejeitada'` no Table Editor — ela some dos perfis na hora.
+  Ainda não tem tela no painel.
 - **Verificação de perfil**: a selfie fica no bucket privado `verificacoes`.
   Para aprovar, mude `verificacoes.status` e `profiles.verificacao_status`
-  para `'aprovada'`. O selo só aparece depois disso.
-- **Denúncias**: `reports`, com `status` `aberta` → `em_analise` → `resolvida`.
+  para `'aprovada'`. O selo só aparece depois disso. Também sem tela no painel.
+
+Três colunas de status com nomes parecidos, que não se misturam:
+
+| Coluna | Valores | Quem decide |
+|---|---|---|
+| `profiles.status_moderacao` | `ativo`, `suspenso`, `banido` | a moderação |
+| `profiles.verificacao_status` | `nao_solicitada`, `pendente`, `aprovada`, `rejeitada` | a moderação |
+| `photos.status_moderacao` | `pendente`, `aprovada`, `rejeitada` | a moderação |
+| `profiles.visivel` | `true` / `false` | **a própria pessoa**, nos Ajustes |
+
+Suspender ou banir não mexe em `visivel`: são coisas diferentes, e misturá-las
+devolveria o acesso a quem apenas voltasse a se tornar visível.
 
 > O Table Editor e o SQL Editor rodam com o papel administrativo do painel, que
 > a migration 0010 não limita — moderar por aqui continua funcionando. O que
@@ -283,3 +309,14 @@ update auth.users
 
 A marcação fica em `app_metadata`, que só o servidor altera — nunca em
 `user_metadata`, que o próprio usuário consegue mudar pela API.
+
+O painel tem duas abas:
+
+- **Números** — novos usuários, usuários ativos, % de ativos com match,
+  conversas iniciadas, gráfico dos últimos 30 dias e as 5 cidades com mais
+  usuários, por período (hoje, 7, 30 ou 90 dias).
+- **Moderação** — a fila de denúncias, com o número de pendentes na própria
+  aba. Veja a seção 8.
+
+Quem não estiver marcado como admin entra e vê "Sem acesso ao painel": as
+funções do banco recusam a consulta, esteja a tela aberta ou não.

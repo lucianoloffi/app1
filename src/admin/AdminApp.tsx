@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
-import { souAdmin } from "../lib/api/admin";
+import { contarDenunciasAbertas, souAdmin } from "../lib/api/admin";
 import { aoMudarSessao, sair, usuarioAtual } from "../lib/api/auth";
 import { mensagemDeErro } from "../lib/errors";
 import { erroDeConfiguracao } from "../lib/supabaseClient";
+import { AdminShell, type AbaDoPainel } from "./AdminShell";
 import { LoginScreen } from "./LoginScreen";
+import { ModerationScreen } from "./ModerationScreen";
 import { NumbersScreen } from "./NumbersScreen";
 import styles from "./AdminApp.module.css";
 
@@ -21,6 +23,9 @@ type Etapa =
  */
 export function AdminApp() {
   const [etapa, setEtapa] = useState<Etapa>({ tipo: "carregando" });
+  const [aba, setAba] = useState<AbaDoPainel>("numeros");
+  /** null = o número ainda não chegou; o aviso na aba só aparece com número. */
+  const [denunciasAbertas, setDenunciasAbertas] = useState<number | null>(null);
 
   const verificar = useCallback(async () => {
     try {
@@ -43,12 +48,25 @@ export function AdminApp() {
   // aba: é ele que dispara a checagem, sem uma chamada a mais ao montar.
   useEffect(() => aoMudarSessao(() => void verificar()), [verificar]);
 
+  // O aviso de denúncias esperando decisão precisa estar certo já na tela de
+  // Números — quem abre o painel tem de ver que há trabalho sem ir procurar.
+  useEffect(() => {
+    if (etapa.tipo !== "painel") return;
+    void contarDenunciasAbertas()
+      .then(setDenunciasAbertas)
+      .catch(() => {
+        /* o número é um aviso; a tela de Moderação mostra o erro de verdade */
+      });
+  }, [etapa.tipo]);
+
   async function aoSair() {
     try {
       await sair();
     } catch {
       /* saindo de qualquer forma */
     }
+    setDenunciasAbertas(null);
+    setAba("numeros");
     setEtapa({ tipo: "entrar" });
   }
 
@@ -79,7 +97,21 @@ export function AdminApp() {
       />
     );
   }
-  return <NumbersScreen email={etapa.email} onSair={() => void aoSair()} />;
+  return (
+    <AdminShell
+      aba={aba}
+      onTrocarAba={setAba}
+      email={etapa.email}
+      denunciasAbertas={denunciasAbertas}
+      onSair={() => void aoSair()}
+    >
+      {aba === "numeros" ? (
+        <NumbersScreen />
+      ) : (
+        <ModerationScreen onContagem={setDenunciasAbertas} />
+      )}
+    </AdminShell>
+  );
 }
 
 function Aviso({
