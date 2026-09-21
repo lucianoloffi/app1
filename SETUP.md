@@ -24,6 +24,7 @@ No painel, **SQL Editor** → **New query**. Cole e execute **na ordem**, um arq
 10. `supabase/migrations/20260920_0010_colunas_so_do_servidor.sql` — o app deixa de escrever colunas de status (verificação, moderação, denúncia, mensagens); a verificação passa a ser pedida pelo RPC `solicitar_verificacao`
 11. `supabase/migrations/20260921_0011_bloqueio_e_fotos.sql` — bloqueio não pode mais ser desfeito pelo bloqueado; fotos só abrem para quem pode ver o perfil; foto aprovada não troca de imagem
 12. `supabase/migrations/20260921_0012_recuperar_telefone.sql` — devolve o telefone a quem o perdeu no fim do cadastro e tira dos avisos do Security Advisor as três funções de gatilho
+13. `supabase/migrations/20260921_0013_registros_para_o_painel.sql` — começa a registrar dias de uso, histórico de matches, marcos de cada pessoa e contas excluídas, para o painel admin
 
 > Sempre que chegar uma migration nova, rode a que falta — pela data no nome dá
 > para saber onde você parou. Todas são seguras de rodar de novo.

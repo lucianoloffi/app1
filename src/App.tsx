@@ -4,6 +4,7 @@ import { Toast } from "./components/Toast";
 import { useChats } from "./chats/useChats";
 import { useDiscoverQueue } from "./discover/useDiscoverQueue";
 import { useToast } from "./hooks/useToast";
+import { esquecerAtividadeRegistrada, registrarAtividade } from "./lib/api/atividade";
 import { aoMudarSessao, sair } from "./lib/api/auth";
 import { erroDeConfiguracao } from "./lib/supabaseClient";
 import { carregarPerfilDoMatch } from "./lib/api/matches";
@@ -174,6 +175,19 @@ export default function App() {
     void carregarAjustes().then(setAjustes);
   }, [stage]);
 
+  // Conta como uso ao entrar no app e ao voltar para ele (trocar de aba ou de
+  // aplicativo e voltar). Quem deixa o app aberto de um dia para o outro
+  // também conta no dia seguinte, na próxima vez que olhar a tela.
+  useEffect(() => {
+    if (stage !== "main") return;
+    void registrarAtividade();
+    const aoVoltar = () => {
+      if (document.visibilityState === "visible") void registrarAtividade();
+    };
+    document.addEventListener("visibilitychange", aoVoltar);
+    return () => document.removeEventListener("visibilitychange", aoVoltar);
+  }, [stage]);
+
   async function abrirBloqueados() {
     setBlockedOpen(true);
     try {
@@ -251,6 +265,7 @@ export default function App() {
   }
 
   async function logout() {
+    esquecerAtividadeRegistrada();
     try {
       await sair();
     } catch {
