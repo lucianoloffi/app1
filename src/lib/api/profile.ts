@@ -137,6 +137,33 @@ export async function carregarSituacaoDeModeracao(): Promise<{
   };
 }
 
+export interface CidadeProxima {
+  /** Exatamente como está em CITY_OPTIONS, para caber no campo do cadastro. */
+  nome: string;
+  uf: string;
+  distanciaKm: number;
+}
+
+/**
+ * A cidade da lista do Lovi mais perto de uma coordenada, ou null quando não
+ * há nenhuma dentro do raio que o banco usa (migration 0019). Sem esse limite,
+ * quem se cadastrasse longe da região receberia uma cidade a centenas de
+ * quilômetros preenchida como se fosse a dela.
+ */
+export async function cidadeMaisProxima(
+  lat: number,
+  lng: number,
+): Promise<CidadeProxima | null> {
+  const { data, error } = await supabase.rpc("cidade_mais_proxima", {
+    p_lat: lat,
+    p_lng: lng,
+  });
+  lancaSeErro(error);
+  const linha = data as { nome: string; uf: string; distancia_km: number } | null;
+  if (!linha) return null;
+  return { nome: linha.nome, uf: linha.uf, distanciaKm: linha.distancia_km };
+}
+
 /** Salva os campos editáveis do perfil (tela Editar perfil). */
 export async function salvarPerfil(perfil: MyProfile): Promise<void> {
   const id = await meuId();

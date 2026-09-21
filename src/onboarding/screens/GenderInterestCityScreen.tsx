@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { PillChipRow } from "../../components/PillChip";
+import { sugerirCidadePelaLocalizacao, suportaLocalizacao } from "../../lib/geo";
 import type { FilterGender, Gender } from "../../types";
 import { CITY_OPTIONS } from "../constants";
 import { OnboardingLayout } from "../OnboardingLayout";
@@ -29,6 +30,24 @@ interface GenderInterestCityScreenProps {
   onNext: () => void;
 }
 
+/**
+ * Como foi a tentativa de descobrir a cidade pela localização:
+ *   inicial   — ainda não pediu (é o único estado em que o botão aparece)
+ *   buscando  — esperando o diálogo do sistema e a coordenada
+ *   ok        — achou e preencheu o campo
+ *   longe     — liberou o GPS, mas não há cidade do Lovi por perto
+ *   negada    — recusou, ou o aparelho não deu a posição
+ */
+type BuscaDeCidade = "inicial" | "buscando" | "ok" | "longe" | "negada";
+
+const NOTA_DA_BUSCA: Record<BuscaDeCidade, string> = {
+  inicial: "Usamos sua localização só para sugerir a cidade e calcular distâncias.",
+  buscando: "Procurando sua cidade…",
+  ok: "Cidade sugerida pela sua localização. Pode trocar se preferir.",
+  longe: "Ainda não temos cidades do Lovi perto de você. Escolha uma da lista.",
+  negada: "Sem problema. Escolha sua cidade na lista.",
+};
+
 export function GenderInterestCityScreen({
   gender,
   interestedIn,
@@ -40,6 +59,19 @@ export function GenderInterestCityScreen({
   onNext,
 }: GenderInterestCityScreenProps) {
   const [suggestionsOpen, setSuggestionsOpen] = useState(false);
+  const [busca, setBusca] = useState<BuscaDeCidade>("inicial");
+
+  async function usarMinhaLocalizacao() {
+    setBusca("buscando");
+    const { estado, cidade } = await sugerirCidadePelaLocalizacao();
+    if (cidade) {
+      onChangeCity(cidade.nome);
+      setSuggestionsOpen(false);
+      setBusca("ok");
+      return;
+    }
+    setBusca(estado === "concedida" ? "longe" : "negada");
+  }
 
   // A cidade é uma lista fechada: ela alimenta o fallback de localização
   // (centro do município) quando a pessoa não libera o GPS.
@@ -79,6 +111,30 @@ export function GenderInterestCityScreen({
 
       <div className={`${fieldStyles.fieldGroup} ${styles.cityWrap}`}>
         <span className={styles.sectionLabel}>Cidade</span>
+
+        {/* O diálogo do sistema só aparece depois deste toque: a nota abaixo
+            explica para quê, antes de o aparelho perguntar. É a mesma regra
+            que o resto do app segue para a localização. */}
+        {suportaLocalizacao() && (busca === "inicial" || busca === "buscando") && (
+          <button
+            type="button"
+            className={styles.localizarBotao}
+            disabled={busca === "buscando"}
+            onClick={() => void usarMinhaLocalizacao()}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path
+                d="M12 21s7-5.6 7-11a7 7 0 10-14 0c0 5.4 7 11 7 11z"
+                fill="#fff"
+                stroke="#8B5CF6"
+                strokeWidth={1.8}
+              />
+              <circle cx="12" cy="10" r="2.6" fill="#8B5CF6" />
+            </svg>
+            {busca === "buscando" ? "Procurando…" : "Usar minha localização"}
+          </button>
+        )}
+
         <input
           className={fieldStyles.input}
           type="text"
@@ -91,8 +147,10 @@ export function GenderInterestCityScreen({
           onFocus={() => setSuggestionsOpen(true)}
           onBlur={() => window.setTimeout(() => setSuggestionsOpen(false), 120)}
         />
-        {!cidadeEscolhida && city.trim().length > 0 && (
+        {!cidadeEscolhida && city.trim().length > 0 ? (
           <p className={fieldStyles.note}>Escolha uma das cidades da lista.</p>
+        ) : (
+          <p className={fieldStyles.note}>{NOTA_DA_BUSCA[busca]}</p>
         )}
         {suggestionsOpen && suggestions.length > 0 && (
           <div className={styles.suggestions}>

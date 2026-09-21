@@ -30,6 +30,18 @@ o `.gitignore` já cobre, mas não deixe sobrando.
 - **`src/lib/api/`** — única camada que importa o `supabaseClient`. Telas e hooks
   falam apenas com ela. Isso é proposital: mantém a futura troca por Capacitor
   restrita a esta camada. Não importe o cliente do Supabase em componentes.
+- **Cidade** (`CITY_OPTIONS` + tabela `cities`): lista fechada, com o centro de cada
+  município gravado. Ela é **só exibição** — quem decide a fila é a distância em
+  quilômetros, pelo GPS. Por isso abrir a lista para o Brasil inteiro não traz mais
+  gente para ninguém: só deixa alguém se cadastrar onde não há ninguém por perto, e
+  a fila chega vazia. Crescer a lista é decisão de até onde divulgar, não de tela.
+  No cadastro, o passo da cidade oferece "Usar minha localização"
+  (`sugerirCidadePelaLocalizacao` + RPC `cidade_mais_proxima`, migration `0019`), que
+  grava a coordenada e preenche a cidade mais próxima dentro de 100 km — sem o raio,
+  quem se cadastrasse em Recife receberia Curitiba. Foi escolhido em lugar de
+  geolocalização por IP: no Brasil o IP costuma resolver para a capital ou para São
+  Paulo, exigiria serviço externo e entrada nova na política de privacidade, e o app
+  já pede o GPS de qualquer forma.
 - **`src/lib/storage.ts` e `src/lib/geo.ts`** — abstrações finas sobre localStorage e
   geolocalização, pelo mesmo motivo (viram `@capacitor/preferences` e
   `@capacitor/geolocation` sem tocar no resto).

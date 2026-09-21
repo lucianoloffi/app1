@@ -35,3 +35,26 @@
 .suggestionItem:not(:last-child) {
   border-bottom: 1px solid var(--color-line-3);
 }
+
+/* Botão de sugerir a cidade pela localização. Contornado e discreto: é um
+   atalho, não o caminho principal — quem não quiser liberar o GPS escolhe na
+   lista logo abaixo, sem perder nada. */
+.localizarBotao {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--tap-min);
+  padding: 0 var(--space-4);
+  border: 1.5px solid var(--color-accent-line);
+  border-radius: var(--radius-pill);
+  background: var(--color-accent-soft);
+  color: var(--color-accent-2);
+  font: 700 14px var(--font-ui);
+  cursor: pointer;
+}
+
+.localizarBotao:disabled {
+  cursor: progress;
+  opacity: 0.6;
+}
