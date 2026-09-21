@@ -4,6 +4,7 @@ import { CloseIcon, HeartIcon } from "../components/icons/ActionIcons";
 import { ReportSheet } from "../components/ReportSheet";
 import { INTENTION_LABEL, type Filters, type Profile, type SwipeDirection } from "../types";
 import styles from "./DiscoverScreen.module.css";
+import perfisVistos from "../assets/perfis-vistos.jpg";
 import semPerfis from "../assets/sem-perfis.jpg";
 
 interface DiscoverScreenProps {
@@ -300,7 +301,7 @@ export function DiscoverScreen({
         </div>
       ) : (
         <div className={styles.emptyWrap}>
-          <div className={styles.spinner} />
+          <img className={styles.emptyArt} src={perfisVistos} alt="" aria-hidden="true" />
           <p className={styles.emptyTitle}>Por hoje é isso</p>
           <p className={styles.emptySupport}>
             Você viu todos os perfis de Joinville que combinam com o que busca.

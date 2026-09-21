@@ -375,15 +375,6 @@
   text-align: center;
 }
 
-.spinner {
-  width: 150px;
-  height: 150px;
-  border-radius: var(--radius-pill);
-  border: 8px solid var(--color-line-3);
-  border-top-color: var(--color-accent);
-  composes: lovi-anim-spin from global;
-}
-
 .emptyTitle {
   margin: 0;
   font: 800 24px/1.25 var(--font-ui);

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { Chat } from "../types";
 import styles from "./ChatsScreen.module.css";
+import buscaSemResultado from "../assets/busca-sem-resultado.jpg";
 import semConversas from "../assets/sem-conversas.jpg";
 
 interface ChatsScreenProps {
@@ -159,6 +160,12 @@ export function ChatsScreen({ chats, onOpenChat }: ChatsScreenProps) {
         <div className={styles.emptyWrap}>
           {termo ? (
             <>
+              <img
+                className={styles.emptyArt}
+                src={buscaSemResultado}
+                alt=""
+                aria-hidden="true"
+              />
               <p className={styles.emptyTitle}>Nenhuma conversa encontrada</p>
               <p className={styles.emptySupport}>Tente outro nome ou apague a busca.</p>
             </>
