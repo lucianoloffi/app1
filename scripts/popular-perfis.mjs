@@ -268,7 +268,10 @@ async function criaPerfil(perfil, indice, proximaFoto) {
   );
 
   // Faixas largas de propósito: assim dá para entrar como qualquer perfil de
-  // teste e ver os outros na fila, sem mexer em Filtros antes.
+  // teste e ver os outros na fila, sem mexer em Filtros antes. Os valores têm
+  // de caber no que a tela de Filtros representa (src/lib/filtros.ts): antes
+  // gravavam 100 km enquanto a tela ia só até 60, e a barra de distância
+  // aparecia cheia e sem a bolinha, desenhada fora do cartão.
   falhaSe(
     (
       await cliente

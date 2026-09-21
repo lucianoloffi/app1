@@ -42,7 +42,10 @@ export function RangeSlider({
     return snap(min + ratio * (max - min));
   }
 
-  function commit(index: number, rawValue: number) {
+  function commit(index: number, rawValueBruto: number) {
+    // As setas do teclado chamam commit direto, sem passar por snap: sem este
+    // limite, segurar a seta levava o valor para além do máximo.
+    const rawValue = Math.min(max, Math.max(min, rawValueBruto));
     const next = [...values];
     if (values.length === 2) {
       if (index === 0) {
@@ -95,8 +98,12 @@ export function RangeSlider({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [draggingIndex, values]);
 
+  // Preso entre 0 e 100: um valor fora da faixa (gravado por outra tela, por um
+  // script, ou por um limite que mudou depois) punha a alça fora da barra, e o
+  // cartão cortava — a barra aparecia cheia e sem bolinha nenhuma.
   function percent(value: number) {
-    return ((value - min) / (max - min)) * 100;
+    const bruto = ((value - min) / (max - min)) * 100;
+    return Math.min(100, Math.max(0, bruto));
   }
 
   const fillStart = values.length === 2 ? percent(values[0]) : 0;

@@ -1,7 +1,15 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { ScreenHeader } from "../components/ScreenHeader";
 import { PillChipCheckRow, PillChipRow } from "../components/PillChip";
 import { RangeSlider } from "../components/RangeSlider";
+import {
+  dentroDaFaixa,
+  DISTANCIA_MAX_KM,
+  DISTANCIA_MIN_KM,
+  DISTANCIA_PASSO_KM,
+  IDADE_MAX,
+  IDADE_MIN,
+} from "../lib/filtros";
 import type { Filters, FilterGender, Intention } from "../types";
 import styles from "./FiltersScreen.module.css";
 
@@ -16,12 +24,6 @@ const INTENTION_OPTIONS: { value: Intention; label: string }[] = [
   { value: "conhecer", label: "Conhecer pessoas" },
   { value: "amizade", label: "Amizade" },
 ];
-
-const AGE_MIN = 18;
-const AGE_MAX = 70;
-const DISTANCE_MIN = 5;
-const DISTANCE_MAX = 60;
-const DISTANCE_STEP = 5;
 
 interface FiltersScreenProps {
   filters: Filters;
@@ -59,8 +61,24 @@ export function FiltersScreen({
   onClose,
   onShowToast,
 }: FiltersScreenProps) {
-  const [draft, setDraft] = useState<Filters>(filters);
-  const isDirty = !isEqual(draft, filters);
+  /**
+   * O que está gravado pode estar fora do que esta tela representa — foi o que
+   * aconteceu com quem tinha 100 km de um limite antigo. A tela trabalha na
+   * própria faixa, inclusive no Reverter: assim a barra e o texto nunca
+   * discordam, e o valor volta para dentro dos limites no próximo "Ver perfis".
+   */
+  const filtrosNaFaixa = useMemo<Filters>(
+    () => ({
+      ...filters,
+      distanceKm: dentroDaFaixa(filters.distanceKm, DISTANCIA_MIN_KM, DISTANCIA_MAX_KM),
+      minAge: dentroDaFaixa(filters.minAge, IDADE_MIN, IDADE_MAX),
+      maxAge: dentroDaFaixa(filters.maxAge, IDADE_MIN, IDADE_MAX),
+    }),
+    [filters],
+  );
+
+  const [draft, setDraft] = useState<Filters>(filtrosNaFaixa);
+  const isDirty = !isEqual(draft, filtrosNaFaixa);
 
   return (
     <div className={styles.screen}>
@@ -87,8 +105,8 @@ export function FiltersScreen({
               </span>
             </div>
             <RangeSlider
-              min={AGE_MIN}
-              max={AGE_MAX}
+              min={IDADE_MIN}
+              max={IDADE_MAX}
               values={[draft.minAge, draft.maxAge]}
               minGap={1}
               ariaLabels={["Idade mínima", "Idade máxima"]}
@@ -105,9 +123,9 @@ export function FiltersScreen({
               <span className={styles.sliderValue}>até {draft.distanceKm} km</span>
             </div>
             <RangeSlider
-              min={DISTANCE_MIN}
-              max={DISTANCE_MAX}
-              step={DISTANCE_STEP}
+              min={DISTANCIA_MIN_KM}
+              max={DISTANCIA_MAX_KM}
+              step={DISTANCIA_PASSO_KM}
               values={[draft.distanceKm]}
               ariaLabels={["Distância máxima"]}
               onChange={([distanceKm]) => setDraft((prev) => ({ ...prev, distanceKm }))}
@@ -137,7 +155,7 @@ export function FiltersScreen({
           }
           onClick={() => {
             if (!isDirty) return;
-            setDraft(filters);
+            setDraft(filtrosNaFaixa);
             onShowToast("Filtros revertidos");
           }}
         >
