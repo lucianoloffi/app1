@@ -25,6 +25,21 @@ e qualquer `VITE_SUPABASE_ANON_KEY`): sem ele o app cai na `ConfigErrorScreen`, 
 nada de rede acontece antes do primeiro submit. Apagar o `.env` antes de commitar —
 o `.gitignore` já cobre, mas não deixe sobrando.
 
+**Conferir uma tela que depende do banco, sem banco.** Telas que recebem tudo por
+props (`FiltersScreen`, `DiscoverScreen`, `ReportSheet`) montam direto numa página de
+prévia temporária: `sed 's#/src/main.tsx#/src/__previewX.tsx#' index.html >
+preview-x.html` e um `src/__previewX.tsx` que renderiza o componente com dados
+inventados — o Vite serve qualquer `.html` da raiz em dev, sem tocar no
+`vite.config.ts`. Para telas que falam com o servidor (painel admin, passo da cidade),
+trocar `globalThis.fetch` no início do arquivo de prévia e responder às rotas
+`/rest/v1/rpc/<funcao>` cobre o caminho inteiro — inclusive o mapeamento em
+`src/lib/api/` — sem nada sair da máquina. `navigator.geolocation.getCurrentPosition`
+se troca do mesmo jeito. **Apagar a prévia depois** (`src/__preview*.tsx`,
+`preview-*.html`) e conferir com `git status` que não sobrou nada.
+
+Foi assim que apareceram, entre outros, a lista do filtro antigo continuando na tela
+sob o filtro novo depois de um erro, e o retângulo cinza em volta das ilustrações.
+
 ## Arquitetura
 
 - **`src/lib/api/`** — única camada que importa o `supabaseClient`. Telas e hooks
@@ -173,6 +188,16 @@ Ao criar coluna numa tabela que o cliente escreve (`profiles`, `photos`, `report
 `consents`, `messages`), decida se o cliente pode escrevê-la: se sim, `grant update
 (coluna)` ou `grant insert (coluna)` na mesma migration; sem grant, a API recusa com
 `permission denied` — o que é o certo para colunas de status.
+
+**`create or replace function` copia da ÚLTIMA migration que define a função, nunca
+da que a criou.** Na `0015`, o corpo de `fila_descobrir` foi copiado da `0003` para
+receber a checagem de sanção — só que a `0008` já tinha trocado `intencao_filtro` de
+texto para lista. O Postgres recusou na hora (`malformed array literal`) e desfez a
+migration inteira; se o erro fosse silencioso em vez de fatal, teria voltado um
+filtro antigo sem ninguém perceber. Ache a versão em vigor com
+`grep -l "create or replace function public.<nome>" supabase/migrations/*.sql | tail -1`,
+copie de lá, e confira por diff que a nova é a antiga MAIS as linhas pretendidas,
+nada além.
 
 **Commits** em português, no imperativo, descrevendo o efeito para quem usa o app
 ("Avisar na hora que a senha é curta demais", "Fazer a lupa das Conversas buscar de
