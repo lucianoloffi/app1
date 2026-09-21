@@ -1,0 +1,50 @@
+.dados {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.nomeLinha {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.nome {
+  margin: 0;
+  font: 800 20px var(--font-ui);
+}
+
+.selo {
+  font: 700 11px var(--font-ui);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  background: var(--color-line-3);
+  color: var(--color-ink-60);
+  padding: 4px 9px;
+  border-radius: var(--radius-pill);
+}
+
+.seloAlerta {
+  background: #fff2e0;
+  color: #8a5300;
+}
+
+.seloGrave {
+  background: #fdecec;
+  color: #8a1c15;
+}
+
+.ficha {
+  margin: 0;
+  font: 500 14px var(--font-ui);
+  color: var(--color-ink-60);
+}
+
+.bio {
+  margin: 0;
+  font: 400 14px/1.5 var(--font-ui);
+  color: var(--color-ink);
+}

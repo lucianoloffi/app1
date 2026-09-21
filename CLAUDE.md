@@ -148,6 +148,37 @@ sob o filtro novo depois de um erro, e o retângulo cinza em volta das ilustraç
   ('pendente','aprovada','rejeitada'), com `profiles.verificacao_status` nem
   com `profiles.visivel` — esta última é escolha da própria pessoa, e por isso
   banir não mexe nela.
+- **Verificação e fotos no painel** (migration `0021`): as duas filas que faltavam.
+  A de **verificação** é por PESSOA, não por pedido: `solicitar_verificacao` insere
+  uma linha por selfie enviada e não impede a segunda, então agrupar evita a mesma
+  pessoa cinco vezes na fila e transforma as selfies extras em material a mais para
+  comparar. `analisar_verificacao(user_id, acao)` decide todos os pedidos pendentes
+  de uma vez; recusar quem já tem o selo é como se tira um selo dado por engano, e
+  por isso a função não exige pedido pendente — sem linha 'pendente' para marcar,
+  ela carimba o último pedido, senão o perfil diria 'rejeitada' e o histórico
+  'aprovada'.
+  **A selfie é apagada de verdade quando a análise termina** — a tela de verificação
+  promete isso a quem a envia. Quem apaga é o painel, pela API de Storage (por isso
+  o admin ganhou DELETE no bucket, além do SELECT que faltava): apagar a linha de
+  `storage.objects` por SQL deixaria o arquivo órfão no bucket, que não é apagar. O
+  apagamento é um passo separado do commit da decisão, e `verificacoes.selfie_apagada_em`
+  registra o que saiu — sem essa marca, um apagamento que falhasse quebraria a
+  promessa em silêncio. O que sobrou aparece em Decididas com botão para apagar de novo.
+  A de **fotos** é reativa: a foto continua entrando `'aprovada'` e aparecendo na
+  hora. Nascer 'pendente' deixaria quem acabou de se cadastrar sem foto nenhuma até
+  alguém olhar (a fila filtra por foto aprovada) — app quebrado à espera de uma
+  equipe que não existe. Mas reativo não é sem fila: `photos.moderada_em` diz se
+  aquela foto já passou por olho humano, e foto sem marca é o que a aba Fotos
+  mostra. Aprovar e rejeitar marcam os dois, então a foto sai da fila inclusive
+  quando a decisão é "não há nada de errado com ela". Rejeitar **não apaga**: a foto
+  sai da vista dos outros (quem decide é `fotos_le`, pelo status) e continua no
+  bucket, porque uma denúncia sobre aquela foto ainda precisa dela.
+  `moderar_fotos` recebe uma lista, e as fotos têm de ser da mesma pessoa: é uma
+  decisão sobre alguém, e é assim que cabe em uma linha de `admin_actions`.
+  A mesma ação existe **dentro da denúncia** (`painel_moderacao` passou a devolver id
+  e status de cada foto): "fotos falsas ou de outra pessoa" é motivo de denúncia, e
+  mandar procurar a pessoa noutra tela sem busca por nome era o mesmo que não ter a
+  ação.
 - **`supabase/functions/`** — Edge Functions para o que a chave anon não pode fazer
   (ex.: `delete-account`, que apaga usuário do auth e arquivos do storage). O id do
   usuário vem sempre do JWT, nunca do corpo da requisição.
@@ -248,17 +279,14 @@ esperado (a chave anon é pública por design) — quem protege os dados é a RL
 
 Em ordem de importância:
 
-1. **Moderação de fotos e de verificação no painel.** As duas entregas do painel
-   admin V0 estão no ar: Números (`0014`) e Moderação de denúncias (`0015`/`0016`).
-   O que sobrou de moderação ainda é feito à mão no Table Editor:
-   `photos.status_moderacao` (rejeitar uma foto) e `verificacoes.status` +
-   `profiles.verificacao_status` (aprovar o selo de verificado). Nenhum dos dois tem
-   tela. A fila de verificação é a mais urgente das duas: hoje quem pede o selo fica
-   em 'pendente' para sempre, e a selfie no bucket `verificacoes` não é vista por
-   ninguém. Quando for feita, reaproveitar o desenho da fila de denúncias
-   (`painel_moderacao` + `moderar` + `admin_actions`) e lembrar que a policy de
-   leitura do bucket `verificacoes` ainda **não** libera o admin — a de `fotos`
-   libera (`is_admin()` na `fotos_le`), a de verificação precisaria do mesmo.
+1. **A pessoa não fica sabendo que a foto dela foi reprovada.** A `0021` deu ao
+   painel o botão de rejeitar, mas no app a foto reprovada continua aparecendo
+   normalmente em Fotos para quem é dona dela — `PhotosManageScreen` recebe
+   `photos: string[]`, só as URLs, e `MyProfile.photos` também. Quem tem uma foto
+   derrubada some da fila dos outros sem entender por quê. Fazer isso é levar o
+   status por essa cadeia (`minhasFotos` já devolve, é de lá para baixo que se
+   perde) e escrever o aviso. A App Store exige moderação com resposta em 24h para
+   app de namoro, e "reprovamos sua foto sem avisar" não é resposta.
 2. **Painel admin completo:** funil, retenção D7, ranking de 10 cidades e contas
    excluídas. Os registros já existem desde a `0013`; falta só consultar e desenhar.
 3. **Provas de assédio: o que ainda falta.** A denúncia já guarda cópia da conversa
@@ -276,7 +304,9 @@ Em ordem de importância:
 5. **Limpar branches já mescladas** no repositório (as `claude/*`).
 6. **Detalhes da auditoria que ficaram para depois:** a Edge Function `delete-account`
    lista no máximo 100 arquivos por pasta (quem pediu muitas verificações deixa selfies
-   para trás) e precisa de novo deploy quando for corrigida; `nome`, `bio`, `profissao`
+   para trás — a `0021` alivia, porque a selfie some ao fim da análise, mas não
+   resolve para quem excluir a conta com pedido ainda pendente) e precisa de novo
+   deploy quando for corrigida; `nome`, `bio`, `profissao`
    e interesses não têm limite de tamanho no banco (colocar junto com a nota do limite
    na tela); qualquer pessoa logada consegue listar as fotos dos perfis visíveis — o
    mesmo que veria rolando a fila, mas facilita copiar em massa (pede limite de uso).
@@ -294,9 +324,12 @@ Em ordem de importância:
   `LEGAL_UPDATED_AT` não é lida por nenhum código; o que o usuário vê é o texto dos
   `.md`, e o consentimento registra só a `versao`. Antes de lançar, os **textos** (não
   só a data) precisam de revisão jurídica: o app trata dado sensível sob a LGPD.
-- **Privacidade e diretrizes estão na versão 1.1** desde 21/09 (a moderação: cópia da
-  conversa na denúncia, o que o admin enxerga, e a denúncia que sobrevive à exclusão
-  da conta). **Não existe fluxo de reconsentimento**: quem aceitou antes tem `1.0`
+- **Privacidade está na 1.2 e diretrizes na 1.1.** A 1.1 (21/09) trouxe a moderação:
+  cópia da conversa na denúncia, o que o admin enxerga, e a denúncia que sobrevive à
+  exclusão da conta. A 1.2 (21/09, junto da `0021`) trouxe a selfie de verificação —
+  que ela é coletada, que uma pessoa a compara com as fotos do perfil, que não passa
+  por reconhecimento facial e que é apagada ao fim da análise — e a moderação de
+  fotos. **Não existe fluxo de reconsentimento**: quem aceitou antes tem `1.0`
   gravado em `consents` e nunca vê o texto novo. Pré-lançamento isso passa; antes de
   abrir ao público, decidir se é preciso pedir o aceite de novo — e aí a tela de
   reconsentimento é trabalho novo.

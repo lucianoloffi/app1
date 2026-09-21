@@ -2,13 +2,17 @@ import { useEffect, useState } from "react";
 import {
   carregarModeracao,
   moderar,
+  moderarFotos,
   DIAS_DE_SUSPENSAO,
+  type AcaoDeFoto,
   type AcaoDeModeracao,
   type DenunciaDoPainel,
   type FilaDeModeracao,
   type FiltroDaModeracao,
 } from "../lib/api/admin";
 import { mensagemDeErro } from "../lib/errors";
+import { dataCurta, dataHora, horaCurta } from "./datas";
+import { PhotoGrid } from "./PhotoGrid";
 import styles from "./ModerationScreen.module.css";
 
 const FILTROS: { valor: FiltroDaModeracao; rotulo: string }[] = [
@@ -24,36 +28,6 @@ const RESOLUCAO_LABEL: Record<NonNullable<DenunciaDoPainel["resolucao"]>, string
 
 /** Ações que mexem na conta de alguém pedem confirmação; arquivar não. */
 const PEDE_CONFIRMACAO: AcaoDeModeracao[] = ["suspender", "banir", "reativar"];
-
-function dataHora(iso: string | null): string {
-  if (!iso) return "";
-  const data = new Date(iso);
-  if (Number.isNaN(data.getTime())) return "";
-  const dia = String(data.getDate()).padStart(2, "0");
-  const mes = String(data.getMonth() + 1).padStart(2, "0");
-  const hora = String(data.getHours()).padStart(2, "0");
-  const minuto = String(data.getMinutes()).padStart(2, "0");
-  return `${dia}/${mes}/${data.getFullYear()} às ${hora}:${minuto}`;
-}
-
-/** "12/09/2026" — data sem hora, para a ficha do perfil. */
-function dataCurta(iso: string): string {
-  const data = new Date(iso);
-  if (Number.isNaN(data.getTime())) return "";
-  const dia = String(data.getDate()).padStart(2, "0");
-  const mes = String(data.getMonth() + 1).padStart(2, "0");
-  return `${dia}/${mes}/${data.getFullYear()}`;
-}
-
-function horaCurta(iso: string): string {
-  const data = new Date(iso);
-  if (Number.isNaN(data.getTime())) return "";
-  const dia = String(data.getDate()).padStart(2, "0");
-  const mes = String(data.getMonth() + 1).padStart(2, "0");
-  const hora = String(data.getHours()).padStart(2, "0");
-  const minuto = String(data.getMinutes()).padStart(2, "0");
-  return `${dia}/${mes} ${hora}:${minuto}`;
-}
 
 interface ModerationScreenProps {
   /** Devolve o total de denúncias abertas, para o aviso na aba do topo. */
@@ -114,6 +88,29 @@ export function ModerationScreen({ onContagem }: ModerationScreenProps) {
             : acao === "banir"
               ? `${nome} foi banido.`
               : `${nome} voltou a usar o app.`,
+      );
+      setTentativa((t) => t + 1);
+    } catch (problema) {
+      setErro(mensagemDeErro(problema));
+    } finally {
+      setAplicando(null);
+    }
+  }
+
+  // Derrubar a foto não resolve a denúncia: o cartão continua onde está, com
+  // os mesmos botões. São duas decisões diferentes — a foto pode ser falsa sem
+  // que a conta mereça suspensão, e pode haver o contrário.
+  async function aplicarNaFoto(denuncia: DenunciaDoPainel, ids: string[], acao: AcaoDeFoto) {
+    setAplicando(denuncia.id);
+    try {
+      const feito = await moderarFotos(ids, acao);
+      setAviso(
+        acao === "rejeitar"
+          ? `${feito.fotos === 1 ? "Foto" : `${feito.fotos} fotos`} de ${feito.nome} fora do ar.` +
+            (feito.semFotoAprovada
+              ? " Não sobrou nenhuma foto aprovada, e o perfil sumiu da fila dos outros."
+              : "")
+          : `${feito.fotos === 1 ? "Foto" : `${feito.fotos} fotos`} de ${feito.nome} de volta ao ar.`,
       );
       setTentativa((t) => t + 1);
     } catch (problema) {
@@ -216,6 +213,7 @@ export function ModerationScreen({ onContagem }: ModerationScreenProps) {
               onPedir={(acao) => pedir(denuncia, acao)}
               onConfirmar={(acao) => void aplicar(denuncia, acao)}
               onCancelar={() => setConfirmando(null)}
+              onModerarFotos={(ids, acao) => void aplicarNaFoto(denuncia, ids, acao)}
             />
           ))}
         </div>
@@ -231,6 +229,7 @@ interface CartaoProps {
   onPedir: (acao: AcaoDeModeracao) => void;
   onConfirmar: (acao: AcaoDeModeracao) => void;
   onCancelar: () => void;
+  onModerarFotos: (ids: string[], acao: AcaoDeFoto) => void;
 }
 
 function CartaoDeDenuncia({
@@ -240,6 +239,7 @@ function CartaoDeDenuncia({
   onPedir,
   onConfirmar,
   onCancelar,
+  onModerarFotos,
 }: CartaoProps) {
   const pessoa = denuncia.denunciado;
   // Vale o status, e não a resolução: uma denúncia fechada à mão pelo SQL
@@ -256,18 +256,6 @@ function CartaoDeDenuncia({
   return (
     <article className={styles.cartao}>
       <div className={styles.pessoa}>
-        <div className={styles.fotos}>
-          {pessoa.fotos.length === 0 ? (
-            <span className={styles.semFoto}>sem foto</span>
-          ) : (
-            pessoa.fotos.slice(0, 4).map((url) => (
-              <a key={url} href={url} target="_blank" rel="noreferrer" className={styles.foto}>
-                <img src={url} alt="" />
-              </a>
-            ))
-          )}
-        </div>
-
         <div className={styles.dados}>
           <div className={styles.nomeLinha}>
             <h2 className={styles.nome}>{pessoa.nome}</h2>
@@ -294,6 +282,8 @@ function CartaoDeDenuncia({
           {ficha.length > 0 && <p className={styles.ficha}>{ficha.join(" · ")}</p>}
           {pessoa.bio && <p className={styles.bio}>{pessoa.bio}</p>}
         </div>
+
+        <PhotoGrid fotos={pessoa.fotos} ocupado={aplicando} onModerar={onModerarFotos} />
       </div>
 
       <div className={styles.denunciaBloco}>

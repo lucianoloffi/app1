@@ -200,3 +200,10 @@
   font: 500 14px var(--font-ui);
   color: #c8353c;
 }
+
+/* O quadro do avatar quando não há foto: mesma medida, com a marca centrada. */
+.avatarVazio {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

@@ -1,6 +1,7 @@
 import { supabase } from "../supabaseClient";
 import { lancaSeErro } from "../errors";
-import { assinarFotos } from "./photos";
+import { apagarSelfies, assinarFotos, assinarSelfies } from "./photos";
+import type { VerificationStatus } from "../../types";
 
 /** Os períodos do painel; todos terminam hoje (dia de São Paulo). */
 export type PeriodoDoPainel = "hoje" | "7d" | "30d" | "90d";
@@ -116,8 +117,8 @@ export interface DenunciadoDoPainel {
   entrouEm: string | null;
   denunciasAbertas: number;
   denunciasTotal: number;
-  /** URLs assinadas, já prontas para a tela. Inclui fotos rejeitadas. */
-  fotos: string[];
+  /** Já com URL assinada. Inclui as rejeitadas — e dá para rejeitar daqui. */
+  fotos: FotoDoPainel[];
 }
 
 export interface DenunciaDoPainel {
@@ -168,7 +169,7 @@ interface LinhaDaDenuncia {
     entrou_em: string | null;
     denuncias_abertas: number;
     denuncias_total: number;
-    fotos: string[];
+    fotos: LinhaDaFoto[];
   };
   conversa: { autor: MensagemDaDenuncia["autor"]; conteudo: string; enviada_em: string }[];
 }
@@ -182,7 +183,9 @@ export async function carregarModeracao(filtro: FiltroDaModeracao): Promise<Fila
 
   // Uma assinatura só para as fotos de todas as denúncias da página: são
   // dezenas de arquivos, e uma chamada por foto faria a tela abrir devagar.
-  const urls = await assinarFotos(itens.flatMap((item) => item.denunciado.fotos ?? []));
+  const urls = await assinarFotos(
+    itens.flatMap((item) => (item.denunciado.fotos ?? []).map((foto) => foto.path)),
+  );
 
   return {
     abertas: resposta.abertas,
@@ -211,9 +214,7 @@ export async function carregarModeracao(filtro: FiltroDaModeracao): Promise<Fila
         entrouEm: item.denunciado.entrou_em,
         denunciasAbertas: item.denunciado.denuncias_abertas,
         denunciasTotal: item.denunciado.denuncias_total,
-        fotos: (item.denunciado.fotos ?? [])
-          .map((caminho) => urls.get(caminho) ?? "")
-          .filter(Boolean),
+        fotos: paraFotos(item.denunciado.fotos, urls),
       },
       conversa: (item.conversa ?? []).map((mensagem) => ({
         autor: mensagem.autor,
@@ -245,6 +246,287 @@ export async function moderar(
 /** Só o número da fila, para o aviso na aba. Não carrega as denúncias. */
 export async function contarDenunciasAbertas(): Promise<number> {
   const { data, error } = await supabase.rpc("painel_denuncias_abertas");
+  lancaSeErro(error);
+  return Number(data ?? 0);
+}
+
+// ───────────────────── fotos e verificação (entrega 3) ─────────────────────
+
+/**
+ * A ficha que as três telas do painel mostram da mesma pessoa. Vem da função
+ * `ficha_do_painel` no banco, uma só para as telas não divergirem.
+ */
+export interface PessoaDoPainel {
+  id: string;
+  nome: string;
+  idade: number | null;
+  cidade: string | null;
+  profissao: string | null;
+  bio: string | null;
+  entrouEm: string | null;
+  /** false = a pessoa se ocultou nos Ajustes. Escolha dela, não sanção. */
+  visivel: boolean;
+  statusModeracao: StatusDeModeracao;
+  suspensaoTerminaEm: string | null;
+  verificacaoStatus: VerificationStatus;
+  denunciasAbertas: number;
+  denunciasTotal: number;
+}
+
+interface LinhaDaPessoa {
+  id: string;
+  nome: string;
+  idade: number | null;
+  cidade: string | null;
+  profissao: string | null;
+  bio: string | null;
+  entrou_em: string | null;
+  visivel: boolean;
+  status_moderacao: StatusDeModeracao;
+  suspensao_termina_em: string | null;
+  verificacao_status: VerificationStatus;
+  denuncias_abertas: number;
+  denuncias_total: number;
+}
+
+function paraPessoa(linha: LinhaDaPessoa): PessoaDoPainel {
+  return {
+    id: linha.id,
+    nome: linha.nome,
+    idade: linha.idade,
+    cidade: linha.cidade,
+    profissao: linha.profissao,
+    bio: linha.bio,
+    entrouEm: linha.entrou_em,
+    visivel: linha.visivel,
+    statusModeracao: linha.status_moderacao,
+    suspensaoTerminaEm: linha.suspensao_termina_em,
+    verificacaoStatus: linha.verificacao_status,
+    denunciasAbertas: linha.denuncias_abertas,
+    denunciasTotal: linha.denuncias_total,
+  };
+}
+
+export type StatusDaFoto = "pendente" | "aprovada" | "rejeitada";
+
+export type AcaoDeFoto = "aprovar" | "rejeitar";
+
+export interface FotoDoPainel {
+  id: string;
+  path: string;
+  /** URL assinada; vazia se a assinatura falhou (a tela avisa no lugar da imagem). */
+  url: string;
+  status: StatusDaFoto;
+  principal: boolean;
+  criadoEm: string;
+  /** null = ninguém olhou esta foto ainda. É isso que a põe na fila. */
+  moderadaEm: string | null;
+  moderadaPor: string | null;
+}
+
+interface LinhaDaFoto {
+  id: string;
+  path: string;
+  status: StatusDaFoto;
+  principal: boolean;
+  criado_em: string;
+  moderada_em: string | null;
+  moderada_por: string | null;
+}
+
+function paraFotos(linhas: LinhaDaFoto[] | null, urls: Map<string, string>): FotoDoPainel[] {
+  return (linhas ?? []).map((linha) => ({
+    id: linha.id,
+    path: linha.path,
+    url: urls.get(linha.path) ?? "",
+    status: linha.status,
+    principal: linha.principal,
+    criadoEm: linha.criado_em,
+    moderadaEm: linha.moderada_em,
+    moderadaPor: linha.moderada_por,
+  }));
+}
+
+export type FiltroDasFotos = "novas" | "rejeitadas";
+
+export interface PessoaComFotos {
+  pessoa: PessoaDoPainel;
+  fotos: FotoDoPainel[];
+}
+
+export interface FilaDeFotos {
+  /** Pessoas com ao menos uma foto que ninguém olhou, seja qual for o filtro. */
+  novas: number;
+  itens: PessoaComFotos[];
+}
+
+export async function carregarFotos(filtro: FiltroDasFotos): Promise<FilaDeFotos> {
+  const { data, error } = await supabase.rpc("painel_fotos", { p_filtro: filtro });
+  lancaSeErro(error);
+
+  const resposta = data as { novas: number; itens: (LinhaDaPessoa & { fotos: LinhaDaFoto[] })[] };
+  const itens = resposta.itens ?? [];
+  const urls = await assinarFotos(itens.flatMap((item) => (item.fotos ?? []).map((f) => f.path)));
+
+  return {
+    novas: resposta.novas,
+    itens: itens.map((item) => ({
+      pessoa: paraPessoa(item),
+      fotos: paraFotos(item.fotos, urls),
+    })),
+  };
+}
+
+export interface ResultadoDaFoto {
+  acao: AcaoDeFoto;
+  nome: string;
+  fotos: number;
+  /** true = a pessoa ficou sem nenhuma foto aprovada, e some da fila dos outros. */
+  semFotoAprovada: boolean;
+}
+
+/**
+ * Rejeitar não apaga a foto: ela sai do perfil que os outros veem (quem decide
+ * isso é a policy `fotos_le`, pelo status), mas continua no bucket — uma
+ * denúncia sobre aquela foto ainda precisa dela.
+ */
+export async function moderarFotos(ids: string[], acao: AcaoDeFoto): Promise<ResultadoDaFoto> {
+  const { data, error } = await supabase.rpc("moderar_fotos", { p_ids: ids, p_acao: acao });
+  lancaSeErro(error);
+  const resposta = data as { acao: AcaoDeFoto; nome: string; fotos: number; sem_foto_aprovada: boolean };
+  return {
+    acao: resposta.acao,
+    nome: resposta.nome,
+    fotos: resposta.fotos,
+    semFotoAprovada: resposta.sem_foto_aprovada,
+  };
+}
+
+export type FiltroDaVerificacao = "pendentes" | "decididas";
+
+export type AcaoDeVerificacao = "aprovar" | "recusar";
+
+export interface SelfieDoPainel {
+  path: string;
+  /** URL assinada; vazia se a assinatura falhou. */
+  url: string;
+}
+
+export interface VerificacaoDoPainel {
+  pessoa: PessoaDoPainel;
+  /** Quando o pedido mais antigo ainda pendente foi feito. */
+  pedidoEm: string | null;
+  decididoEm: string | null;
+  decididoPor: string | null;
+  /**
+   * Selfies que continuam no bucket. Em "pendentes" é o que há para analisar;
+   * em "decididas" é sobra de um apagamento que falhou, e a tela oferece
+   * apagar de novo.
+   */
+  selfies: SelfieDoPainel[];
+  /** As fotos do perfil, para comparar com a selfie. URLs assinadas. */
+  fotos: string[];
+}
+
+export interface FilaDeVerificacao {
+  /** Pessoas esperando análise, seja qual for o filtro pedido. */
+  pendentes: number;
+  itens: VerificacaoDoPainel[];
+}
+
+export async function carregarVerificacoes(
+  filtro: FiltroDaVerificacao,
+): Promise<FilaDeVerificacao> {
+  const { data, error } = await supabase.rpc("painel_verificacoes", { p_filtro: filtro });
+  lancaSeErro(error);
+
+  const resposta = data as {
+    pendentes: number;
+    itens: (LinhaDaPessoa & {
+      pedido_em: string | null;
+      decidido_em: string | null;
+      decidido_por: string | null;
+      selfies: string[];
+      fotos: string[];
+    })[];
+  };
+  const itens = resposta.itens ?? [];
+
+  // Dois buckets, duas assinaturas — mas uma chamada para cada, não uma por
+  // arquivo: a fila traz até 50 pessoas com várias fotos cada.
+  const [selfies, fotos] = await Promise.all([
+    assinarSelfies(itens.flatMap((item) => item.selfies ?? [])),
+    assinarFotos(itens.flatMap((item) => item.fotos ?? [])),
+  ]);
+
+  return {
+    pendentes: resposta.pendentes,
+    itens: itens.map((item) => ({
+      pessoa: paraPessoa(item),
+      pedidoEm: item.pedido_em,
+      decididoEm: item.decidido_em,
+      decididoPor: item.decidido_por,
+      selfies: (item.selfies ?? []).map((path) => ({ path, url: selfies.get(path) ?? "" })),
+      fotos: (item.fotos ?? []).map((path) => fotos.get(path) ?? "").filter(Boolean),
+    })),
+  };
+}
+
+export interface ResultadoDaVerificacao {
+  nome: string;
+  /**
+   * Selfies que a análise deveria ter apagado e não saíram do bucket. Vazio é
+   * o normal; com item, a tela precisa dizer, porque a promessa feita a quem
+   * mandou a foto foi que ela some depois da análise.
+   */
+  selfiesNaoApagadas: string[];
+}
+
+/**
+ * Apaga as selfies do bucket e carimba no banco o que saiu. Em dois passos de
+ * propósito: quem apaga arquivo é a API de Storage, e carimbar antes de o
+ * arquivo sair criaria exatamente a mentira que `selfie_apagada_em` existe
+ * para evitar.
+ */
+export async function limparSelfies(paths: string[]): Promise<string[]> {
+  if (paths.length === 0) return [];
+
+  const sobraram = await apagarSelfies(paths);
+  if (sobraram.length > 0) return sobraram;
+
+  const { error } = await supabase.rpc("marcar_selfies_apagadas", { p_paths: paths });
+  // O arquivo já saiu; o que falhou foi a marca. A fila vai continuar
+  // oferecendo apagar, e a segunda tentativa carimba — apagar o que não existe
+  // mais não é erro no Storage.
+  if (error) console.warn("Não foi possível marcar as selfies como apagadas:", error.message);
+  return [];
+}
+
+/**
+ * Decide o selo da PESSOA, não de um pedido: se houver mais de uma selfie
+ * pendente, o mesmo veredito vale para todas (quem faz isso é o banco).
+ * Recusar quem já tem o selo é como se tira um selo dado por engano.
+ */
+export async function analisarVerificacao(
+  userId: string,
+  acao: AcaoDeVerificacao,
+): Promise<ResultadoDaVerificacao> {
+  const { data, error } = await supabase.rpc("analisar_verificacao", {
+    p_user_id: userId,
+    p_acao: acao,
+  });
+  lancaSeErro(error);
+
+  const resposta = data as { nome: string; selfies: string[] | null };
+  return {
+    nome: resposta.nome,
+    selfiesNaoApagadas: await limparSelfies(resposta.selfies ?? []),
+  };
+}
+
+/** Só o número da fila, para o aviso na aba. Não carrega as selfies. */
+export async function contarVerificacoesPendentes(): Promise<number> {
+  const { data, error } = await supabase.rpc("painel_verificacoes_pendentes");
   lancaSeErro(error);
   return Number(data ?? 0);
 }

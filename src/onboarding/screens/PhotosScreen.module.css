@@ -1,12 +1,25 @@
+/* Quem manda nesta grade é a ALTURA, não a largura: são duas fileiras, e num
+   celular com a barra do navegador à mostra elas não cabem em largura cheia —
+   a fileira de baixo ficava cortada na dobra. Em tela alta a grade continua
+   ocupando tudo; em tela baixa ela encolhe. dvh, e não vh, porque vh mede a
+   tela SEM a barra do navegador, que é justamente o que causa o corte. */
 .grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
+  /* width + align-self, e não margin-inline: auto — margem automática em item
+     de coluna flex encolhe a caixa até o conteúdo, e a grade virava uma tira
+     estreita no meio da tela. */
+  width: 100%;
+  max-width: 40dvh;
+  align-self: center;
 }
 
 .slot {
   position: relative;
-  aspect-ratio: 3 / 4;
+  /* A mesma proporção do recorte (PROPORCAO_DA_FOTO, 4:5): o espaço mostra a
+     foto como ela vai ficar, sem cortar mais um pedaço só para caber no slot. */
+  aspect-ratio: 4 / 5;
   border-radius: var(--radius-card-sm);
   border: 0;
   padding: 0;

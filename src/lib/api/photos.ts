@@ -15,19 +15,18 @@ export interface FotoDoPerfil {
   status: "pendente" | "aprovada" | "rejeitada";
 }
 
-/** Troca caminhos do storage por URLs assinadas, em uma só chamada. */
-export async function assinarFotos(paths: string[]): Promise<Map<string, string>> {
+async function assinarArquivos(bucket: string, paths: string[]): Promise<Map<string, string>> {
   const unicos = [...new Set(paths.filter(Boolean))];
   const mapa = new Map<string, string>();
   if (unicos.length === 0) return mapa;
 
   const { data, error } = await supabase.storage
-    .from(BUCKET)
+    .from(bucket)
     .createSignedUrls(unicos, VALIDADE_URL_SEGUNDOS);
 
   // Sem URL a foto some da tela sem explicação — vale deixar o motivo no console.
   if (error) {
-    console.warn("Não foi possível assinar as fotos:", error.message);
+    console.warn(`Não foi possível assinar os arquivos de ${bucket}:`, error.message);
     return mapa;
   }
 
@@ -35,6 +34,42 @@ export async function assinarFotos(paths: string[]): Promise<Map<string, string>
     if (item.signedUrl && item.path) mapa.set(item.path, item.signedUrl);
   }
   return mapa;
+}
+
+/** Troca caminhos do storage por URLs assinadas, em uma só chamada. */
+export async function assinarFotos(paths: string[]): Promise<Map<string, string>> {
+  return assinarArquivos(BUCKET, paths);
+}
+
+/**
+ * O mesmo para as selfies de verificação. Só o painel usa: fora dele, ninguém
+ * além do dono consegue assinar um arquivo deste bucket (policy verificacoes_le).
+ */
+export async function assinarSelfies(paths: string[]): Promise<Map<string, string>> {
+  return assinarArquivos(BUCKET_VERIFICACAO, paths);
+}
+
+/**
+ * Apaga as selfies do bucket depois que a análise termina — é a promessa que a
+ * tela de verificação faz a quem manda a foto. Devolve o que NÃO saiu, para o
+ * painel poder avisar em vez de deixar a promessa quebrada em silêncio.
+ *
+ * Vale o erro da chamada, não a lista de apagados que a API devolve: arquivo
+ * que já não existia não vem nessa lista, e tratá-lo como "não saiu" deixaria
+ * a selfie marcada para sempre como pendente de apagamento, com o painel
+ * pedindo para apagar o que não está mais lá. Sem erro, o bucket não tem mais
+ * nenhum desses caminhos — foi agora ou foi antes.
+ */
+export async function apagarSelfies(paths: string[]): Promise<string[]> {
+  const unicos = [...new Set(paths.filter(Boolean))];
+  if (unicos.length === 0) return [];
+
+  const { error } = await supabase.storage.from(BUCKET_VERIFICACAO).remove(unicos);
+  if (error) {
+    console.warn("Não foi possível apagar as selfies:", error.message);
+    return unicos;
+  }
+  return [];
 }
 
 export async function minhasFotos(): Promise<FotoDoPerfil[]> {

@@ -1,0 +1,169 @@
+.conteudo {
+  flex: 1;
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 40px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ───────── topo da tela ───────── */
+.tituloLinha {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.titulo {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-grow: 1;
+}
+
+.h1 {
+  margin: 0;
+  font: 900 30px var(--font-display);
+}
+
+.intervalo {
+  font: 400 14px var(--font-ui);
+  color: var(--color-ink-60);
+}
+
+.filtros {
+  display: flex;
+  gap: 8px;
+}
+
+.filtro {
+  height: 40px;
+  padding: 0 18px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-line-2);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font: 600 14px var(--font-ui);
+  cursor: pointer;
+}
+
+.filtroAtivo {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  color: #fff;
+}
+
+.nota {
+  margin: 0;
+  font: 400 14px/1.5 var(--font-ui);
+  color: var(--color-ink-60);
+}
+
+.erro {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #fdecec;
+  color: #8a1c15;
+  border-radius: 16px;
+  padding: 14px 18px;
+  font: 600 15px var(--font-ui);
+}
+
+.erroBotao {
+  margin-left: auto;
+  height: 40px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--color-ink);
+  color: #fff;
+  font: 700 14px var(--font-ui);
+  cursor: pointer;
+}
+
+.aviso {
+  margin: 0;
+  background: var(--color-accent-soft);
+  color: var(--color-accent-2);
+  border-radius: 16px;
+  padding: 14px 18px;
+  font: 600 15px var(--font-ui);
+}
+
+/* ───────── lista ───────── */
+.vazio {
+  background: var(--color-surface);
+  border-radius: 18px;
+  padding: 48px 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.vazioTitulo {
+  margin: 0;
+  font: 800 18px var(--font-ui);
+}
+
+.vazioApoio {
+  margin: 0;
+  font: 400 14px var(--font-ui);
+  color: var(--color-ink-60);
+}
+
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  transition: opacity 0.2s var(--ease-standard);
+}
+
+.listaCarregando {
+  opacity: 0.45;
+}
+
+.cartao {
+  background: var(--color-surface);
+  border-radius: 18px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ───────── ações ───────── */
+.acoes {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  border-top: 1px solid var(--color-line-3);
+  padding-top: 16px;
+}
+
+.notaAcao {
+  flex-grow: 1;
+  font: 500 13px/1.4 var(--font-ui);
+  color: var(--color-ink-60);
+}
+
+.botao {
+  height: 42px;
+  padding: 0 18px;
+  border: 1px solid var(--color-line-2);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font: 700 14px var(--font-ui);
+  cursor: pointer;
+}
+
+.botao:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}

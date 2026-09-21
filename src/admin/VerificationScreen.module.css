@@ -1,0 +1,261 @@
+.conteudo {
+  flex: 1;
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 40px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ───────── topo da tela ───────── */
+.tituloLinha {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.titulo {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-grow: 1;
+}
+
+.h1 {
+  margin: 0;
+  font: 900 30px var(--font-display);
+}
+
+.intervalo {
+  font: 400 14px var(--font-ui);
+  color: var(--color-ink-60);
+}
+
+.filtros {
+  display: flex;
+  gap: 8px;
+}
+
+.filtro {
+  height: 40px;
+  padding: 0 18px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-line-2);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font: 600 14px var(--font-ui);
+  cursor: pointer;
+}
+
+.filtroAtivo {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  color: #fff;
+}
+
+.nota {
+  margin: 0;
+  font: 400 14px/1.5 var(--font-ui);
+  color: var(--color-ink-60);
+}
+
+.erro {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #fdecec;
+  color: #8a1c15;
+  border-radius: 16px;
+  padding: 14px 18px;
+  font: 600 15px var(--font-ui);
+}
+
+.erroBotao {
+  margin-left: auto;
+  height: 40px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--color-ink);
+  color: #fff;
+  font: 700 14px var(--font-ui);
+  cursor: pointer;
+}
+
+.aviso {
+  margin: 0;
+  background: var(--color-accent-soft);
+  color: var(--color-accent-2);
+  border-radius: 16px;
+  padding: 14px 18px;
+  font: 600 15px var(--font-ui);
+}
+
+/* ───────── lista ───────── */
+.vazio {
+  background: var(--color-surface);
+  border-radius: 18px;
+  padding: 48px 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.vazioTitulo {
+  margin: 0;
+  font: 800 18px var(--font-ui);
+}
+
+.vazioApoio {
+  margin: 0;
+  font: 400 14px var(--font-ui);
+  color: var(--color-ink-60);
+}
+
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  transition: opacity 0.2s var(--ease-standard);
+}
+
+.listaCarregando {
+  opacity: 0.45;
+}
+
+.cartao {
+  background: var(--color-surface);
+  border-radius: 18px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ───────── ações ───────── */
+.acoes {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  border-top: 1px solid var(--color-line-3);
+  padding-top: 16px;
+}
+
+.notaAcao {
+  flex-grow: 1;
+  font: 500 13px/1.4 var(--font-ui);
+  color: var(--color-ink-60);
+}
+
+.botao {
+  height: 42px;
+  padding: 0 18px;
+  border: 1px solid var(--color-line-2);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font: 700 14px var(--font-ui);
+  cursor: pointer;
+}
+
+.botao:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+/* ───────── selfie ao lado das fotos ───────── */
+/* Lado a lado e do mesmo tamanho de propósito: a pergunta é "é a mesma
+   pessoa?", e comparar uma miniatura com uma imagem grande atrapalha. */
+.comparacao {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.coluna {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.colunaTitulo {
+  margin: 0;
+  font: 700 12px var(--font-ui);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--color-ink-60);
+}
+
+.selfies,
+.fotos {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.selfie,
+.foto {
+  width: 152px;
+  height: 190px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--color-line-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.selfie img,
+.foto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.semArquivo {
+  color: var(--color-ink-40);
+  font: 600 12px/1.4 var(--font-ui);
+  text-align: center;
+  padding: 0 10px;
+}
+
+.selo {
+  font: 700 11px var(--font-ui);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  background: var(--color-line-3);
+  color: var(--color-ink-60);
+  padding: 4px 9px;
+  border-radius: var(--radius-pill);
+}
+
+.pergunta {
+  flex-grow: 1;
+  font: 700 13px/1.4 var(--font-ui);
+  color: var(--color-ink);
+}
+
+.notaGrave {
+  flex-grow: 0;
+  color: #8a1c15;
+  font-weight: 700;
+}
+
+.botaoPrincipal {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  color: #fff;
+}
+
+.botaoGrave {
+  border-color: #f0b3ad;
+  background: #fdecec;
+  color: #8a1c15;
+}

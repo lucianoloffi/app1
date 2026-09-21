@@ -149,3 +149,11 @@
 .hiddenInput {
   display: none;
 }
+
+/* Mesma medida do retrato, com a marca no lugar da foto que ainda não existe. */
+.faceVazia {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-accent-soft);
+}

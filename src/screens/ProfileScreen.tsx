@@ -1,4 +1,5 @@
-import type { Filters, Intention, MyProfile } from "../types";
+import { LoviMark } from "../components/icons/LoviMark";
+import type { Filters, Intention, MyProfile, VerificationStatus } from "../types";
 import { ageFromBirthdate } from "../utils/age";
 import { computeCompleteness } from "../utils/completeness";
 import styles from "./ProfileScreen.module.css";
@@ -20,6 +21,20 @@ function resumoDeIntencoes(intencoes: Intention[]): string {
   if (intencoes.length >= 3) return "Todas as intenções";
   return intencoes.map((item) => INTENTION_FILTER_LABEL[item]).join(" e ");
 }
+
+/**
+ * O aviso ao lado de "Verificar meu perfil". Antes eram dois estados para
+ * quatro: tudo que não fosse 'aprovada' aparecia como "pendente", então quem
+ * nunca pediu o selo lia que havia algo em análise, e quem teve a selfie
+ * recusada lia a mesma coisa e ficava esperando um desfecho que já saiu.
+ * Sem pedido nenhum, o certo é não prometer nada — a linha já convida.
+ */
+const AVISO_DA_VERIFICACAO: Record<VerificationStatus, string> = {
+  nao_solicitada: "",
+  pendente: "em análise",
+  aprovada: "verificado",
+  rejeitada: "envie outra selfie",
+};
 
 const RING_RADIUS = 41;
 const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
@@ -49,6 +64,7 @@ export function ProfileScreen({
   const photosCount = myProfile?.photos.length ?? 0;
   const { pct, hint } = computeCompleteness(myProfile, photosCount);
   const dashOffset = RING_CIRCUMFERENCE * (1 - pct / 100);
+  const aviso = AVISO_DA_VERIFICACAO[myProfile?.verificationStatus ?? "nao_solicitada"];
 
   const filtersSummary = `${GENDER_FILTER_LABEL[filters.interestedIn]} · ${filters.minAge}–${filters.maxAge} anos · até ${filters.distanceKm} km · ${resumoDeIntencoes(filters.intentions)}`;
 
@@ -83,11 +99,21 @@ export function ProfileScreen({
               transform="rotate(-90 44 44)"
             />
           </svg>
-          <img
-            className={styles.avatar}
-            src={myProfile?.photos[0] ?? "https://i.pravatar.cc/200?img=15"}
-            alt={myProfile?.name ?? "Você"}
-          />
+          {/* Sem foto, a marca do Lovi — nunca um rosto. Aqui havia um avatar
+              do i.pravatar.cc: uma pessoa de verdade, desconhecida, baixada de
+              um serviço de fora a cada abertura da tela. Demorava a carregar e
+              aparecia como se fosse a foto de quem está olhando. */}
+          {myProfile?.photos[0] ? (
+            <img
+              className={styles.avatar}
+              src={myProfile.photos[0]}
+              alt={myProfile.name || "Você"}
+            />
+          ) : (
+            <span className={`${styles.avatar} ${styles.avatarVazio}`}>
+              <LoviMark size={30} variant="purple" />
+            </span>
+          )}
           <span className={styles.pct}>{pct}%</span>
         </div>
         <div className={styles.headerMain}>
@@ -172,11 +198,11 @@ export function ProfileScreen({
             onClick={onVerifyProfile}
           >
             Verificar meu perfil
-            <span
-              className={verified ? styles.verifyHintDone : styles.verifyHint}
-            >
-              {verified ? "verificado" : "pendente"}
-            </span>
+            {aviso && (
+              <span className={verified ? styles.verifyHintDone : styles.verifyHint}>
+                {aviso}
+              </span>
+            )}
           </button>
           <button
             type="button"

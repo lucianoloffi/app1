@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { LoviMark } from "../components/icons/LoviMark";
 import { enviarSelfieDeVerificacao } from "../lib/api/photos";
 import { mensagemDeErro } from "../lib/errors";
 import type { VerificationStatus } from "../types";
@@ -101,11 +102,21 @@ export function VerifyProfileScreen({
             enviando ? styles.ringLoading : ""
           }`}
         >
-          <img
-            className={enviando ? `${styles.face} ${styles.faceLoading}` : styles.face}
-            src={photo ?? "https://i.pravatar.cc/300?img=15"}
-            alt="Sua foto"
-          />
+          {/* Mesmo motivo da tela de Perfil: sem foto do perfil, a marca — e
+              não o rosto de um estranho vindo de um serviço de fora. Na tela de
+              verificação era pior: o rosto aparecia justamente ao lado do texto
+              que fala em comparar a selfie com as suas fotos. */}
+          {photo ? (
+            <img
+              className={enviando ? `${styles.face} ${styles.faceLoading}` : styles.face}
+              src={photo}
+              alt="Sua foto"
+            />
+          ) : (
+            <span className={`${styles.face} ${styles.faceVazia}`}>
+              <LoviMark size={56} variant="purple" />
+            </span>
+          )}
         </div>
         <p className={styles.title2}>{title}</p>
         <p className={styles.support}>{body}</p>

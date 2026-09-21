@@ -184,7 +184,47 @@ export function AccountScreen({
         )}
       </div>
 
+      {/* A caixa dos dados sensíveis vem primeiro de propósito: é a maior
+          das duas, e no 390×844 a segunda nascia fora da tela. Com a maior
+          em cima, o pedaço que sobra embaixo mostra que ainda há o que
+          rolar — antes a de cima terminava certinha na dobra, e nada na tela
+          dizia que faltava marcar mais uma. É também a que a LGPD pede em
+          destaque. */}
       <div className={styles.consentGroup}>
+        <button
+          type="button"
+          className={styles.consentRowHighlight}
+          onClick={onToggleSensitiveData}
+        >
+          <Check on={acceptedSensitiveData} />
+          <span className={styles.consentMain}>
+            <p className={styles.consentTitle}>Autorizo o tratamento dos meus dados sensíveis.</p>
+            <p className={styles.consentText}>
+              Interesse (indica orientação sexual), cidade e fotos. Sem eles o Lovi não funciona.
+              Revogar, quando quiser, encerra a conta.
+            </p>
+            <span className={styles.legalLinks}>
+              <span
+                role="link"
+                tabIndex={0}
+                className={styles.legalLink}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onOpenLegal("privacidade");
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.stopPropagation();
+                    onOpenLegal("privacidade");
+                  }
+                }}
+              >
+                Política de Privacidade
+              </span>
+            </span>
+          </span>
+        </button>
+
         <button type="button" className={styles.consentRow} onClick={onToggleTerms}>
           <Check on={acceptedTerms} />
           <span className={styles.consentMain}>
@@ -223,40 +263,6 @@ export function AccountScreen({
                 }}
               >
                 Diretrizes de Comunidade
-              </span>
-            </span>
-          </span>
-        </button>
-
-        <button
-          type="button"
-          className={styles.consentRowHighlight}
-          onClick={onToggleSensitiveData}
-        >
-          <Check on={acceptedSensitiveData} />
-          <span className={styles.consentMain}>
-            <p className={styles.consentTitle}>Autorizo o tratamento dos meus dados sensíveis.</p>
-            <p className={styles.consentText}>
-              Interesse (indica orientação sexual), cidade e fotos. Sem eles o Lovi não funciona.
-              Revogar, quando quiser, encerra a conta.
-            </p>
-            <span className={styles.legalLinks}>
-              <span
-                role="link"
-                tabIndex={0}
-                className={styles.legalLink}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onOpenLegal("privacidade");
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.stopPropagation();
-                    onOpenLegal("privacidade");
-                  }
-                }}
-              >
-                Política de Privacidade
               </span>
             </span>
           </span>

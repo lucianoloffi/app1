@@ -131,44 +131,13 @@
 }
 
 /* ───────── quem foi denunciado ───────── */
+/* A ficha em cima e as fotos embaixo, ocupando a largura: cada foto agora tem
+   o próprio botão de rejeitar, e em coluna não caberiam as seis. */
 .pessoa {
   display: flex;
-  gap: 18px;
-  align-items: flex-start;
-}
-
-.fotos {
-  flex: none;
-  display: flex;
-  gap: 6px;
-}
-
-.foto {
-  width: 72px;
-  height: 90px;
-  border-radius: 12px;
-  overflow: hidden;
-  background: var(--color-line-3);
-  display: block;
-}
-
-.foto img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.semFoto {
-  width: 72px;
-  height: 90px;
-  border-radius: 12px;
-  background: var(--color-line-3);
-  color: var(--color-ink-40);
-  font: 600 12px var(--font-ui);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+  gap: 14px;
+  align-items: stretch;
 }
 
 .dados {

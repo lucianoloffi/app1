@@ -1,7 +1,7 @@
 # Política de Privacidade — Lovi
 
 **Última atualização:** 25 de setembro de 2026
-**Versão:** 1.1
+**Versão:** 1.2
 
 Esta política explica quais dados o Lovi coleta, por que coleta e o que você
 pode fazer a respeito. Ela segue a Lei Geral de Proteção de Dados (Lei
@@ -31,6 +31,7 @@ excluiremos os dados imediatamente.
 **Dados que você fornece:**
 - Nome, e-mail, telefone celular e data de nascimento
 - Fotos de perfil
+- A **selfie de verificação**, se você pedir o selo de perfil verificado
 - Gênero, altura, profissão, status de relacionamento
 - Descrição pessoal ("Sobre você"), o que você busca, interesses e estilo de vida
 - Suas preferências de busca, incluindo por quais gêneros você tem interesse
@@ -53,11 +54,18 @@ pela LGPD:
 - **Orientação sexual**, inferida da sua preferência de interesse
 - **Fotos**, que podem revelar características pessoais
 - **Localização**
+- A **selfie de verificação**, que é uma imagem do seu rosto
 
 Esses dados só são tratados mediante seu **consentimento específico e destacado**,
 solicitado separadamente no momento do cadastro. Você pode revogar esse
 consentimento a qualquer momento, o que implica o encerramento da sua conta,
 já que sem esses dados o serviço não funciona.
+
+A selfie de verificação é a exceção: ela é **opcional** — o Lovi funciona sem o
+selo — e o consentimento é o ato de enviá-la. Ela **não** passa por
+reconhecimento facial nem por qualquer análise automática: uma pessoa da nossa
+equipe compara a selfie com as fotos do seu perfil e decide. Terminada a
+análise, o arquivo é **apagado** (veja a seção 6.2).
 
 ---
 
@@ -72,6 +80,7 @@ já que sem esses dados o serviço não funciona.
 | Preferência de interesse | Mostrar perfis compatíveis | Consentimento específico |
 | Localização | Mostrar pessoas próximas e calcular distância | Consentimento específico |
 | Fotos | Compor seu perfil | Consentimento específico |
+| Selfie de verificação | Confirmar que o perfil é de quem diz ser | Consentimento específico |
 | Mensagens | Permitir conversas entre matches | Execução de contrato |
 | Denúncias e bloqueios | Segurança da comunidade e moderação | Legítimo interesse |
 | Cópia da conversa anexada a uma denúncia | Analisar a denúncia e proteger quem foi alvo | Legítimo interesse |
@@ -126,6 +135,27 @@ app e pode contestar pelo e-mail de contato desta política.
 
 ---
 
+## 6.2. Verificação de perfil e moderação de fotos
+
+**A selfie de verificação.** Se você pedir o selo de perfil verificado, uma
+pessoa da nossa equipe abre a sua selfie ao lado das fotos do seu perfil e
+compara as duas. É o único uso que fazemos dela: ela não vai para o seu perfil,
+não é mostrada a ninguém além de quem analisa e não alimenta nenhum sistema de
+reconhecimento facial.
+
+Assim que a análise termina — aprovada ou recusada —, **o arquivo da selfie é
+apagado do nosso servidor**. O que fica guardado é apenas o registro de que
+houve um pedido, quando ele foi decidido e qual foi a decisão.
+
+**As fotos do perfil.** A sua foto entra no ar assim que você a envia; a
+revisão vem depois. Nossa equipe pode olhar as fotos enviadas e **reprovar** as
+que violem as Diretrizes da Comunidade. Reprovar não apaga a foto: ela deixa de
+ser exibida aos outros usuários, continua visível para você e pode ser
+restabelecida se a reprovação tiver sido um engano. Uma foto que seja objeto de
+uma denúncia continua guardada enquanto a denúncia existir.
+
+---
+
 ## 7. Com quem compartilhamos
 
 Não vendemos seus dados e não os compartilhamos para fins publicitários.
@@ -149,6 +179,8 @@ proteção de dados, conforme o art. 33 da LGPD.
 ## 8. Por quanto tempo guardamos
 
 - **Enquanto sua conta existir:** todos os dados do perfil
+- **Selfie de verificação:** apagada assim que a análise termina; fica apenas o
+  registro do pedido e da decisão
 - **Após a exclusão da conta:** os dados de perfil, fotos, curtidas e mensagens
   são apagados em até 30 dias
 - **Exceções:** registros de acesso são mantidos por 6 meses (art. 15 do Marco

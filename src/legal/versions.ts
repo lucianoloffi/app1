@@ -1,6 +1,6 @@
 export const LEGAL_VERSIONS = {
   termos: "1.0",
-  privacidade: "1.1",
+  privacidade: "1.2",
   diretrizes: "1.1",
   dados_sensiveis: "1.0",
 } as const;

@@ -1,13 +1,17 @@
 import { useCallback, useEffect, useState } from "react";
-import { contarDenunciasAbertas, souAdmin } from "../lib/api/admin";
+import { contarDenunciasAbertas, contarVerificacoesPendentes, souAdmin } from "../lib/api/admin";
 import { aoMudarSessao, sair, usuarioAtual } from "../lib/api/auth";
 import { mensagemDeErro } from "../lib/errors";
 import { erroDeConfiguracao } from "../lib/supabaseClient";
-import { AdminShell, type AbaDoPainel } from "./AdminShell";
+import { AdminShell, type AbaDoPainel, type AvisosDoPainel } from "./AdminShell";
 import { LoginScreen } from "./LoginScreen";
 import { ModerationScreen } from "./ModerationScreen";
 import { NumbersScreen } from "./NumbersScreen";
+import { PhotosScreen } from "./PhotosScreen";
+import { VerificationScreen } from "./VerificationScreen";
 import styles from "./AdminApp.module.css";
+
+const SEM_AVISOS: AvisosDoPainel = { denunciasAbertas: null, verificacoesPendentes: null };
 
 type Etapa =
   | { tipo: "carregando" }
@@ -25,7 +29,18 @@ export function AdminApp() {
   const [etapa, setEtapa] = useState<Etapa>({ tipo: "carregando" });
   const [aba, setAba] = useState<AbaDoPainel>("numeros");
   /** null = o número ainda não chegou; o aviso na aba só aparece com número. */
-  const [denunciasAbertas, setDenunciasAbertas] = useState<number | null>(null);
+  const [avisos, setAvisos] = useState<AvisosDoPainel>(SEM_AVISOS);
+
+  const anotarDenuncias = useCallback(
+    (valor: number) => setAvisos((atual) => ({ ...atual, denunciasAbertas: valor })),
+    [],
+  );
+  const anotarVerificacoes = useCallback(
+    (valor: number) => setAvisos((atual) => ({ ...atual, verificacoesPendentes: valor })),
+    [],
+  );
+  /** Fotos não tem aviso na aba, mas a tela pede um callback. */
+  const ignorarContagem = useCallback(() => {}, []);
 
   const verificar = useCallback(async () => {
     try {
@@ -48,16 +63,23 @@ export function AdminApp() {
   // aba: é ele que dispara a checagem, sem uma chamada a mais ao montar.
   useEffect(() => aoMudarSessao(() => void verificar()), [verificar]);
 
-  // O aviso de denúncias esperando decisão precisa estar certo já na tela de
-  // Números — quem abre o painel tem de ver que há trabalho sem ir procurar.
+  // Os avisos precisam estar certos já na tela de Números — quem abre o painel
+  // tem de ver que há trabalho sem ir procurar aba por aba. São duas consultas
+  // de uma contagem só, lado a lado; a fila de verdade fica para quando a aba
+  // for aberta.
   useEffect(() => {
     if (etapa.tipo !== "painel") return;
     void contarDenunciasAbertas()
-      .then(setDenunciasAbertas)
+      .then(anotarDenuncias)
       .catch(() => {
         /* o número é um aviso; a tela de Moderação mostra o erro de verdade */
       });
-  }, [etapa.tipo]);
+    void contarVerificacoesPendentes()
+      .then(anotarVerificacoes)
+      .catch(() => {
+        /* idem: quem mostra o erro é a tela de Verificação */
+      });
+  }, [etapa.tipo, anotarDenuncias, anotarVerificacoes]);
 
   async function aoSair() {
     try {
@@ -65,7 +87,7 @@ export function AdminApp() {
     } catch {
       /* saindo de qualquer forma */
     }
-    setDenunciasAbertas(null);
+    setAvisos(SEM_AVISOS);
     setAba("numeros");
     setEtapa({ tipo: "entrar" });
   }
@@ -102,14 +124,16 @@ export function AdminApp() {
       aba={aba}
       onTrocarAba={setAba}
       email={etapa.email}
-      denunciasAbertas={denunciasAbertas}
+      avisos={avisos}
       onSair={() => void aoSair()}
     >
-      {aba === "numeros" ? (
-        <NumbersScreen />
-      ) : (
-        <ModerationScreen onContagem={setDenunciasAbertas} />
-      )}
+      {/* Os callbacks são estáveis de propósito: cada tela põe o onContagem na
+          lista de dependências do efeito que carrega a fila, e uma função nova
+          a cada render faria a fila recarregar sem parar. */}
+      {aba === "numeros" && <NumbersScreen />}
+      {aba === "moderacao" && <ModerationScreen onContagem={anotarDenuncias} />}
+      {aba === "verificacao" && <VerificationScreen onContagem={anotarVerificacoes} />}
+      {aba === "fotos" && <PhotosScreen onContagem={ignorarContagem} />}
     </AdminShell>
   );
 }
