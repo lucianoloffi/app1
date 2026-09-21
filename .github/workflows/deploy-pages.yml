@@ -3,7 +3,12 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches:
-      - claude/stoic-faraday-twwgpu
+      - fase1-supabase
+    # Mudou só migration ou documentação? O bundle é o mesmo, não há o que
+    # publicar. As migrations são aplicadas à mão no Supabase de qualquer jeito.
+    paths-ignore:
+      - "supabase/**"
+      - "**.md"
   workflow_dispatch:
 
 permissions:
@@ -17,12 +22,17 @@ concurrency:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    # Fixo em 24.04: em 19/10/2026 o ubuntu-latest passa a apontar para o
+    # Ubuntu 26 e o build trocaria de imagem sem ninguém ter pedido. Migrar
+    # para 26.04 é uma decisão a tomar e testar, não uma surpresa de calendário.
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
-          node-version: 20
+          # O Node 20 saiu de suporte em 30/04/2026. O 22 é o que o projeto
+          # usa localmente (lint e build conferidos nele).
+          node-version: 22
           cache: npm
       - run: npm ci
       - run: npm run build
@@ -31,16 +41,16 @@ jobs:
           # duas em Settings → Secrets and variables → Actions.
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: dist
 
   deploy:
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
