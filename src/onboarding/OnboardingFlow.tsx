@@ -114,11 +114,11 @@ export function OnboardingFlow({
     }
   }
 
-  async function enviarFotoDoPasso(indice: number, arquivo: File) {
+  async function enviarFotoDoPasso(indice: number, imagem: Blob) {
     if (ocupado) return;
     setOcupado(true);
     try {
-      const foto = await enviarFoto(arquivo);
+      const foto = await enviarFoto(imagem);
       setFotos((prev) => prev.map((item, i) => (i === indice ? foto : item)));
       setState((prev) => ({
         ...prev,
@@ -261,8 +261,9 @@ export function OnboardingFlow({
         <PhotosScreen
           photos={state.photos}
           busy={ocupado}
-          onPickPhoto={(index, file) => void enviarFotoDoPasso(index, file)}
+          onPickPhoto={enviarFotoDoPasso}
           onRemovePhoto={(index) => void removerFotoDoPasso(index)}
+          onShowToast={onShowToast}
           onBack={() => goTo("gender-interest-city")}
           onNext={() => goTo("intention-interests")}
         />

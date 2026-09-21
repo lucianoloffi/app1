@@ -61,6 +61,20 @@
   display: block;
 }
 
+/* Por cima da prévia enquanto a foto sobe. */
+.uploading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: rgba(22, 33, 26, 0.45);
+  color: #fff;
+  font: 700 11px var(--font-ui);
+}
+
 .mainBadge {
   position: absolute;
   top: 6px;

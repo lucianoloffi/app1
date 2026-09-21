@@ -55,6 +55,12 @@ o `.gitignore` já cobre, mas não deixe sobrando.
   usuário vem sempre do JWT, nunca do corpo da requisição.
 - **`src/screens/`** e **`src/onboarding/screens/`** — uma tela por arquivo.
 - **`src/components/`** — componentes compartilhados.
+- **Foto de perfil nova** (cadastro e edição): arquivo escolhido → `validaFotoEscolhida`
+  → `PhotoCropSheet` (recorte 4:5, `PROPORCAO_DA_FOTO`, com a biblioteca
+  `react-easy-crop`) → `recortaImagem` (recorta e comprime num passo, JPEG até 1280px)
+  → `enviarFoto(blob)`, que sobe o arquivo como chega. O caminho inteiro, com o
+  carregando sobre a prévia, está em `src/hooks/useEscolhaDeFoto.ts`. A selfie de
+  verificação não passa por recorte (`enviarSelfieDeVerificacao`).
 
 ## Convenções
 

@@ -282,9 +282,9 @@ export function EditProfileScreen({ profile, onCancel, onSave, onShowToast }: Ed
           onShowToast={onShowToast}
           photos={photos}
           busy={fotosOcupado}
-          onAddPhoto={(file) =>
-            void comFotos(async () => {
-              await enviarFoto(file);
+          onAddPhoto={(imagem) =>
+            comFotos(async () => {
+              await enviarFoto(imagem);
             }, "Foto adicionada")
           }
           onRemovePhoto={(index) =>

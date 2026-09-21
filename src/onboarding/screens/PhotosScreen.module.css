@@ -42,6 +42,21 @@
   text-align: center;
 }
 
+/* Por cima da prévia enquanto a foto sobe: a pessoa já vê a foto que escolheu
+   e entende que falta só terminar de enviar. */
+.uploading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: rgba(22, 33, 26, 0.45);
+  color: #fff;
+  font: 700 13px var(--font-ui);
+}
+
 .hiddenInput {
   display: none;
 }

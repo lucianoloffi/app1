@@ -1,6 +1,6 @@
 import { supabase } from "../supabaseClient";
 import { lancaSeErro, ErroDeApp } from "../errors";
-import { comprimeImagem, validaArquivoDeImagem } from "../imagem";
+import { comprimeImagem, TAMANHO_MAXIMO_BYTES, validaArquivoDeImagem } from "../imagem";
 
 const BUCKET = "fotos";
 const BUCKET_VERIFICACAO = "verificacoes";
@@ -64,15 +64,19 @@ export async function minhasFotos(): Promise<FotoDoPerfil[]> {
   }));
 }
 
-export async function enviarFoto(arquivo: File): Promise<FotoDoPerfil> {
-  const problema = validaArquivoDeImagem(arquivo);
-  if (problema) throw new ErroDeApp(problema);
+/**
+ * Recebe a foto já recortada e comprimida (recortaImagem, na janela de
+ * recorte): o que chega aqui é o arquivo final, sobe como está.
+ */
+export async function enviarFoto(imagem: Blob): Promise<FotoDoPerfil> {
+  if (imagem.size > TAMANHO_MAXIMO_BYTES)
+    throw new ErroDeApp("A imagem é grande demais. Escolha outra.");
 
   const { data: sessao } = await supabase.auth.getUser();
   const userId = sessao.user?.id;
   if (!userId) throw new ErroDeApp("Sua sessão expirou. Entre de novo.");
 
-  const blob = await comprimeImagem(arquivo);
+  const blob = imagem;
   const path = `${userId}/${crypto.randomUUID()}.jpg`;
 
   const { error: erroUpload } = await supabase.storage

@@ -1,0 +1,112 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: #0d140f;
+  display: flex;
+  justify-content: center;
+}
+
+/* Mesma largura máxima do app: no computador a janela fica do tamanho do
+   celular, no meio da tela, em vez de esticar a foto na largura toda. */
+.panel {
+  width: 100%;
+  max-width: 430px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  box-sizing: border-box;
+}
+
+.header {
+  flex: none;
+  padding: 20px 24px 14px;
+}
+
+.title {
+  margin: 0;
+  font: 700 18px var(--font-ui);
+  color: #fff;
+}
+
+.support {
+  margin: 6px 0 0;
+  font: 400 14px/1.45 var(--font-ui);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* O Cropper se posiciona dentro do primeiro ancestral posicionado e ocupa o
+   espaço todo dele: precisa de position e de altura definida. */
+.cropArea {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+
+.loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.controls {
+  flex: none;
+  padding: 18px 24px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.zoomRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.zoomIcon {
+  font: 700 20px var(--font-ui);
+  color: rgba(255, 255, 255, 0.8);
+  width: 16px;
+  text-align: center;
+}
+
+.zoom {
+  flex: 1;
+  accent-color: var(--color-accent);
+}
+
+.buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.cancel,
+.confirm {
+  flex: 1;
+  border: 0;
+  cursor: pointer;
+  font: 700 16px var(--font-ui);
+  padding: 16px;
+  border-radius: var(--radius-pill);
+}
+
+.cancel {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+.confirm {
+  background: var(--color-accent);
+  color: #fff;
+  box-shadow: var(--shadow-btn-primary);
+}
+
+.cancel:disabled,
+.confirm:disabled {
+  opacity: 0.55;
+  cursor: default;
+}

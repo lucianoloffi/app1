@@ -1,0 +1,17 @@
+/* A animação fica aqui (e não em motion.css) porque só este componente a usa;
+   quem precisa de um carregando usa o componente. A lovi-spin de motion.css
+   gira devagar, para decoração: um carregando precisa parecer ativo. */
+@keyframes girar {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spinner {
+  display: inline-block;
+  box-sizing: border-box;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  animation: girar 0.8s linear infinite;
+}

@@ -1,4 +1,7 @@
 import { useRef } from "react";
+import { PhotoCropSheet } from "../../components/PhotoCropSheet";
+import { Spinner } from "../../components/Spinner";
+import { useEscolhaDeFoto } from "../../hooks/useEscolhaDeFoto";
 import { OnboardingLayout } from "../OnboardingLayout";
 import { MAX_ONBOARDING_PHOTOS, MIN_ONBOARDING_PHOTOS } from "../constants";
 import styles from "./PhotosScreen.module.css";
@@ -6,10 +9,11 @@ import styles from "./PhotosScreen.module.css";
 interface PhotosScreenProps {
   photos: (string | null)[];
   busy?: boolean;
-  onPickPhoto: (index: number, file: File) => void;
+  onPickPhoto: (index: number, image: Blob) => Promise<void>;
   onRemovePhoto: (index: number) => void;
   onBack: () => void;
   onNext: () => void;
+  onShowToast: (message: string) => void;
 }
 
 export function PhotosScreen({
@@ -19,13 +23,12 @@ export function PhotosScreen({
   onRemovePhoto,
   onBack,
   onNext,
+  onShowToast,
 }: PhotosScreenProps) {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const isValid = photos.filter(Boolean).length >= MIN_ONBOARDING_PHOTOS && !busy;
 
-  function handleFile(index: number, file: File | null) {
-    if (file) onPickPhoto(index, file);
-  }
+  const foto = useEscolhaDeFoto({ busy, onErro: onShowToast, onEnviar: onPickPhoto });
 
   function handleTap(index: number) {
     if (busy) return;
@@ -50,18 +53,30 @@ export function PhotosScreen({
       <div className={styles.grid}>
         {Array.from({ length: MAX_ONBOARDING_PHOTOS }, (_, index) => {
           const photo = photos[index];
+          const enviando = foto.envio?.indice === index ? foto.envio.previa : null;
           return (
             <div
               key={index}
               role="button"
               tabIndex={0}
-              className={photo ? `${styles.slot} ${styles.slotFilled}` : `${styles.slot} ${styles.slotEmpty}`}
+              className={
+                photo || enviando ? `${styles.slot} ${styles.slotFilled}` : `${styles.slot} ${styles.slotEmpty}`
+              }
+              aria-busy={enviando ? true : undefined}
               onClick={() => handleTap(index)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") handleTap(index);
               }}
             >
-              {photo ? (
+              {enviando ? (
+                <>
+                  <img className={styles.photo} src={enviando} alt="" />
+                  <span className={styles.uploading}>
+                    <Spinner label="Enviando a foto" />
+                    Enviando…
+                  </span>
+                </>
+              ) : photo ? (
                 <img className={styles.photo} src={photo} alt={`Foto ${index + 1}`} />
               ) : (
                 <>
@@ -82,13 +97,26 @@ export function PhotosScreen({
                 className={styles.hiddenInput}
                 type="file"
                 accept="image/*"
-                onChange={(e) => handleFile(index, e.target.files?.[0] ?? null)}
+                onChange={(e) => {
+                  foto.escolher(index, e.target.files?.[0] ?? null);
+                  // Sem limpar, escolher a mesma foto de novo (depois de cancelar
+                  // o recorte, por exemplo) não dispara onChange.
+                  e.target.value = "";
+                }}
               />
             </div>
           );
         })}
       </div>
       <p className={styles.note}>Toque para enviar. A primeira foto é a principal.</p>
+      {foto.pendente && (
+        <PhotoCropSheet
+          arquivo={foto.pendente.arquivo}
+          onCancel={foto.cancelar}
+          onConfirm={(imagem) => void foto.confirmar(imagem)}
+          onError={onShowToast}
+        />
+      )}
     </OnboardingLayout>
   );
 }
