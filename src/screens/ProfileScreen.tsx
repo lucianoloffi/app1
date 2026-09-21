@@ -47,7 +47,7 @@ export function ProfileScreen({
 }: ProfileScreenProps) {
   const age = myProfile ? ageFromBirthdate(myProfile.birthdate) : null;
   const photosCount = myProfile?.photos.length ?? 0;
-  const { pct, hint, missing } = computeCompleteness(myProfile, photosCount);
+  const { pct, hint } = computeCompleteness(myProfile, photosCount);
   const dashOffset = RING_CIRCUMFERENCE * (1 - pct / 100);
 
   const filtersSummary = `${GENDER_FILTER_LABEL[filters.interestedIn]} · ${filters.minAge}–${filters.maxAge} anos · até ${filters.distanceKm} km · ${resumoDeIntencoes(filters.intentions)}`;
@@ -121,37 +121,6 @@ export function ProfileScreen({
       </button>
 
       <div className={styles.section}>
-        {/* Some quando não falta nada: o cartão existe para ser resolvido. */}
-        {missing.length > 0 && (
-          <button type="button" className={styles.completeCard} onClick={onOpenEdit}>
-            <span className={styles.completeHeader}>
-              <span className={styles.completeIcon}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                  <path
-                    d="M12 3.4l2.3 5 5.4.6-4 3.7 1.1 5.3-4.8-2.7-4.8 2.7L8.3 12.7l-4-3.7 5.4-.6z"
-                    fill="#fff"
-                    stroke="#5B34C9"
-                    strokeWidth={1.7}
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </span>
-              <span className={styles.completeMain}>
-                <span className={styles.completeTitle}>Complete seu perfil</span>
-                <span className={styles.completeSupport}>Toque para preencher o que falta</span>
-              </span>
-              <span className={styles.rowChevron}>›</span>
-            </span>
-            <span className={styles.completeChips}>
-              {missing.slice(0, 3).map((item) => (
-                <span key={item} className={styles.completeChip}>
-                  {item}
-                </span>
-              ))}
-            </span>
-          </button>
-        )}
-
         <button
           type="button"
           className={styles.filtersCard}

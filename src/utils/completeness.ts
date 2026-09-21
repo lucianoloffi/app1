@@ -2,15 +2,14 @@ import type { MyProfile } from "../types";
 
 export interface Completeness {
   pct: number;
+  /** O que falta, em uma linha, embaixo do nome no topo do perfil. */
   hint: string;
-  /** O que ainda falta, em ordem de peso — alimenta o cartão do perfil. */
-  missing: string[];
 }
 
 const TOTAL_ITEMS = 16; // 10 campos + 6 slots de foto
 
 export function computeCompleteness(profile: MyProfile | null, photosCount: number): Completeness {
-  if (!profile) return { pct: 0, hint: "Faltam suas informações", missing: [] };
+  if (!profile) return { pct: 0, hint: "Faltam suas informações" };
 
   const lifestyleComplete = Boolean(
     profile.lifestyle.bebida && profile.lifestyle.atividade && profile.lifestyle.filhos,
@@ -39,7 +38,15 @@ export function computeCompleteness(profile: MyProfile | null, photosCount: numb
   if (!lifestyleComplete) missing.push("estilo de vida");
   if (!profile.profession) missing.push("profissão");
   if (!profile.relationshipStatus) missing.push("estado civil");
+  // Altura conta na porcentagem mas não estava nesta lista: quem não tinha
+  // preenchido via "Faltam" e mais nada.
+  if (!profile.height) missing.push("sua altura");
 
-  const hint = pct >= 100 ? "Perfil completo" : `Faltam ${missing.slice(0, 2).join(" e ")}`;
-  return { pct, hint, missing };
+  if (pct >= 100 || missing.length === 0) return { pct, hint: "Perfil completo" };
+
+  // "Falta 1 foto", "Faltam 2 fotos", "Faltam sua bio e altura": plural quando
+  // são dois itens ou quando o primeiro já é plural (começa por número > 1).
+  const itens = missing.slice(0, 2);
+  const plural = itens.length > 1 || /^([2-9]|\d{2,}) /.test(itens[0]);
+  return { pct, hint: `${plural ? "Faltam" : "Falta"} ${itens.join(" e ")}` };
 }
