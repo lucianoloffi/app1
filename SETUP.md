@@ -22,6 +22,7 @@ No painel, **SQL Editor** → **New query**. Cole e execute **na ordem**, um arq
 8. `supabase/migrations/20260917_0008_intencao_filtro_multipla.sql` — intenção do filtro vira múltipla escolha
 9. `supabase/migrations/20260917_0009_onboarding_minimo_opcional.sql` — cadastro passa a exigir só 1 foto e nenhum interesse (antes eram 3 e 3)
 10. `supabase/migrations/20260920_0010_colunas_so_do_servidor.sql` — o app deixa de escrever colunas de status (verificação, moderação, denúncia, mensagens); a verificação passa a ser pedida pelo RPC `solicitar_verificacao`
+11. `supabase/migrations/20260921_0011_bloqueio_e_fotos.sql` — bloqueio não pode mais ser desfeito pelo bloqueado; fotos só abrem para quem pode ver o perfil; foto aprovada não troca de imagem
 
 > Sempre que chegar uma migration nova, rode a que falta — pela data no nome dá
 > para saber onde você parou. Todas são seguras de rodar de novo.
@@ -246,3 +247,11 @@ uma pessoa logada escrever colunas que são do servidor (status de verificação
 moderação e denúncia, texto e remetente de mensagem recebida, data de
 consentimento) passavam antes e são recusadas depois; as operações que o app faz
 seguem funcionando e o `service_role` continua com acesso total.
+
+A migration 0011 foi testada do mesmo jeito, com o banco recriado do zero (0001 a 0011).
+Recusado depois dela: quem foi bloqueado reativar a conversa e escrever de novo; quem foi
+bloqueado, ou um estranho, abrir fotos de perfil oculto ou de quem o bloqueou; trocar a
+imagem de uma foto aprovada (sobrescrevendo, ou apagando e reenviando com o mesmo nome);
+mensagem com mais de 2000 caracteres. Segue funcionando: curtir, dar match, conversar,
+desfazer match, ver fotos na fila, nas conversas (mesmo de perfil oculto) e na lista de
+bloqueados, enviar e apagar fotos.

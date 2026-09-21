@@ -45,6 +45,11 @@ o `.gitignore` já cobre, mas não deixe sobrando.
   nasce somente-leitura até haver um grant explícito. Status de verificação, de
   moderação e de denúncia são do servidor; o cliente pede por RPC
   (`solicitar_verificacao`) e a moderação escreve com service role.
+  Cuidado com policy que consulta outra tabela: a consulta roda sob o RLS *daquela*
+  tabela, com os olhos de quem está logado. Quem foi bloqueado não enxerga o bloqueio,
+  ninguém enxerga a foto do outro — a checagem "passa" ou "falha" em silêncio. Nesses
+  casos a policy chama uma função `security definer` que devolve só sim/não
+  (`foto_visivel`, `bloqueio_no_match`). Aconteceu duas vezes (0006 e 0011).
 - **`supabase/functions/`** — Edge Functions para o que a chave anon não pode fazer
   (ex.: `delete-account`, que apaga usuário do auth e arquivos do storage). O id do
   usuário vem sempre do JWT, nunca do corpo da requisição.
@@ -143,27 +148,38 @@ Em ordem de importância:
    `profiles.verificacao_status` já existem, com vocabulários diferentes do de
    `profiles.status_moderacao`. Colunas de status novas já nascem protegidas pela
    migration `0010`: o cliente não as escreve.
-2. **Auditar a RLS** antes de abrir para público. A escrita por coluna já foi
-   revisada e fechada na migration `0010` (reproduzida e testada num Postgres local).
-   Falta o resto: funções `security definer` (`search_path`, validações), policies do
-   storage e as de leitura. Alvo: `supabase/migrations/*_rls.sql` e as funções.
+2. **Guardar provas de assédio** (decidir junto com a moderação). Auditoria de 20/09:
+   `desfazer_match` apaga todas as mensagens da conversa (cascade do match), e excluir a
+   conta apaga as denúncias feitas contra a pessoa (`reports.denunciado_id` em cascade).
+   Quem assediou pode sumir com as provas. Pede decisão de produto e de LGPD: o que
+   reter, por quanto tempo e com que base legal (e entrar na política de privacidade).
+   O resto da auditoria de RLS foi feito e fechado nas migrations `0010` e `0011`.
 3. **iOS via Capacitor.** Depois do empacotamento vêm: plugins nativos (Preferences,
    Geolocation, Camera) com as strings de permissão no `Info.plist`, deep link para a
    confirmação de e-mail (hoje o `redirectTo` usa `window.location.origin`), push via
    APNs, e as exigências da App Store para app de namoro (18+, moderação com resposta
    em 24h, exclusão de conta no app — essa já existe).
 4. **Limpar branches já mescladas** no repositório (as `claude/*`).
+5. **Detalhes da auditoria que ficaram para depois:** a Edge Function `delete-account`
+   lista no máximo 100 arquivos por pasta (quem pediu muitas verificações deixa selfies
+   para trás) e precisa de novo deploy quando for corrigida; `nome`, `bio`, `profissao`
+   e interesses não têm limite de tamanho no banco (colocar junto com a nota do limite
+   na tela); qualquer pessoa logada consegue listar as fotos dos perfis visíveis — o
+   mesmo que veria rolando a fila, mas facilita copiar em massa (pede limite de uso).
 
 ## Pontos de atenção
 
+- **Security Advisor do Supabase:** o erro "RLS Disabled in Public" em
+  `public.spatial_ref_sys` é esperado. É tabela do PostGIS (sistemas de coordenadas, sem
+  dado de usuário) e ligar RLS nela exige ser o dono. A `0011` tira a escrita pela API se
+  tiver permissão para isso.
 - **Sem testes automatizados.** Em um app com RLS, matches e exclusão de conta, isso
   é frágil. Nada impede uma regra de validação de voltar a ficar silenciosa.
-- **Data dos documentos legais: 25/09/2026, mas eles foram escritos em 15/09.** A data
-  entrou no commit "Adicionar documentos legais (LGPD) v1.0" (15/09) sem explicação,
-  e os três `.md` dizem "Última atualização: 25 de setembro de 2026" — o que só faz
-  sentido se for uma data de publicação programada. `LEGAL_UPDATED_AT` não é lida por
-  nenhum código; o que o usuário vê é o texto dos `.md`, e o consentimento registra
-  só a `versao` ("1.0"). Decidir a data antes de abrir ao público.
+- **Data dos documentos legais (25/09/2026) é de exemplo** (confirmado pelo Lu em 20/09):
+  o lançamento ainda não tem data. Trocar nos três `.md` de `src/legal/` quando houver.
+  `LEGAL_UPDATED_AT` não é lida por nenhum código; o que o usuário vê é o texto dos
+  `.md`, e o consentimento registra só a `versao`. Antes de lançar, os **textos** (não
+  só a data) precisam de revisão jurídica: o app trata dado sensível sob a LGPD.
 - **Validação no cliente é UX, não segurança.** O mínimo de senha real é o do Supabase
   Auth; o cliente só antecipa a mensagem.
 - **Dado sensível.** Interesse (indica orientação sexual), cidade, fotos e telefone
