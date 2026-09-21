@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ScreenHeader } from "../components/ScreenHeader";
 import { ToggleRow } from "../components/ToggleRow";
 import type { AjustesDeNotificacao } from "../lib/api/settings";
+import { exibeTelefone } from "../onboarding/phoneFormat";
 import { DeleteAccountSheet } from "./DeleteAccountSheet";
 import type { DocumentoLegal } from "./LegalScreen";
 import styles from "./SettingsScreen.module.css";
@@ -118,7 +119,7 @@ export function SettingsScreen({
             </button>
             <button type="button" className={styles.accessRow} onClick={onOpenPhoneChange}>
               Trocar número
-              <span className={styles.accessValue}>{currentPhone}</span>
+              <span className={styles.accessValue}>{exibeTelefone(currentPhone)}</span>
             </button>
             <button
               type="button"

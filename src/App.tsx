@@ -496,12 +496,12 @@ export default function App() {
                 await atualizarTelefone(phone);
                 setMyProfile((prev) => (prev ? { ...prev, phone } : prev));
                 setPhoneChangeOpen(false);
+                showToast("Número atualizado");
               } catch (problema) {
                 showToast(mensagemDeErro(problema));
               }
             })();
           }}
-          onShowToast={showToast}
         />
       );
     }

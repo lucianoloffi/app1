@@ -1,13 +1,12 @@
 import { useState } from "react";
 import { ScreenHeader } from "../components/ScreenHeader";
-import { onlyDigits, formatPhone } from "../onboarding/phoneFormat";
+import { exibeTelefone, formatPhone, onlyDigits } from "../onboarding/phoneFormat";
 import styles from "./PhoneChangeScreen.module.css";
 
 interface PhoneChangeScreenProps {
   currentPhone: string;
   onBack: () => void;
   onConfirm: (phone: string) => void;
-  onShowToast: (message: string) => void;
 }
 
 /**
@@ -18,7 +17,6 @@ export function PhoneChangeScreen({
   currentPhone,
   onBack,
   onConfirm,
-  onShowToast,
 }: PhoneChangeScreenProps) {
   const [dial, setDial] = useState("+55");
   const [phone, setPhone] = useState("");
@@ -32,7 +30,7 @@ export function PhoneChangeScreen({
       <div className={styles.body}>
         <div className={styles.currentCard}>
           <span className={styles.currentLabel}>Número atual</span>
-          <span className={styles.currentValue}>{currentPhone || "Nenhum número salvo"}</span>
+          <span className={styles.currentValue}>{exibeTelefone(currentPhone) || "Nenhum número salvo"}</span>
         </div>
 
         <div className={styles.step}>
@@ -69,8 +67,9 @@ export function PhoneChangeScreen({
             }
             disabled={!phoneValid}
             onClick={() => {
+              // O "Número atualizado" é mostrado por quem salva, depois de
+              // salvar: avisar aqui dizia "atualizado" mesmo quando falhava.
               onConfirm(`${dial} ${formatPhone(phone)}`);
-              onShowToast("Número atualizado");
             }}
           >
             Salvar número

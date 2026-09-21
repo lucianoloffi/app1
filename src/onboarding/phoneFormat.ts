@@ -15,6 +15,22 @@ export function formatPhone(rawDigits: string): string {
   return `(${ddd}) ${first}-${second}`;
 }
 
+/**
+ * Telefone salvo, pronto para mostrar. Ele chega em dois formatos: o cadastro
+ * grava só os dígitos ("47999990000") e a troca de número grava formatado
+ * ("+55 (47) 99999-9999"). Só dígitos viram o formato completo; o resto
+ * aparece como foi salvo.
+ */
+export function exibeTelefone(salvo: string): string {
+  const texto = salvo.trim();
+  // Fixo tem 10 dígitos e agrupa 4-4; formatPhone agrupa 5-4, que é o celular
+  // (e o certo enquanto se digita, quando ainda não dá para saber qual é).
+  if (/^\d{10}$/.test(texto))
+    return `+55 (${texto.slice(0, 2)}) ${texto.slice(2, 6)}-${texto.slice(6)}`;
+  if (/^\d{11}$/.test(texto)) return `+55 ${formatPhone(texto)}`;
+  return texto;
+}
+
 /** Formata dígitos de data no padrão dd/mm/aaaa. */
 export function formatBirthdate(rawDigits: string): string {
   const digits = onlyDigits(rawDigits).slice(0, 8);

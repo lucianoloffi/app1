@@ -149,7 +149,11 @@ export async function concluirCadastro(estado: OnboardingState): Promise<void> {
     .from("profiles")
     .update({
       nome: estado.name.trim(),
-      telefone: estado.phone,
+      // Sem telefone aqui: ele é gravado na criação da conta (vai nos metadados
+      // do signUp e o gatilho tg_novo_usuario copia para o perfil). Quando o
+      // cadastro é retomado depois de confirmar o e-mail, o telefone digitado
+      // ficou para trás e o estado chega vazio: gravar aqui apagava o número
+      // de todo mundo que confirmou o e-mail.
       data_nascimento: nascimento,
       bio: estado.bio,
       genero: estado.gender,
