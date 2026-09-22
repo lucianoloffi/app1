@@ -39,6 +39,7 @@
       var veredito = document.getElementById('veredito');
       var raiz = document.documentElement;
       var ate = 0;
+      var alturaEscrita = -1, deslocEscrito = -1, escritas = 0;
 
       function focado() {
         var a = document.activeElement;
@@ -48,14 +49,26 @@
       function medir() {
         if (!vv) { saida.textContent = 'sem visualViewport'; return; }
 
-        // A MESMA regra nova do app: gatilho é o foco, não a altura.
+        // A MESMA regra do app: gatilho é o foco; valor é o menor entre
+        // innerHeight e a janela visual; e só escreve quando muda.
         if (focado()) {
-          raiz.style.setProperty('--altura', vv.height + 'px');
-          raiz.style.setProperty('--desloc', vv.offsetTop + 'px');
+          var altura = Math.min(window.innerHeight, vv.height);
+          if (altura !== alturaEscrita) {
+            raiz.style.setProperty('--altura', altura + 'px');
+            alturaEscrita = altura;
+            escritas++;
+          }
+          var desloc = Math.round(vv.offsetTop);
+          if (desloc !== deslocEscrito) {
+            if (desloc > 0) raiz.style.setProperty('--desloc', desloc + 'px');
+            else raiz.style.removeProperty('--desloc');
+            deslocEscrito = desloc;
+          }
           if (window.scrollY !== 0) window.scrollTo(0, 0);
         } else {
           raiz.style.removeProperty('--altura');
           raiz.style.removeProperty('--desloc');
+          alturaEscrita = -1; deslocEscrito = -1; escritas = 0;
         }
 
         var r = topo.getBoundingClientRect();
@@ -70,6 +83,7 @@
           'TOPO top ' + Math.round(r.top) + '   bottom ' + Math.round(r.bottom),
           '--altura ' + (raiz.style.getPropertyValue('--altura') || '(sem)'),
           '--desloc ' + (raiz.style.getPropertyValue('--desloc') || '(sem)'),
+          'redimensionou ' + escritas + 'x  (1 = sem pulo)',
         ].join('\n');
       }
 

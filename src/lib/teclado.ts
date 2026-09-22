@@ -25,9 +25,19 @@
  *     passa a se comportar como absolute e sobe junto com a página — foi o que
  *     o diagnóstico mostrou, com o cabeçalho em -288.
  *
- * E é aplicado repetidamente por um tempo: o teclado sobe animado, e o valor
- * logo após o toque não é o mesmo de meio segundo depois. Uma medida só pega o
- * estado do meio da animação e erra.
+ * É aplicado repetidamente por um tempo, porque o teclado sobe animado e uma
+ * medida só pega o estado do meio da animação. Mas o VALOR aplicado é o menor
+ * entre innerHeight e a altura da janela visual, e só é escrito quando muda —
+ * senão o app é redimensionado a cada quadro da subida do teclado e a tela dá
+ * um pulo visível antes de assentar, que foi o que apareceu no iPhone.
+ *
+ * O menor dos dois porque eles medem coisas diferentes durante a animação: a
+ * janela visual acompanha o teclado quadro a quadro, enquanto o innerHeight já
+ * vale o tamanho final desde o primeiro quadro (o Safari encolhe o layout de
+ * uma vez, por causa do interactive-widget=resizes-content). Com o menor, o
+ * app assenta no tamanho certo de primeira, num passo só. Em navegador que não
+ * encolhe o layout, innerHeight não muda e o menor é a janela visual — mesmo
+ * comportamento de antes.
  *
  * Abstração fina de propósito, como storage.ts e geo.ts: no Capacitor quem
  * resolve isso é o @capacitor/keyboard, e a troca fica restrita a este arquivo.
@@ -56,10 +66,15 @@ export function acompanharTeclado(): () => void {
 
   const raiz = document.documentElement;
   let insistirAte = 0;
+  /** O que já está escrito, para não reescrever o mesmo valor a cada quadro. */
+  let alturaEscrita = -1;
+  let deslocamentoEscrito = -1;
 
   function limpar() {
     raiz.style.removeProperty(ALTURA);
     raiz.style.removeProperty(DESLOCAMENTO);
+    alturaEscrita = -1;
+    deslocamentoEscrito = -1;
   }
 
   function ajustar() {
@@ -69,8 +84,21 @@ export function acompanharTeclado(): () => void {
       return;
     }
 
-    raiz.style.setProperty(ALTURA, `${janela.height}px`);
-    raiz.style.setProperty(DESLOCAMENTO, `${janela.offsetTop}px`);
+    const altura = Math.min(window.innerHeight, janela.height);
+    if (altura !== alturaEscrita) {
+      raiz.style.setProperty(ALTURA, `${altura}px`);
+      alturaEscrita = altura;
+    }
+
+    const deslocamento = Math.round(janela.offsetTop);
+    if (deslocamento !== deslocamentoEscrito) {
+      // Zero não precisa ser escrito: o padrão da variável já é 0, e escrever
+      // deixaria um `top` inline sem serventia.
+      if (deslocamento > 0) raiz.style.setProperty(DESLOCAMENTO, `${deslocamento}px`);
+      else raiz.style.removeProperty(DESLOCAMENTO);
+      deslocamentoEscrito = deslocamento;
+    }
+
     // Só quando há o que desfazer: chamar à toa brigaria com uma rolagem que a
     // própria pessoa tenha feito.
     if (window.scrollY !== 0) window.scrollTo(0, 0);
