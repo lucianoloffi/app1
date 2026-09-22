@@ -21,10 +21,53 @@ function json(body: unknown, status = 200) {
   });
 }
 
-async function apagarPasta(admin: ReturnType<typeof createClient>, bucket: string, userId: string) {
-  const { data, error } = await admin.storage.from(bucket).list(userId, { limit: 100 });
-  if (error || !data?.length) return;
-  await admin.storage.from(bucket).remove(data.map((file) => `${userId}/${file.name}`));
+/**
+ * Buckets onde há arquivo de usuário, sempre numa pasta com o id da pessoa
+ * (as policies de storage exigem isso no envio). Bucket novo com arquivo de
+ * usuário tem de entrar aqui, senão a exclusão deixa o arquivo para trás.
+ */
+const BUCKETS_DO_USUARIO = ["fotos", "verificacoes"];
+
+/** Tamanho de cada página da listagem e de cada lote do remove. */
+const POR_PAGINA = 100;
+
+type Admin = ReturnType<typeof createClient>;
+
+/**
+ * Todos os caminhos dentro de uma pasta, página por página. Antes era uma
+ * chamada só com limit 100: quem tinha mais de 100 arquivos numa pasta (dá
+ * para chegar lá pedindo verificação repetidas vezes) ficava com o excedente
+ * no bucket depois de excluir a conta — contra o que a política de
+ * privacidade promete. Entra em subpastas também: hoje não há nenhuma, mas
+ * a listagem as devolve como itens sem id, e ignorá-las seria o mesmo erro.
+ *
+ * Lista tudo antes de apagar qualquer coisa: apagar no meio da paginação
+ * desloca o offset e pula arquivos.
+ */
+async function listarTudo(admin: Admin, bucket: string, pasta: string): Promise<string[]> {
+  const caminhos: string[] = [];
+  for (let offset = 0; ; offset += POR_PAGINA) {
+    const { data, error } = await admin.storage
+      .from(bucket)
+      .list(pasta, { limit: POR_PAGINA, offset, sortBy: { column: "name", order: "asc" } });
+    if (error) throw new Error(`listar ${bucket}/${pasta}: ${error.message}`);
+    const itens = data ?? [];
+
+    for (const item of itens) {
+      const caminho = `${pasta}/${item.name}`;
+      if (!item.id) caminhos.push(...(await listarTudo(admin, bucket, caminho)));
+      else caminhos.push(caminho);
+    }
+    if (itens.length < POR_PAGINA) return caminhos;
+  }
+}
+
+async function apagarPasta(admin: Admin, bucket: string, userId: string) {
+  const caminhos = await listarTudo(admin, bucket, userId);
+  for (let i = 0; i < caminhos.length; i += POR_PAGINA) {
+    const { error } = await admin.storage.from(bucket).remove(caminhos.slice(i, i + POR_PAGINA));
+    if (error) throw new Error(`apagar ${bucket}/${userId}: ${error.message}`);
+  }
 }
 
 Deno.serve(async (req) => {
@@ -48,8 +91,16 @@ Deno.serve(async (req) => {
   const userId = sessao.user.id;
   const admin = createClient(url, serviceRole, { auth: { persistSession: false } });
 
-  await apagarPasta(admin, "fotos", userId);
-  await apagarPasta(admin, "verificacoes", userId);
+  // Arquivos primeiro, e só depois o usuário. Se o storage falhar, a conta
+  // NÃO é apagada: antes o erro era ignorado e a conta sumia com os arquivos
+  // ficando para trás, sem ninguém saber — e sem conta, sem como tentar de
+  // novo. Assim a pessoa recebe o erro e pode repetir o pedido.
+  try {
+    for (const bucket of BUCKETS_DO_USUARIO) await apagarPasta(admin, bucket, userId);
+  } catch (problema) {
+    console.error("delete-account: falha ao apagar arquivos", problema);
+    return json({ error: "Não foi possível excluir a conta agora." }, 500);
+  }
 
   // Apagar o usuário do auth remove profiles e, em cascata, todo o resto.
   const { error } = await admin.auth.admin.deleteUser(userId);
