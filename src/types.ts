@@ -38,6 +38,8 @@ export interface Profile {
   lifestyle?: Lifestyle;
   relationshipStatus?: RelationshipStatus;
   height?: number;
+  /** Selo de verificado. Só o "sim ou não" sai do servidor (migration 0022). */
+  verified?: boolean;
 }
 
 export interface ChatMessage {

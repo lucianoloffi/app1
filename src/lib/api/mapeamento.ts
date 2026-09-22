@@ -19,6 +19,7 @@ export interface LinhaPerfilPublico {
   filhos: string | null;
   relationship_status: Profile["relationshipStatus"] | null;
   height: number | string | null;
+  verificado: boolean | null;
 }
 
 /** Converte as linhas do servidor no type Profile que as telas já usam. */
@@ -44,5 +45,6 @@ export async function paraPerfis(linhas: LinhaPerfilPublico[]): Promise<Profile[
     },
     relationshipStatus: linha.relationship_status ?? undefined,
     height: linha.height === null ? undefined : Number(linha.height),
+    verified: linha.verificado === true,
   }));
 }

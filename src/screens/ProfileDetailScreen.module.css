@@ -111,6 +111,24 @@
   margin: 0;
   font: 800 26px/1.15 var(--font-ui);
   letter-spacing: -0.02em;
+  /* O selo é inline com o nome, e o nome pode ter duas linhas: inline-flex
+     mantém a tag colada no fim do texto em vez de sobrar sozinha embaixo. */
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Mesma tag da tela de Perfil, onde a pessoa vê o próprio selo. */
+.verifiedBadge {
+  font: 700 11px var(--font-ui);
+  color: var(--color-accent-2);
+  background: var(--color-accent-soft);
+  border: 1px solid var(--color-accent-line);
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+  letter-spacing: 0;
 }
 
 .meta {

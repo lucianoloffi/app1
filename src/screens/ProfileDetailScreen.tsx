@@ -99,6 +99,11 @@ export function ProfileDetailScreen({
           <div>
             <p className={styles.name}>
               {profile.name}, {profile.age}
+              {profile.verified && (
+                <span className={styles.verifiedBadge}>
+                  <span aria-hidden="true">✓</span> verificado
+                </span>
+              )}
             </p>
             <p className={styles.meta}>
               {profile.profession} · {profile.city.replace(", ", "/")}
