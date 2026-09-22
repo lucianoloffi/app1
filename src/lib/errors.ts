@@ -1,7 +1,22 @@
 /** Mensagens de erro em português, a partir do que o Supabase devolve. */
 
+import {
+  BIO_MAXIMA,
+  INTERESSE_MAXIMO,
+  NOME_MAXIMO,
+  PROFISSAO_MAXIMA,
+} from "../onboarding/constants";
+
 /** Campo do formulário a que um erro se refere, quando dá para saber. */
-export type CampoDeErro = "email" | "senha" | "telefone" | "cidade";
+export type CampoDeErro =
+  | "email"
+  | "senha"
+  | "telefone"
+  | "cidade"
+  | "nome"
+  | "profissao"
+  | "bio"
+  | "interesses";
 
 export interface ErroNoFormulario {
   texto: string;
@@ -40,6 +55,13 @@ const MENSAGENS: { teste: RegExp; texto: string; campo?: CampoDeErro }[] = [
   // apareciam crus na tela: apagar a cidade e salvar o perfil mostrava
   // "violates foreign key constraint profiles_cidade_fkey" para quem usa o app.
   { teste: /profiles_cidade_fkey/i, texto: "Escolha uma das cidades da lista.", campo: "cidade" },
+  // Limites de tamanho (migration 0024). O app já corta no maxLength, então
+  // chegar aqui é app e banco com números diferentes — melhor dizer qual campo
+  // e qual limite do que o "algum campo" genérico lá embaixo.
+  { teste: /profiles_nome_tamanho/i, texto: `O nome pode ter até ${NOME_MAXIMO} caracteres.`, campo: "nome" },
+  { teste: /profiles_profissao_tamanho/i, texto: `A profissão pode ter até ${PROFISSAO_MAXIMA} caracteres.`, campo: "profissao" },
+  { teste: /profiles_bio_tamanho/i, texto: `O "Sobre você" pode ter até ${BIO_MAXIMA} caracteres.`, campo: "bio" },
+  { teste: /profile_interests_interesse_tamanho/i, texto: `Cada interesse pode ter até ${INTERESSE_MAXIMO} caracteres.`, campo: "interesses" },
   { teste: /duplicate key|unique constraint/i, texto: "Esse valor já está em uso." },
   { teste: /violates row-level security|permission denied/i, texto: "Você não tem permissão para fazer isso." },
   { teste: /violates .*constraint|invalid input|not-null/i, texto: "Algum campo está com um valor que não dá para salvar. Confira e tente de novo." },

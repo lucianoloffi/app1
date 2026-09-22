@@ -1,7 +1,10 @@
+import { LimitedTextField } from "../../components/LimitedTextField";
 import { PillChipRow } from "../../components/PillChip";
 import { RangeSlider } from "../../components/RangeSlider";
 import { ONBOARDING_STATUS_OPTIONS } from "../../data/lifestyle";
+import type { ErroNoFormulario } from "../../lib/errors";
 import { heightLabel, type RelationshipStatus } from "../../types";
+import { PROFISSAO_MAXIMA } from "../constants";
 import { OnboardingLayout } from "../OnboardingLayout";
 import fieldStyles from "../fields.module.css";
 import styles from "./ProfessionHeightStatusScreen.module.css";
@@ -13,6 +16,8 @@ interface ProfessionHeightStatusScreenProps {
   onChangeProfession: (value: string) => void;
   onChangeHeight: (value: number) => void;
   onChangeStatus: (value: RelationshipStatus | null) => void;
+  /** Erro do servidor ao concluir o cadastro que pertence a um campo desta tela. */
+  error?: ErroNoFormulario | null;
   onBack: () => void;
   onFinish: () => void;
 }
@@ -24,6 +29,7 @@ export function ProfessionHeightStatusScreen({
   onChangeProfession,
   onChangeHeight,
   onChangeStatus,
+  error,
   onBack,
   onFinish,
 }: ProfessionHeightStatusScreenProps) {
@@ -38,16 +44,15 @@ export function ProfessionHeightStatusScreen({
       onCta={onFinish}
     >
       <div className={styles.groups}>
-        <div className={fieldStyles.fieldGroup}>
-          <span className={fieldStyles.label}>Qual sua profissão</span>
-          <input
-            className={fieldStyles.input}
-            type="text"
-            placeholder="ex: arquiteta, professor, autônomo"
-            value={profession}
-            onChange={(e) => onChangeProfession(e.target.value)}
-          />
-        </div>
+        <LimitedTextField
+          id="cadastro-profissao"
+          label="Qual sua profissão"
+          placeholder="ex: arquiteta, professor, autônomo"
+          value={profession}
+          onChange={onChangeProfession}
+          maxLength={PROFISSAO_MAXIMA}
+          serverError={error?.campo === "profissao" ? error.texto : null}
+        />
 
         <div className={fieldStyles.fieldGroup}>
           <span className={fieldStyles.label}>Altura</span>

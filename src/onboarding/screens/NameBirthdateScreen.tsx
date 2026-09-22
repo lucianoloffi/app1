@@ -1,4 +1,7 @@
 import { useEffect, useRef } from "react";
+import { LimitedTextField } from "../../components/LimitedTextField";
+import type { ErroNoFormulario } from "../../lib/errors";
+import { BIO_MAXIMA, NOME_MAXIMO } from "../constants";
 import { OnboardingLayout } from "../OnboardingLayout";
 import { ageFromBirthdate, problemaNaDataDeNascimento } from "../../utils/age";
 import { formatBirthdate, onlyDigits } from "../phoneFormat";
@@ -11,6 +14,8 @@ interface NameBirthdateScreenProps {
   onChangeName: (value: string) => void;
   onChangeBirthdate: (digits: string) => void;
   onChangeBio: (value: string) => void;
+  /** Erro do servidor ao concluir o cadastro que pertence a um campo desta tela. */
+  error?: ErroNoFormulario | null;
   onBack?: () => void;
   onNext: () => void;
 }
@@ -22,6 +27,7 @@ export function NameBirthdateScreen({
   onChangeName,
   onChangeBirthdate,
   onChangeBio,
+  error,
   onBack,
   onNext,
 }: NameBirthdateScreenProps) {
@@ -37,7 +43,13 @@ export function NameBirthdateScreen({
   const menorDeIdade = dataCompleta && !problemaData && idade !== null && idade < 18;
 
   const isValid =
-    name.trim().length > 1 && dataCompleta && !problemaData && !menorDeIdade && bio.trim().length > 4;
+    name.trim().length > 1 &&
+    name.length <= NOME_MAXIMO &&
+    dataCompleta &&
+    !problemaData &&
+    !menorDeIdade &&
+    bio.trim().length > 4 &&
+    bio.length <= BIO_MAXIMA;
 
   return (
     <OnboardingLayout
@@ -50,17 +62,16 @@ export function NameBirthdateScreen({
       ctaDisabled={!isValid}
       onCta={onNext}
     >
-      <div className={fieldStyles.fieldGroup}>
-        <span className={fieldStyles.label}>Nome</span>
-        <input
-          ref={nameRef}
-          className={fieldStyles.input}
-          type="text"
-          placeholder="Como quer ser chamado"
-          value={name}
-          onChange={(e) => onChangeName(e.target.value)}
-        />
-      </div>
+      <LimitedTextField
+        id="cadastro-nome"
+        label="Nome"
+        inputRef={nameRef}
+        placeholder="Como quer ser chamado"
+        value={name}
+        onChange={onChangeName}
+        maxLength={NOME_MAXIMO}
+        serverError={error?.campo === "nome" ? error.texto : null}
+      />
       <div className={fieldStyles.fieldGroup}>
         <span className={fieldStyles.label}>Data de nascimento</span>
         <input
@@ -83,15 +94,17 @@ export function NameBirthdateScreen({
           <p className={fieldStyles.note}>Mostramos só a idade, nunca a data completa.</p>
         )}
       </div>
-      <div className={fieldStyles.fieldGroup}>
-        <span className={fieldStyles.label}>Sobre você</span>
-        <textarea
-          className={fieldStyles.textarea}
-          placeholder="Uma frase sobre o que você procura"
-          value={bio}
-          onChange={(e) => onChangeBio(e.target.value)}
-        />
-      </div>
+      <LimitedTextField
+        id="cadastro-bio"
+        label="Sobre você"
+        multiline
+        counter="sempre"
+        placeholder="Uma frase sobre o que você procura"
+        value={bio}
+        onChange={onChangeBio}
+        maxLength={BIO_MAXIMA}
+        serverError={error?.campo === "bio" ? error.texto : null}
+      />
     </OnboardingLayout>
   );
 }

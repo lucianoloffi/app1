@@ -76,6 +76,8 @@ export function OnboardingFlow({
   );
   const [ocupado, setOcupado] = useState(false);
   const [erroDaConta, setErroDaConta] = useState<ErroNoFormulario | null>(null);
+  /** Erro do servidor ao concluir o cadastro que pertence a um campo de texto do perfil. */
+  const [erroDoPerfil, setErroDoPerfil] = useState<ErroNoFormulario | null>(null);
   const [aguardandoEmail, setAguardandoEmail] = useState<string | null>(null);
 
   function goTo(step: OnboardingStep) {
@@ -85,6 +87,7 @@ export function OnboardingFlow({
   /** Some com o erro do campo assim que a pessoa mexe nele. */
   function limpaErroDoCampo(campo: CampoDeErro) {
     setErroDaConta((prev) => (prev?.campo === campo ? null : prev));
+    setErroDoPerfil((prev) => (prev?.campo === campo ? null : prev));
   }
 
   async function criarConta() {
@@ -157,7 +160,18 @@ export function OnboardingFlow({
       await concluirCadastro(state);
       goTo("success");
     } catch (problema) {
-      onShowToast(mensagemDeErro(problema));
+      // Nome e bio ficam três telas para trás: um erro deles só aparece aqui,
+      // no fim. Em vez de um aviso solto, a pessoa volta ao campo e vê o erro
+      // embaixo dele. Profissão é desta tela mesma.
+      const erro = erroNoFormulario(problema);
+      if (erro.campo === "nome" || erro.campo === "bio") {
+        setErroDoPerfil(erro);
+        goTo("name-birthdate");
+      } else if (erro.campo === "profissao") {
+        setErroDoPerfil(erro);
+      } else {
+        onShowToast(erro.texto);
+      }
     } finally {
       setOcupado(false);
     }
@@ -232,9 +246,16 @@ export function OnboardingFlow({
           name={state.name}
           birthdate={state.birthdate}
           bio={state.bio}
-          onChangeName={(name) => setState((prev) => ({ ...prev, name }))}
+          error={erroDoPerfil}
+          onChangeName={(name) => {
+            limpaErroDoCampo("nome");
+            setState((prev) => ({ ...prev, name }));
+          }}
           onChangeBirthdate={(birthdate) => setState((prev) => ({ ...prev, birthdate }))}
-          onChangeBio={(bio) => setState((prev) => ({ ...prev, bio }))}
+          onChangeBio={(bio) => {
+            limpaErroDoCampo("bio");
+            setState((prev) => ({ ...prev, bio }));
+          }}
           onBack={passoInicial ? undefined : () => goTo("account")}
           onNext={() => goTo("gender-interest-city")}
         />
@@ -307,7 +328,11 @@ export function OnboardingFlow({
           profession={state.profession}
           height={state.height}
           relationshipStatus={state.relationshipStatus}
-          onChangeProfession={(profession) => setState((prev) => ({ ...prev, profession }))}
+          error={erroDoPerfil}
+          onChangeProfession={(profession) => {
+            limpaErroDoCampo("profissao");
+            setState((prev) => ({ ...prev, profession }));
+          }}
           onChangeHeight={(height) => setState((prev) => ({ ...prev, height }))}
           onChangeStatus={(relationshipStatus: RelationshipStatus | null) =>
             setState((prev) => ({ ...prev, relationshipStatus }))

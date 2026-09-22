@@ -1,0 +1,34 @@
+.footer {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.counter,
+.counterOver {
+  flex: none;
+  margin-left: auto;
+  font: 500 12px/1.6 var(--font-ui);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ink-40);
+}
+
+.counterOver {
+  color: var(--color-danger);
+}
+
+/* Com o elemento no seletor para ganhar da classe do campo que a tela passa
+   (inputClassName): as duas teriam o mesmo peso, e a borda vermelha
+   dependeria da ordem em que o CSS carrega. */
+input.invalid,
+textarea.invalid,
+input.invalid:focus,
+textarea.invalid:focus {
+  border-color: var(--color-danger);
+}
+
+input.invalid:focus,
+textarea.invalid:focus {
+  box-shadow: 0 0 0 4px rgba(var(--color-danger-rgb), 0.14);
+}

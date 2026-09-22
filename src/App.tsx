@@ -23,7 +23,7 @@ import {
 import { excluirConta, exportarMeusDados } from "./lib/api/privacy";
 import { bloquear, denunciar, desbloquear, listarBloqueados } from "./lib/api/safety";
 import { carregarAjustes, salvarAjustes, type AjustesDeNotificacao } from "./lib/api/settings";
-import { mensagemDeErro } from "./lib/errors";
+import { erroNoFormulario, mensagemDeErro, type ErroNoFormulario } from "./lib/errors";
 import {
   atualizarLocalizacaoNaAbertura,
   estadoDaPermissao,
@@ -95,6 +95,8 @@ export default function App() {
   const [phoneChangeOpen, setPhoneChangeOpen] = useState(false);
   const [verifyOpen, setVerifyOpen] = useState(false);
   const [documentoLegal, setDocumentoLegal] = useState<DocumentoLegal | null>(null);
+  /** Erro do servidor ao salvar Editar perfil que pertence a um campo. */
+  const [erroDaEdicao, setErroDaEdicao] = useState<ErroNoFormulario | null>(null);
 
   const [blockedProfiles, setBlockedProfiles] = useState<BlockedProfile[]>([]);
   const [offlineSim, setOfflineSim] = useState(false);
@@ -600,8 +602,13 @@ export default function App() {
       return (
         <EditProfileScreen
           profile={myProfile}
-          onCancel={() => setEditingProfile(false)}
+          onCancel={() => {
+            setErroDaEdicao(null);
+            setEditingProfile(false);
+          }}
           onOpenGuidelines={() => setDocumentoLegal("diretrizes")}
+          error={erroDaEdicao}
+          onClearError={() => setErroDaEdicao(null)}
           onSave={(edicao) => {
             void (async () => {
               try {
@@ -618,12 +625,21 @@ export default function App() {
                 // carrega uma cópia ao abrir, e a moderação pode ter agido no
                 // meio da edição.
                 const atualizado = { ...myProfile, ...edicao };
+                setErroDaEdicao(null);
                 await salvarPerfil(atualizado);
                 setMyProfile(atualizado);
                 setEditingProfile(false);
                 showToast("Perfil atualizado");
               } catch (problema) {
-                showToast(mensagemDeErro(problema));
+                // Erro de um campo (texto longo demais, cidade fora da lista)
+                // vai para baixo do campo; o aviso diz só que não salvou.
+                const erro = erroNoFormulario(problema);
+                if (erro.campo) {
+                  setErroDaEdicao(erro);
+                  showToast("Não deu para salvar. Confira o campo marcado.");
+                } else {
+                  showToast(erro.texto);
+                }
               }
             })();
           }}

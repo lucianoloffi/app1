@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { HeightSheet } from "../components/HeightSheet";
 import { InterestBottomSheet } from "../components/InterestBottomSheet";
+import { LimitedTextField } from "../components/LimitedTextField";
 import {
   RejectedPhotoBadge,
   RejectedPhotoNotice,
@@ -15,8 +16,13 @@ import {
   enviarFoto,
   type FotoDoPerfil,
 } from "../lib/api/photos";
-import { mensagemDeErro } from "../lib/errors";
-import { MAX_PROFILE_PHOTOS } from "../onboarding/constants";
+import { mensagemDeErro, type ErroNoFormulario } from "../lib/errors";
+import {
+  BIO_MAXIMA,
+  MAX_PROFILE_PHOTOS,
+  NOME_MAXIMO,
+  PROFISSAO_MAXIMA,
+} from "../onboarding/constants";
 import { formatBirthdate, onlyDigits } from "../onboarding/phoneFormat";
 import type { Gender, Lifestyle, MyProfile, PerfilEditavel, RelationshipStatus } from "../types";
 import { heightLabel } from "../types";
@@ -47,6 +53,10 @@ interface EditProfileScreenProps {
   onSave: (edicao: PerfilEditavel) => void;
   onShowToast: (message: string) => void;
   onOpenGuidelines?: () => void;
+  /** Erro do servidor ao salvar que pertence a um campo: aparece embaixo dele. */
+  error?: ErroNoFormulario | null;
+  /** A pessoa mexeu no campo do erro: ele deixa de valer. */
+  onClearError?: () => void;
 }
 
 export function EditProfileScreen({
@@ -55,6 +65,8 @@ export function EditProfileScreen({
   onSave,
   onShowToast,
   onOpenGuidelines,
+  error,
+  onClearError,
 }: EditProfileScreenProps) {
   const [name, setName] = useState(profile.name);
   const [city, setCity] = useState(profile.city);
@@ -100,11 +112,29 @@ export function EditProfileScreen({
     MAX_PROFILE_PHOTOS,
   );
 
+  const erroDo = (campo: NonNullable<ErroNoFormulario["campo"]>) =>
+    error?.campo === campo ? error.texto : null;
+
+  /** Quem mexe no campo com erro do servidor já está resolvendo: o erro sai. */
+  function aoMudar(campo: NonNullable<ErroNoFormulario["campo"]>, setter: (valor: string) => void) {
+    return (valor: string) => {
+      if (error?.campo === campo) onClearError?.();
+      setter(valor);
+    };
+  }
+
+  const textoLongoDemais =
+    name.length > NOME_MAXIMO || profession.length > PROFISSAO_MAXIMA || bio.length > BIO_MAXIMA;
   const podeSalvar = cidadeValida(city);
 
   function handleSave() {
     if (!podeSalvar) {
       onShowToast("Escolha uma das cidades da lista antes de salvar.");
+      return;
+    }
+    // O erro já está embaixo do campo; o aviso só diz por que nada aconteceu.
+    if (textoLongoDemais) {
+      onShowToast("Algum texto passou do limite de caracteres. Confira os campos.");
       return;
     }
     onSave({
@@ -189,22 +219,29 @@ export function EditProfileScreen({
           <p className={styles.photosHint}>{photosHint(photos.length)}</p>
         </div>
 
-        <div className={styles.fieldGroup}>
-          <span className={styles.label}>Nome</span>
-          <input className={styles.input} value={name} onChange={(e) => setName(e.target.value)} />
-        </div>
+        <LimitedTextField
+          id="editar-nome"
+          label="Nome"
+          value={name}
+          onChange={aoMudar("nome", setName)}
+          maxLength={NOME_MAXIMO}
+          serverError={erroDo("nome")}
+          groupClassName={styles.fieldGroup}
+          labelClassName={styles.label}
+          inputClassName={styles.input}
+        />
 
         <div className={styles.fieldGroup}>
           <span className={styles.label}>Localidade</span>
           <CityPicker
             value={city}
-            onChange={setCity}
+            onChange={aoMudar("cidade", setCity)}
             inputClassName={styles.input}
             placeholder="Escolha sua cidade"
           />
-          {!cidadeValida(city) && (
+          {(erroDo("cidade") || !cidadeValida(city)) && (
             <p className={styles.fieldNote} role="alert">
-              Escolha uma das cidades da lista.
+              {erroDo("cidade") ?? "Escolha uma das cidades da lista."}
             </p>
           )}
         </div>
@@ -238,15 +275,18 @@ export function EditProfileScreen({
         </div>
 
         <div className={styles.fieldRow}>
-          <div className={styles.fieldGroup}>
-            <span className={styles.label}>Profissão</span>
-            <input
-              className={styles.input}
-              placeholder="ex: engenheiro"
-              value={profession}
-              onChange={(e) => setProfession(e.target.value)}
-            />
-          </div>
+          <LimitedTextField
+            id="editar-profissao"
+            label="Profissão"
+            placeholder="ex: engenheiro"
+            value={profession}
+            onChange={aoMudar("profissao", setProfession)}
+            maxLength={PROFISSAO_MAXIMA}
+            serverError={erroDo("profissao")}
+            groupClassName={styles.fieldGroup}
+            labelClassName={styles.label}
+            inputClassName={styles.input}
+          />
           <div className={`${styles.fieldGroup} ${styles.fieldRowHeight}`}>
             <span className={styles.label}>Altura</span>
             <button
@@ -259,24 +299,35 @@ export function EditProfileScreen({
           </div>
         </div>
 
-        <div className={styles.fieldGroup}>
-          <span className={styles.label}>Sobre você</span>
-          <textarea
-            className={`${styles.input} ${styles.textarea}`}
-            value={bio}
-            onChange={(e) => setBio(e.target.value)}
-          />
-        </div>
+        <LimitedTextField
+          id="editar-bio"
+          label="Sobre você"
+          multiline
+          counter="sempre"
+          value={bio}
+          onChange={aoMudar("bio", setBio)}
+          maxLength={BIO_MAXIMA}
+          serverError={erroDo("bio")}
+          groupClassName={styles.fieldGroup}
+          labelClassName={styles.label}
+          inputClassName={`${styles.input} ${styles.textarea}`}
+        />
 
         <div className={styles.interestsGroup}>
           <span className={styles.label}>Interesses</span>
           <SelectedInterests
             interests={interests}
-            onRemove={(interest) =>
-              setInterests((prev) => prev.filter((item) => item !== interest))
-            }
+            onRemove={(interest) => {
+              if (error?.campo === "interesses") onClearError?.();
+              setInterests((prev) => prev.filter((item) => item !== interest));
+            }}
             onAdd={() => setInterestSheetOpen(true)}
           />
+          {erroDo("interesses") && (
+            <p className={styles.fieldNote} role="alert">
+              {erroDo("interesses")}
+            </p>
+          )}
         </div>
 
         <RowBottomSheet
@@ -303,11 +354,12 @@ export function EditProfileScreen({
       {interestSheetOpen && (
         <InterestBottomSheet
           interests={interests}
-          onToggle={(interest) =>
+          onToggle={(interest) => {
+            if (error?.campo === "interesses") onClearError?.();
             setInterests((prev) =>
               prev.includes(interest) ? prev.filter((item) => item !== interest) : [...prev, interest],
-            )
-          }
+            );
+          }}
           onOverMax={() => onShowToast("Máximo de 6 interesses")}
           onClose={() => setInterestSheetOpen(false)}
         />
