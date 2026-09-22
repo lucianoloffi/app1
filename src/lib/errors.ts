@@ -26,6 +26,10 @@ const MENSAGENS: { teste: RegExp; texto: string; campo?: CampoDeErro }[] = [
   { teste: /email not confirmed/i, texto: "Confirme seu e-mail antes de entrar.", campo: "email" },
   { teste: /invalid email/i, texto: "E-mail inválido.", campo: "email" },
   { teste: /18 anos/i, texto: "É preciso ter 18 anos ou mais para usar o Lovi." },
+  // O PostgREST recusa o token quando o relógio do servidor de login está uns
+  // segundos à frente do banco (PGRST303). Não é culpa de quem usa, nem do
+  // relógio do celular: o token nasce no servidor. Some sozinho em segundos.
+  { teste: /jwt issued at future|pgrst303/i, texto: "Não deu para carregar agora. Tente de novo em alguns segundos." },
   { teste: /jwt expired|session.*(expired|missing)|refresh.?token/i, texto: "Sua sessão expirou. Entre de novo." },
   { teste: /failed to fetch|network|offline/i, texto: "Sem conexão. Tente de novo." },
   { teste: /rate limit|too many requests/i, texto: "Muitas tentativas. Aguarde um minuto." },
