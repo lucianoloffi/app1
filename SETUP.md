@@ -61,8 +61,8 @@ cadeado de RLS ativo, e em **Storage** que existem os buckets `fotos` e
 
 **Authentication → URL Configuration**:
 
-- **Site URL**: `https://lucianoloffi.github.io/app1/`
-- **Redirect URLs**: acrescente `https://lucianoloffi.github.io/app1/` e
+- **Site URL**: `https://lovidates.com/app1/`
+- **Redirect URLs**: acrescente `https://lovidates.com/app1/` e
   `http://localhost:5173/` (recuperação de senha volta para cá)
 
 ## 4. Edge Function de exclusão de conta
@@ -291,7 +291,7 @@ bloqueados, enviar e apagar fotos.
 
 ## Painel admin
 
-O painel fica em `https://<usuário>.github.io/app1/admin/` (no ar, publicado junto
+O painel fica em `https://lovidates.com/app1/admin/` (no ar, publicado junto
 com o app) e em `http://localhost:5173/app1/admin/` rodando `npm run dev`. Entra-se
 com uma conta do próprio Lovi, mas só abre para contas marcadas como administradoras.
 
