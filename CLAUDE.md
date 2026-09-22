@@ -177,6 +177,14 @@ sob o filtro novo depois de um erro, e o retângulo cinza em volta das ilustraç
   ('pendente','aprovada','rejeitada'), com `profiles.verificacao_status` nem
   com `profiles.visivel` — esta última é escolha da própria pessoa, e por isso
   banir não mexe nela.
+- **Espera das denúncias no painel** (migration `0025`). Sem aviso por e-mail
+  (depende de SMTP próprio, ver Pendências), é o painel que avisa: uma faixa
+  abaixo do topo, em qualquer aba, diz quantas denúncias estão abertas e há quanto
+  tempo a mais antiga espera, e o selo da aba Moderação acompanha. Passou de
+  `PRAZO_DA_DENUNCIA_HORAS` (24 h, o prazo que a App Store exige de app de namoro),
+  os dois ficam vermelhos com "!". A conta é do banco (`painel_espera_das_denuncias`,
+  minutos pelo relógio dele) e o painel relê a cada 5 minutos e depois de cada
+  decisão. "Aberta" é `status <> 'resolvida'`, o mesmo critério da fila.
 - **Verificação e fotos no painel** (migration `0021`): as duas filas que faltavam.
   A de **verificação** é por PESSOA, não por pedido: `solicitar_verificacao` insere
   uma linha por selfie enviada e não impede a segunda, então agrupar evita a mesma
@@ -210,9 +218,35 @@ sob o filtro novo depois de um erro, e o retângulo cinza em volta das ilustraç
   ação.
 - **`supabase/functions/`** — Edge Functions para o que a chave anon não pode fazer
   (ex.: `delete-account`, que apaga usuário do auth e arquivos do storage). O id do
-  usuário vem sempre do JWT, nunca do corpo da requisição.
+  usuário vem sempre do JWT, nunca do corpo da requisição. A `delete-account` lista cada pasta página por página
+  nos buckets de `BUCKETS_DO_USUARIO` (`fotos`, `verificacoes`) e só apaga a conta
+  depois que os arquivos saíram; se o Storage falhar, devolve erro e a conta fica,
+  para a pessoa poder tentar de novo. Bucket novo com arquivo de usuário entra nessa
+  lista. Mudou a função? Ela não sai no push: `supabase functions deploy delete-account`.
 - **`src/screens/`** e **`src/onboarding/screens/`** — uma tela por arquivo.
 - **`src/components/`** — componentes compartilhados.
+- **Foto reprovada chega à dona** (migration `0023`). `MyProfile.photos` é
+  `MyPhoto[]` (URL + status), não só URLs: antes o status que `minhasFotos` já
+  devolvia se perdia no caminho, e a foto reprovada pelo painel continuava
+  aparecendo para a dona como se nada tivesse acontecido. `RejectedPhotoNotice`
+  (aviso + marca "Reprovada" sobre a foto) aparece em Perfil, Editar perfil e
+  Fotos, com link para as diretrizes. A `0023` fez a `fila_descobrir` exigir ao
+  menos uma foto aprovada — antes o perfil sem nenhuma continuava na fila, como um
+  card vazio e curtível — e o aviso diz isso à dona. `distancia_do_mais_proximo`
+  ganhou a mesma linha, para não contar quem a fila não mostraria.
+- **Limite de tamanho nos textos do perfil** (migration `0024`): `NOME_MAXIMO`,
+  `PROFISSAO_MAXIMA`, `BIO_MAXIMA` e `INTERESSE_MAXIMO` em
+  `src/onboarding/constants.ts`, com o MESMO número em `check (char_length(...))`
+  no banco. Mudar um exige migration nova com o outro — se o app deixar passar
+  mais do que o banco aceita, quem digita até o fim recebe erro. Na tela,
+  `LimitedTextField` segue o padrão de validação (nota permanente com o limite,
+  contador, erro do servidor com precedência) e o `errors.ts` reconhece o erro
+  pelo nome da constraint, com o campo certo; no cadastro, erro de nome ou bio
+  leva de volta à tela deles. O app conta em UTF-16 (`value.length`, como o
+  `maxLength`) e o banco em caracteres: emoji vale 2 no app e 1 no banco, então o
+  app corta antes, nunca depois. A `0024` cortou os textos antigos maiores que o
+  limite em vez de usar `not valid`, porque check `not valid` é conferida em
+  qualquer update da linha e travaria o perfil inteiro.
 - **Foto de perfil nova** (cadastro e edição): arquivo escolhido → `validaFotoEscolhida`
   → `PhotoCropSheet` (recorte 4:5, `PROPORCAO_DA_FOTO`, com a biblioteca
   `react-easy-crop`) → `recortaImagem` (recorta e comprime num passo, JPEG até 1280px)
@@ -238,7 +272,8 @@ comum vive em `src/styles/tokens.css` (cor, tipografia, espaçamento, raios, som
 cor ou espaçamento direto no componente quando existe token.
 
 **Constantes em um lugar só.** `src/onboarding/constants.ts` (`MAX_INTERESTS`,
-`MIN_ONBOARDING_PHOTOS`, `CITY_OPTIONS`, `INTEREST_OPTIONS`) e `SENHA_MINIMA` em
+`MIN_ONBOARDING_PHOTOS`, `CITY_OPTIONS`, `INTEREST_OPTIONS`, os limites de tamanho
+`NOME_MAXIMO` & cia.) e `SENHA_MINIMA` em
 `src/lib/api/auth.ts`. Nunca repetir o número no texto da tela — interpole a
 constante, para mensagem e validação não divergirem.
 
@@ -308,41 +343,36 @@ esperado (a chave anon é pública por design) — quem protege os dados é a RL
 
 Em ordem de importância:
 
-1. **A pessoa não fica sabendo que a foto dela foi reprovada.** A `0021` deu ao
-   painel o botão de rejeitar, mas no app a foto reprovada continua aparecendo
-   normalmente em Fotos para quem é dona dela — `PhotosManageScreen` recebe
-   `photos: string[]`, só as URLs, e `MyProfile.photos` também. Quem tem uma foto
-   derrubada some da fila dos outros sem entender por quê. Fazer isso é levar o
-   status por essa cadeia (`minhasFotos` já devolve, é de lá para baixo que se
-   perde) e escrever o aviso. A App Store exige moderação com resposta em 24h para
-   app de namoro, e "reprovamos sua foto sem avisar" não é resposta.
-2. **Painel admin completo:** funil, retenção D7, ranking de 10 cidades e contas
+1. **E-mail próprio (SMTP) no Supabase Auth.** O e-mail padrão do Supabase manda
+   pouquíssimas mensagens por hora e costuma cair no spam: com gente de verdade se
+   cadastrando, a confirmação de cadastro falha. O aviso de denúncia nova por e-mail
+   (hoje só existe a faixa no painel, `0025`) depende disso. Decisão do Lu em 22/09:
+   fica para depois.
+2. **Plano pago do Supabase.** No gratuito o projeto é pausado depois de alguns dias
+   sem uso e não há backup automático — um beta com gente real não pode acordar com
+   o app fora do ar nem perder dados. Decisão do Lu em 22/09: fica para depois.
+3. **Painel admin completo:** funil, retenção D7, ranking de 10 cidades e contas
    excluídas. Os registros já existem desde a `0013`; falta só consultar e desenhar.
-3. **Provas de assédio: o que ainda falta.** A denúncia já guarda cópia da conversa
+4. **Provas de assédio: o que ainda falta.** A denúncia já guarda cópia da conversa
    e sobrevive à exclusão da conta do denunciado (`0015`). O que continua em aberto:
    `desfazer_match` apaga as mensagens de conversas que **nunca** foram denunciadas,
    e a cópia pega só as 200 últimas mensagens. Também não há prazo de descarte
    automático — a decisão de 21/09 foi guardar sem prazo fixo, enquanto houver conta
    envolvida, e está escrita na política de privacidade (seção 8). Se um dia virar
    prazo fixo, vai precisar de agendamento no banco (pg_cron), que hoje não existe.
-4. **iOS via Capacitor.** Depois do empacotamento vêm: plugins nativos (Preferences,
+5. **iOS via Capacitor.** Depois do empacotamento vêm: plugins nativos (Preferences,
    Geolocation, Camera) com as strings de permissão no `Info.plist`, deep link para a
    confirmação de e-mail (hoje o `redirectTo` usa `window.location.origin`), push via
    APNs, e as exigências da App Store para app de namoro (18+, moderação com resposta
    em 24h, exclusão de conta no app — essa já existe).
-5. **Duas branches `claude/*` no remoto que NÃO foram mescladas** e precisam de
+6. **Duas branches `claude/*` no remoto que NÃO foram mescladas** e precisam de
    decisão: `focused-cannon-5w5jyw` ("Implement Lovi app: full design system,
    onboarding…", de 13/09) pode ter trabalho que nunca entrou, e
    `ecstatic-faraday-iwlow6` ("Remove all repository content", de 09/09) parece
    engano. As mescladas já foram apagadas, local e no remoto, em 22/09.
-6. **Detalhes da auditoria que ficaram para depois:** a Edge Function `delete-account`
-   lista no máximo 100 arquivos por pasta (quem pediu muitas verificações deixa selfies
-   para trás — a `0021` alivia, porque a selfie some ao fim da análise, mas não
-   resolve para quem excluir a conta com pedido ainda pendente) e precisa de novo
-   deploy quando for corrigida; `nome`, `bio`, `profissao`
-   e interesses não têm limite de tamanho no banco (colocar junto com a nota do limite
-   na tela); qualquer pessoa logada consegue listar as fotos dos perfis visíveis — o
-   mesmo que veria rolando a fila, mas facilita copiar em massa (pede limite de uso).
+7. **Detalhes da auditoria que ficaram para depois:** qualquer pessoa logada
+   consegue listar as fotos dos perfis visíveis — o mesmo que veria rolando a fila,
+   mas facilita copiar em massa (pede limite de uso).
 
 ## Pontos de atenção
 
