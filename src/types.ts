@@ -128,6 +128,35 @@ export interface MyProfile {
   approximateLocation?: boolean;
 }
 
+/**
+ * O que a tela de edição de perfil mexe — e só isso. O resto do MyProfile é do
+ * servidor (selo de verificado, sanção da moderação, modo cidade, telefone) e
+ * não passa pelas mãos da tela.
+ *
+ * Existe porque esses campos são opcionais em MyProfile, então um objeto sem
+ * nenhum deles passava batido pelo TypeScript: a tela devolvia um perfil novo
+ * com os 13 campos editáveis, o App trocava o estado inteiro por ele, e o selo
+ * de verificado sumia até recarregar a página. Junto com o selo iam a sanção
+ * (quem estava suspenso voltava a ver o app) e o modo cidade (o GPS
+ * sobrescrevia a escolha no abrir seguinte).
+ */
+export type PerfilEditavel = Pick<
+  MyProfile,
+  | "name"
+  | "city"
+  | "birthdate"
+  | "gender"
+  | "bio"
+  | "photos"
+  | "intention"
+  | "interestedIn"
+  | "interests"
+  | "lifestyle"
+  | "profession"
+  | "height"
+  | "relationshipStatus"
+>;
+
 export interface Filters {
   /** Intenções aceitas na fila. Nunca vazia: sem nenhuma, não viria ninguém. */
   intentions: Intention[];

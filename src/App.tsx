@@ -601,11 +601,24 @@ export default function App() {
         <EditProfileScreen
           profile={myProfile}
           onCancel={() => setEditingProfile(false)}
-          onSave={(profile) => {
+          onSave={(edicao) => {
             void (async () => {
               try {
-                await salvarPerfil(profile);
-                setMyProfile(profile);
+                // Mesclar, nunca trocar: o que volta da tela são os campos
+                // editáveis, e o resto do perfil é do servidor — selo de
+                // verificado, sanção da moderação, modo cidade, telefone.
+                // Trocando o estado inteiro, o selo sumia da tela de Perfil até
+                // a pessoa recarregar a página; junto iam a sanção (quem estava
+                // suspenso voltava a ver o app) e o modo cidade (o GPS
+                // sobrescrevia a escolha no abrir seguinte).
+                //
+                // A ordem também importa: os campos do servidor vêm de `prev`,
+                // que é o valor mais novo que o app tem. A tela de edição
+                // carrega uma cópia ao abrir, e a moderação pode ter agido no
+                // meio da edição.
+                const atualizado = { ...myProfile, ...edicao };
+                await salvarPerfil(atualizado);
+                setMyProfile(atualizado);
                 setEditingProfile(false);
                 showToast("Perfil atualizado");
               } catch (problema) {

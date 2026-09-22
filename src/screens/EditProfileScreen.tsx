@@ -14,7 +14,7 @@ import {
 import { mensagemDeErro } from "../lib/errors";
 import { MAX_PROFILE_PHOTOS } from "../onboarding/constants";
 import { formatBirthdate, onlyDigits } from "../onboarding/phoneFormat";
-import type { Gender, Lifestyle, MyProfile, RelationshipStatus } from "../types";
+import type { Gender, Lifestyle, MyProfile, PerfilEditavel, RelationshipStatus } from "../types";
 import { heightLabel } from "../types";
 import { PhotosManageScreen } from "./PhotosManageScreen";
 import styles from "./EditProfileScreen.module.css";
@@ -39,7 +39,8 @@ function photosHint(count: number): string {
 interface EditProfileScreenProps {
   profile: MyProfile;
   onCancel: () => void;
-  onSave: (profile: MyProfile) => void;
+  /** Só os campos editáveis: o que é do servidor o App preserva. */
+  onSave: (edicao: PerfilEditavel) => void;
   onShowToast: (message: string) => void;
 }
 
