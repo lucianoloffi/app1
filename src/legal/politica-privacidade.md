@@ -1,7 +1,7 @@
 # Política de Privacidade — Lovi
 
 **Última atualização:** 25 de setembro de 2026
-**Versão:** 1.4
+**Versão:** 1.5
 
 Esta política explica quais dados o Lovi coleta, por que coleta e o que você
 pode fazer a respeito. Ela segue a Lei Geral de Proteção de Dados (Lei
@@ -232,8 +232,14 @@ comunicaremos você e a ANPD conforme exige a LGPD.
 
 ## 11. Alterações
 
-Se mudarmos esta política de forma relevante, avisaremos pelo app ou por e-mail
-antes de a mudança entrar em vigor.
+Esta política pode mudar. A versão nova vale a partir de quando é publicada,
+com o número da versão e a data de atualização no topo deste texto. A versão
+em vigor fica sempre disponível no app, em **Configurações e privacidade →
+Política de privacidade**, e em lovidates.com/app1/privacidade.
+
+Se a mudança passar a usar dados que tratamos com base no seu consentimento
+(veja a seção 5) para uma finalidade que não está descrita aqui, ela só vale
+para você depois que você concordar.
 
 ---
 

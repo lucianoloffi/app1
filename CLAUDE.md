@@ -393,7 +393,7 @@ Em ordem de importância:
   `LEGAL_UPDATED_AT` não é lida por nenhum código; o que o usuário vê é o texto dos
   `.md`, e o consentimento registra só a `versao`. Antes de lançar, os **textos** (não
   só a data) precisam de revisão jurídica: o app trata dado sensível sob a LGPD.
-- **Privacidade está na 1.4 e diretrizes na 1.1.** A 1.1 (21/09) trouxe a moderação:
+- **Privacidade está na 1.5 e diretrizes na 1.1.** A 1.1 (21/09) trouxe a moderação:
   cópia da conversa na denúncia, o que o admin enxerga, e a denúncia que sobrevive à
   exclusão da conta. A 1.2 (21/09, junto da `0021`) trouxe a selfie de verificação —
   que ela é coletada, que uma pessoa a compara com as fotos do perfil, que não passa
@@ -405,9 +405,12 @@ Em ordem de importância:
   legal é o `.md` E o `versions.ts`, no mesmo commit. **Não existe fluxo de reconsentimento, e
   não vai existir** (decisão do Lu em 22/09): quem aceitou antes fica com a versão
   antiga gravada em `consents` e não é levado a aceitar o texto novo. Não propor a
-  tela de novo aceite. A seção 11 da política continua prometendo avisar "pelo app ou
-  por e-mail" antes de mudança relevante — esse aviso, sem pedir aceite, é o que
-  sobra para cumprir a promessa.
+  tela de novo aceite. Por isso a seção 11 da política (1.5, 22/09) deixou de
+  prometer aviso "pelo app ou por e-mail" antes de mudança relevante — o app não
+  tem como mandar nenhum dos dois. A versão nova vale ao ser publicada. A única
+  exceção, que a LGPD exige e o texto mantém: uso NOVO de dado tratado por
+  consentimento só vale depois que a pessoa concordar. Se isso um dia acontecer,
+  aí é preciso pedir o aceite — só nesse caso.
 - **Validação no cliente é UX, não segurança.** O mínimo de senha real é o do Supabase
   Auth; o cliente só antecipa a mensagem.
 - **Dado sensível.** Interesse (indica orientação sexual), cidade, fotos e telefone
