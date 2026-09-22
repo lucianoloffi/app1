@@ -1,43 +1,37 @@
+import { gravarLocal, lerLocal } from "./storage";
+
 /**
- * Mantém o app colado na faixa visível enquanto o teclado está aberto.
+ * Mantém o app do tamanho da faixa visível enquanto o teclado está aberto, e
+ * — o ponto desta versão — faz isso ANTES do teclado subir, para o cabeçalho
+ * da conversa não se mexer nem um pouco.
  *
- * Sem isso, o topo da conversa sumia ao tocar no campo de mensagem: quem
- * escrevia perdia de vista com quem falava, e perdia junto o caminho de volta
- * e o menu de denunciar, que moram no cabeçalho.
+ * O caminho até aqui, porque cada erro ensinou a regra seguinte:
  *
- * O GATILHO É O FOCO, não uma medida de altura. As duas versões anteriores
- * mediram `window.innerHeight - visualViewport.height` e só agiam acima de
- * 150px. Medido no Safari do iPhone, essa conta NÃO passa de 150 com o teclado
- * aberto — as variáveis abaixo nunca chegavam a ser escritas e nenhuma das
- * duas correções executava uma linha sequer. O sinal confiável de que o
- * teclado vai subir é o campo de texto receber foco; a altura serve para saber
- * o tamanho, não para decidir se age.
+ *  1. Medir `innerHeight - visualViewport.height` e só agir acima de 150px.
+ *     No Safari do iPhone essa conta não passa de 150 e o código nunca rodava.
+ *     Lição: o gatilho é o FOCO do campo, não uma medida de altura.
+ *  2. Aplicar a altura da janela visual a cada quadro. Funcionou, mas a janela
+ *     visual acompanha a animação do teclado, então o app era redimensionado
+ *     doze vezes durante a subida e a tela pulava. Lição: usar o menor entre
+ *     innerHeight e a janela visual, que já vale o valor final no primeiro
+ *     quadro, e escrever só quando muda.
+ *  3. Ainda sobrava movimento — o do próprio Safari. Ele reposiciona a página
+ *     porque, no instante do toque, o campo de mensagem fica embaixo de onde o
+ *     teclado vai aparecer, e ele rola para revelá-lo. Reagir depois é sempre
+ *     tarde: quando o evento chega, o deslocamento já aconteceu.
  *
- * Com o campo em foco, três coisas são aplicadas juntas, porque cada navegador
- * empurra a tela de um jeito e não dá para saber qual é pelo user agent:
+ * Daí esta versão: no `focusin`, antes de qualquer animação, o app já encolhe
+ * para a altura que vai ter com o teclado aberto. O campo nasce dentro da área
+ * que continuará visível, o Safari não tem o que revelar, e não rola nada. O
+ * app assume o tamanho final de uma vez e o teclado sobe por cima do espaço
+ * que sobrou — que é como um app nativo se comporta.
  *
- *  1. `--altura-visivel` = altura da janela visual, para o app caber acima do
- *     teclado em vez de continuar do tamanho da tela inteira.
- *  2. `--deslocamento-visivel` = visualViewport.offsetTop, para quando o
- *     navegador desliza a janela visual sobre a página.
- *  3. `window.scrollTo(0, 0)`, para quando ele rola o documento. No Safari do
- *     iPhone é este o caso: com o teclado aberto, elemento em position: fixed
- *     passa a se comportar como absolute e sobe junto com a página — foi o que
- *     o diagnóstico mostrou, com o cabeçalho em -288.
- *
- * É aplicado repetidamente por um tempo, porque o teclado sobe animado e uma
- * medida só pega o estado do meio da animação. Mas o VALOR aplicado é o menor
- * entre innerHeight e a altura da janela visual, e só é escrito quando muda —
- * senão o app é redimensionado a cada quadro da subida do teclado e a tela dá
- * um pulo visível antes de assentar, que foi o que apareceu no iPhone.
- *
- * O menor dos dois porque eles medem coisas diferentes durante a animação: a
- * janela visual acompanha o teclado quadro a quadro, enquanto o innerHeight já
- * vale o tamanho final desde o primeiro quadro (o Safari encolhe o layout de
- * uma vez, por causa do interactive-widget=resizes-content). Com o menor, o
- * app assenta no tamanho certo de primeira, num passo só. Em navegador que não
- * encolhe o layout, innerHeight não muda e o menor é a janela visual — mesmo
- * comportamento de antes.
+ * Para isso é preciso saber a altura do teclado antes de ele aparecer, e só há
+ * um jeito honesto: lembrar da última vez. Fica guardado por aparelho (o
+ * teclado tem alturas diferentes em cada um, e muda com teclado de terceiros,
+ * emoji ou a barra de sugestões). Na primeiríssima vez, sem nada guardado, o
+ * comportamento é o da etapa 2 — e a medida daquela vez já fica guardada para
+ * as próximas.
  *
  * Abstração fina de propósito, como storage.ts e geo.ts: no Capacitor quem
  * resolve isso é o @capacitor/keyboard, e a troca fica restrita a este arquivo.
@@ -46,17 +40,28 @@
 const ALTURA = "--altura-visivel";
 const DESLOCAMENTO = "--deslocamento-visivel";
 
+/** Onde fica a altura do teclado aprendida neste aparelho. */
+const CHAVE_ALTURA_DO_TECLADO = "altura-do-teclado";
+
 /** Quanto tempo insistir depois do foco, cobrindo a animação do teclado. */
 const DURACAO_DA_ANIMACAO_MS = 900;
 
+/**
+ * Faixa aceitável para a altura aprendida. Fora dela é medida de outra coisa —
+ * barra de endereço aparecendo, giro de tela, aparelho trocado — e aplicar
+ * encolheria o app à toa.
+ */
+const TECLADO_MINIMO = 180;
+const TECLADO_MAXIMO_EM_FRACAO = 0.75;
+
 const CAMPOS_DE_TEXTO = new Set(["INPUT", "TEXTAREA"]);
+const TIPOS_SEM_TECLADO = ["checkbox", "radio", "button", "submit", "file", "range", "color"];
 
 function campoEmFoco(): boolean {
   const alvo = document.activeElement as HTMLInputElement | null;
   if (!alvo || !CAMPOS_DE_TEXTO.has(alvo.tagName)) return false;
-  // Campo só de leitura e caixa de marcar não abrem teclado.
   if (alvo.readOnly || alvo.disabled) return false;
-  return alvo.tagName === "TEXTAREA" || !["checkbox", "radio", "button", "submit", "file", "range"].includes(alvo.type);
+  return alvo.tagName === "TEXTAREA" || !TIPOS_SEM_TECLADO.includes(alvo.type);
 }
 
 export function acompanharTeclado(): () => void {
@@ -66,15 +71,34 @@ export function acompanharTeclado(): () => void {
 
   const raiz = document.documentElement;
   let insistirAte = 0;
-  /** O que já está escrito, para não reescrever o mesmo valor a cada quadro. */
   let alturaEscrita = -1;
   let deslocamentoEscrito = -1;
+  let alturaDoTeclado = lerLocal<number>(CHAVE_ALTURA_DO_TECLADO, 0);
+  /**
+   * A altura da tela ANTES de o teclado subir, guardada no instante do foco.
+   *
+   * É a régua de tudo aqui, e não dá para usar o innerHeight do momento: neste
+   * Safari ele encolhe junto com a janela visual, então `innerHeight -
+   * vv.height` termina em zero e a altura do teclado nunca seria aprendida —
+   * medido, era o que acontecia. A conta certa é contra a altura de antes.
+   */
+  let alturaCheia = window.innerHeight;
+
+  function tecladoPlausivel(altura: number): boolean {
+    return altura >= TECLADO_MINIMO && altura <= alturaCheia * TECLADO_MAXIMO_EM_FRACAO;
+  }
 
   function limpar() {
     raiz.style.removeProperty(ALTURA);
     raiz.style.removeProperty(DESLOCAMENTO);
     alturaEscrita = -1;
     deslocamentoEscrito = -1;
+  }
+
+  function escreverAltura(altura: number) {
+    if (altura === alturaEscrita) return;
+    raiz.style.setProperty(ALTURA, `${altura}px`);
+    alturaEscrita = altura;
   }
 
   function ajustar() {
@@ -84,23 +108,31 @@ export function acompanharTeclado(): () => void {
       return;
     }
 
-    const altura = Math.min(window.innerHeight, janela.height);
-    if (altura !== alturaEscrita) {
-      raiz.style.setProperty(ALTURA, `${altura}px`);
-      alturaEscrita = altura;
+    // O menor dos dois: a janela visual acompanha a animação do teclado,
+    // enquanto o innerHeight já vale o tamanho final no primeiro quadro.
+    const medida = Math.min(window.innerHeight, janela.height);
+    const coberto = Math.round(alturaCheia - medida);
+
+    // Aprende com o teclado que está aberto agora, para o próximo foco já
+    // nascer no tamanho certo.
+    if (tecladoPlausivel(coberto) && coberto !== alturaDoTeclado) {
+      alturaDoTeclado = coberto;
+      gravarLocal(CHAVE_ALTURA_DO_TECLADO, coberto);
     }
+
+    // A previsão vale enquanto o teclado ainda não cobriu nada: encolher agora
+    // é o que tira do Safari o motivo para reposicionar a página.
+    const previsto = alturaDoTeclado > 0 ? alturaCheia - alturaDoTeclado : medida;
+    escreverAltura(Math.min(medida, previsto));
 
     const deslocamento = Math.round(janela.offsetTop);
     if (deslocamento !== deslocamentoEscrito) {
-      // Zero não precisa ser escrito: o padrão da variável já é 0, e escrever
-      // deixaria um `top` inline sem serventia.
+      // Zero não precisa ser escrito: o padrão da variável já é 0.
       if (deslocamento > 0) raiz.style.setProperty(DESLOCAMENTO, `${deslocamento}px`);
       else raiz.style.removeProperty(DESLOCAMENTO);
       deslocamentoEscrito = deslocamento;
     }
 
-    // Só quando há o que desfazer: chamar à toa brigaria com uma rolagem que a
-    // própria pessoa tenha feito.
     if (window.scrollY !== 0) window.scrollTo(0, 0);
   }
 
@@ -110,6 +142,15 @@ export function acompanharTeclado(): () => void {
   }
 
   function aoFocar() {
+    // A tela ainda está inteira neste instante: é agora que dá para saber a
+    // altura cheia, e é contra ela que tudo é medido daqui para a frente.
+    if (alturaEscrita === -1) alturaCheia = window.innerHeight;
+
+    // Síncrono, no próprio evento: é a única janela de tempo antes de o Safari
+    // decidir rolar a página. Um setTimeout aqui, mesmo de 0ms, já chega tarde.
+    if (alturaDoTeclado > 0 && tecladoPlausivel(alturaDoTeclado) && campoEmFoco()) {
+      escreverAltura(alturaCheia - alturaDoTeclado);
+    }
     insistirAte = performance.now() + DURACAO_DA_ANIMACAO_MS;
     insistir();
   }
@@ -119,7 +160,12 @@ export function acompanharTeclado(): () => void {
     // O foco passa por um instante de "ninguém" ao pular de um campo para
     // outro; limpar na hora faria a tela saltar entre os dois.
     setTimeout(() => {
-      if (!campoEmFoco()) limpar();
+      if (!campoEmFoco()) {
+        limpar();
+        // Sem teclado, a tela volta ao tamanho cheio: é a régua para o próximo
+        // foco, e ela muda quando a barra de endereço aparece ou some.
+        alturaCheia = window.innerHeight;
+      }
     }, 100);
   }
 

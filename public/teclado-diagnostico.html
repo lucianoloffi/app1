@@ -33,31 +33,43 @@
       </div>
     </div>
     <script>
+      // Espelha a lógica do app: aprende a altura do teclado e, no foco
+      // seguinte, encolhe ANTES de o teclado subir.
       var vv = window.visualViewport;
       var topo = document.getElementById('topo');
       var saida = document.getElementById('medidas');
       var veredito = document.getElementById('veredito');
       var raiz = document.documentElement;
-      var ate = 0;
-      var alturaEscrita = -1, deslocEscrito = -1, escritas = 0;
+      var ate = 0, alturaEscrita = -1, deslocEscrito = -1, escritas = 0;
+      var CHAVE = 'lovi:altura-do-teclado';
+      var alturaDoTeclado = 0;
+      var alturaCheia = window.innerHeight;
+      try { alturaDoTeclado = JSON.parse(localStorage.getItem(CHAVE)) || 0; } catch (e) {}
 
       function focado() {
         var a = document.activeElement;
         return !!a && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA');
       }
+      function plausivel(h) { return h >= 180 && h <= alturaCheia * 0.75; }
+      function escrever(h) {
+        if (h === alturaEscrita) return;
+        raiz.style.setProperty('--altura', h + 'px');
+        alturaEscrita = h; escritas++;
+      }
 
       function medir() {
         if (!vv) { saida.textContent = 'sem visualViewport'; return; }
 
-        // A MESMA regra do app: gatilho é o foco; valor é o menor entre
-        // innerHeight e a janela visual; e só escreve quando muda.
         if (focado()) {
-          var altura = Math.min(window.innerHeight, vv.height);
-          if (altura !== alturaEscrita) {
-            raiz.style.setProperty('--altura', altura + 'px');
-            alturaEscrita = altura;
-            escritas++;
+          var medida = Math.min(window.innerHeight, vv.height);
+          var coberto = Math.round(alturaCheia - medida);
+          if (plausivel(coberto) && coberto !== alturaDoTeclado) {
+            alturaDoTeclado = coberto;
+            try { localStorage.setItem(CHAVE, JSON.stringify(coberto)); } catch (e) {}
           }
+          var previsto = alturaDoTeclado > 0 ? alturaCheia - alturaDoTeclado : medida;
+          escrever(Math.min(medida, previsto));
+
           var desloc = Math.round(vv.offsetTop);
           if (desloc !== deslocEscrito) {
             if (desloc > 0) raiz.style.setProperty('--desloc', desloc + 'px');
@@ -69,6 +81,7 @@
           raiz.style.removeProperty('--altura');
           raiz.style.removeProperty('--desloc');
           alturaEscrita = -1; deslocEscrito = -1; escritas = 0;
+          alturaCheia = window.innerHeight;
         }
 
         var r = topo.getBoundingClientRect();
@@ -78,11 +91,10 @@
 
         saida.textContent = [
           'innerHeight ' + window.innerHeight + '   vv.height ' + Math.round(vv.height),
-          'vv.offsetTop ' + Math.round(vv.offsetTop) + '   vv.pageTop ' + Math.round(vv.pageTop),
-          'scrollY ' + Math.round(window.scrollY) + '   foco ' + (focado() ? 'sim' : 'nao'),
+          'vv.offsetTop ' + Math.round(vv.offsetTop) + '   scrollY ' + Math.round(window.scrollY),
+          'foco ' + (focado() ? 'sim' : 'nao') + '   teclado aprendido ' + alturaDoTeclado,
           'TOPO top ' + Math.round(r.top) + '   bottom ' + Math.round(r.bottom),
           '--altura ' + (raiz.style.getPropertyValue('--altura') || '(sem)'),
-          '--desloc ' + (raiz.style.getPropertyValue('--desloc') || '(sem)'),
           'redimensionou ' + escritas + 'x  (1 = sem pulo)',
         ].join('\n');
       }
@@ -91,13 +103,18 @@
         medir();
         if (performance.now() < ate) requestAnimationFrame(insistir);
       }
-
       if (vv) {
         vv.addEventListener('resize', medir);
         vv.addEventListener('scroll', medir);
       }
       window.addEventListener('scroll', medir);
-      document.addEventListener('focusin', function () { ate = performance.now() + 900; insistir(); });
+      document.addEventListener('focusin', function () {
+        if (alturaEscrita === -1) alturaCheia = window.innerHeight;
+        if (alturaDoTeclado > 0 && plausivel(alturaDoTeclado) && focado()) {
+          escrever(alturaCheia - alturaDoTeclado);
+        }
+        ate = performance.now() + 900; insistir();
+      });
       document.addEventListener('focusout', function () { ate = 0; setTimeout(medir, 120); });
       setInterval(medir, 400);
       medir();
