@@ -68,9 +68,33 @@ sob o filtro novo depois de um erro, e o retângulo cinza em volta das ilustraç
   isso também, `atualizarLocalizacaoNaAbertura` **não roda** para quem está em modo
   cidade (`approximateLocation`) — senão o GPS devolveria a posição no próximo abrir
   e a escolha sumiria sozinha. Para voltar ao GPS existe Ajustes › Permissões.
-- **`src/lib/storage.ts` e `src/lib/geo.ts`** — abstrações finas sobre localStorage e
-  geolocalização, pelo mesmo motivo (viram `@capacitor/preferences` e
-  `@capacitor/geolocation` sem tocar no resto).
+- **`src/lib/storage.ts`, `src/lib/geo.ts` e `src/lib/teclado.ts`** — abstrações finas
+  sobre localStorage, geolocalização e teclado, pelo mesmo motivo (viram
+  `@capacitor/preferences`, `@capacitor/geolocation` e `@capacitor/keyboard` sem tocar
+  no resto).
+- **Teclado: o app encolhe ANTES de ele subir.** No Safari do iPhone, tocar no campo
+  de mensagem tirava o cabeçalho da conversa da tela. A causa não é o teclado cobrir
+  a tela, é o Safari REPOSICIONAR a página para revelar o campo, que no instante do
+  toque está embaixo de onde o teclado vai aparecer. Reagir depois é sempre tarde:
+  quando o evento chega, o deslocamento já ocorreu. Então `teclado.ts` tira o motivo
+  — no próprio `focusin`, síncrono, encolhe o app para a altura que ele terá com o
+  teclado aberto. O campo nasce dentro da área que continua visível e nada rola.
+  Isso exige saber a altura do teclado antes de ele aparecer, e o único jeito é
+  lembrar da última vez (guardada por aparelho; muda com teclado de terceiros, barra
+  de sugestões e giro de tela). Na primeira vez em cada aparelho ainda há ajuste —
+  é ela que ensina a medida.
+  Três tentativas anteriores falharam, e cada uma vale como regra: (a) gatilho por
+  `innerHeight - visualViewport.height > 150` nunca disparava, porque neste Safari o
+  `innerHeight` encolhe JUNTO e a conta dá zero — o gatilho tem de ser o foco;
+  (b) aplicar `visualViewport.height` a cada quadro redimensionava o app doze vezes
+  durante a subida do teclado, e a tela pulava — vale o menor entre `innerHeight` e a
+  janela visual, escrito só quando muda; (c) `window.scrollTo(0, 0)` não desfaz nada,
+  porque `html, body` são `overflow: hidden` e quem se move é a janela visual, não o
+  documento. **Toda medida é contra a altura cheia guardada no instante do foco**,
+  nunca contra o `innerHeight` do momento, que já está encolhido.
+  `#root` é `position: fixed` com `top` vindo de `--deslocamento-visivel`: `top` e não
+  `transform`, senão viraria bloco de contenção e as folhas em `position: fixed`
+  passariam a se ancorar nele em vez da tela.
 - **`src/lib/errors.ts`** — tradução centralizada dos erros do Supabase. `ErroDeApp`
   carrega o campo do formulário a que o erro pertence (`"email" | "senha" |
   "telefone"`), `erroNoFormulario()` traduz por regex e `lancaSeErro()` é o guarda
@@ -287,22 +311,32 @@ Em ordem de importância:
    status por essa cadeia (`minhasFotos` já devolve, é de lá para baixo que se
    perde) e escrever o aviso. A App Store exige moderação com resposta em 24h para
    app de namoro, e "reprovamos sua foto sem avisar" não é resposta.
-2. **Painel admin completo:** funil, retenção D7, ranking de 10 cidades e contas
+2. **O app promete prioridade na fila que não existe.** `VerifyProfileScreen` diz,
+   para quem recebe o selo: "Perfis verificados aparecem com prioridade na fila."
+   A `fila_descobrir` ordena por modo cidade, distância e data de cadastro —
+   verificação não entra em lugar nenhum. Ou a ordenação entra (uma linha no `order
+   by`, e aí é decisão de produto: verificado na frente muda quem aparece para quem),
+   ou a frase sai da tela (uma linha). O que não dá é seguir prometendo.
+3. **Painel admin completo:** funil, retenção D7, ranking de 10 cidades e contas
    excluídas. Os registros já existem desde a `0013`; falta só consultar e desenhar.
-3. **Provas de assédio: o que ainda falta.** A denúncia já guarda cópia da conversa
+4. **Provas de assédio: o que ainda falta.** A denúncia já guarda cópia da conversa
    e sobrevive à exclusão da conta do denunciado (`0015`). O que continua em aberto:
    `desfazer_match` apaga as mensagens de conversas que **nunca** foram denunciadas,
    e a cópia pega só as 200 últimas mensagens. Também não há prazo de descarte
    automático — a decisão de 21/09 foi guardar sem prazo fixo, enquanto houver conta
    envolvida, e está escrita na política de privacidade (seção 8). Se um dia virar
    prazo fixo, vai precisar de agendamento no banco (pg_cron), que hoje não existe.
-4. **iOS via Capacitor.** Depois do empacotamento vêm: plugins nativos (Preferences,
+5. **iOS via Capacitor.** Depois do empacotamento vêm: plugins nativos (Preferences,
    Geolocation, Camera) com as strings de permissão no `Info.plist`, deep link para a
    confirmação de e-mail (hoje o `redirectTo` usa `window.location.origin`), push via
    APNs, e as exigências da App Store para app de namoro (18+, moderação com resposta
    em 24h, exclusão de conta no app — essa já existe).
-5. **Limpar branches já mescladas** no repositório (as `claude/*`).
-6. **Detalhes da auditoria que ficaram para depois:** a Edge Function `delete-account`
+6. **Duas branches `claude/*` no remoto que NÃO foram mescladas** e precisam de
+   decisão: `focused-cannon-5w5jyw` ("Implement Lovi app: full design system,
+   onboarding…", de 13/09) pode ter trabalho que nunca entrou, e
+   `ecstatic-faraday-iwlow6` ("Remove all repository content", de 09/09) parece
+   engano. As mescladas já foram apagadas, local e no remoto, em 22/09.
+7. **Detalhes da auditoria que ficaram para depois:** a Edge Function `delete-account`
    lista no máximo 100 arquivos por pasta (quem pediu muitas verificações deixa selfies
    para trás — a `0021` alivia, porque a selfie some ao fim da análise, mas não
    resolve para quem excluir a conta com pedido ainda pendente) e precisa de novo
