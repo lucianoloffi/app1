@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
+    <title>Diagnóstico do teclado</title>
+    <style>
+      html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; }
+      body { font: 13px/1.35 -apple-system, system-ui, sans-serif; background: #e9e4f3; }
+      /* Mesma estrutura do app: raiz fixa, coluna, cabeçalho preso no topo. */
+      #raiz {
+        position: fixed; top: var(--desloc, 0px); left: 0; width: 100%;
+        height: var(--altura, 100dvh); display: flex; flex-direction: column; background: #fff;
+      }
+      #topo { flex: none; background: #7c4dff; color: #fff; padding: 14px 16px; font-weight: 700; font-size: 16px; }
+      #meio { flex: 1; min-height: 0; overflow-y: auto; padding: 12px 16px; }
+      #medidas { white-space: pre; font: 12px/1.5 ui-monospace, monospace; }
+      #baixo { flex: none; border-top: 1px solid #ddd; padding: 10px 16px 20px; background: #fff; }
+      input { width: 100%; font-size: 16px; padding: 12px; border: 1px solid #bbb; border-radius: 999px; box-sizing: border-box; }
+      .aviso { background: #fff3cd; padding: 8px 16px; font-weight: 700; }
+    </style>
+  </head>
+  <body>
+    <div id="raiz">
+      <div id="topo">TOPO — este bloco tem de continuar visível</div>
+      <div class="aviso">Toque no campo lá embaixo e tire um print desta tela.</div>
+      <div id="meio"><div id="medidas">carregando…</div></div>
+      <div id="baixo"><input id="campo" type="text" placeholder="Toque aqui" /></div>
+    </div>
+    <script>
+      var vv = window.visualViewport;
+      var topo = document.getElementById('topo');
+      var saida = document.getElementById('medidas');
+      var raiz = document.documentElement;
+      var maiorCoberto = 0;
+
+      function medir() {
+        if (!vv) { saida.textContent = 'sem visualViewport'; return; }
+        var coberto = window.innerHeight - vv.height;
+        if (coberto > maiorCoberto) maiorCoberto = coberto;
+
+        // A MESMA regra do app hoje.
+        if (coberto > 150) {
+          raiz.style.setProperty('--altura', vv.height + 'px');
+          raiz.style.setProperty('--desloc', vv.offsetTop + 'px');
+        } else {
+          raiz.style.removeProperty('--altura');
+          raiz.style.removeProperty('--desloc');
+        }
+
+        var r = topo.getBoundingClientRect();
+        saida.textContent = [
+          'innerHeight      ' + window.innerHeight,
+          'vv.height        ' + Math.round(vv.height),
+          'vv.offsetTop     ' + Math.round(vv.offsetTop),
+          'vv.pageTop       ' + Math.round(vv.pageTop),
+          'vv.scale         ' + vv.scale,
+          'scrollY          ' + Math.round(window.scrollY),
+          'doc.scrollTop    ' + Math.round(raiz.scrollTop),
+          'body.scrollTop   ' + Math.round(document.body.scrollTop),
+          '',
+          'coberto agora    ' + Math.round(coberto),
+          'maior coberto    ' + Math.round(maiorCoberto),
+          '',
+          'TOPO .top        ' + Math.round(r.top),
+          'TOPO .bottom     ' + Math.round(r.bottom),
+          '',
+          '--altura         ' + (raiz.style.getPropertyValue('--altura') || '(sem)'),
+          '--desloc         ' + (raiz.style.getPropertyValue('--desloc') || '(sem)'),
+        ].join('\n');
+      }
+
+      if (vv) {
+        vv.addEventListener('resize', medir);
+        vv.addEventListener('scroll', medir);
+      }
+      window.addEventListener('scroll', medir);
+      document.getElementById('campo').addEventListener('focus', function () {
+        // Mede várias vezes: o teclado sobe animado, e o valor logo após o
+        // toque não é o mesmo de meio segundo depois.
+        [0, 100, 300, 600, 1000].forEach(function (t) { setTimeout(medir, t); });
+      });
+      setInterval(medir, 500);
+      medir();
+    </script>
+  </body>
+</html>
