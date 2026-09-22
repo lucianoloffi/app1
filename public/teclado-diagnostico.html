@@ -13,61 +13,69 @@
         height: var(--altura, 100dvh); display: flex; flex-direction: column; background: #fff;
       }
       #topo { flex: none; background: #7c4dff; color: #fff; padding: 14px 16px; font-weight: 700; font-size: 16px; }
-      #meio { flex: 1; min-height: 0; overflow-y: auto; padding: 12px 16px; }
-      #medidas { white-space: pre; font: 12px/1.5 ui-monospace, monospace; }
-      #baixo { flex: none; border-top: 1px solid #ddd; padding: 10px 16px 20px; background: #fff; }
-      input { width: 100%; font-size: 16px; padding: 12px; border: 1px solid #bbb; border-radius: 999px; box-sizing: border-box; }
-      .aviso { background: #fff3cd; padding: 8px 16px; font-weight: 700; }
+      #meio { flex: 1; min-height: 0; overflow-y: auto; padding: 12px 16px; color: #666; }
+      /* O painel fica ACIMA do campo, colado no pé: assim continua visível com
+         o teclado aberto, que é justamente quando os números interessam. */
+      #baixo { flex: none; border-top: 1px solid #ddd; padding: 8px 12px 16px; background: #fff; }
+      #veredito { font-weight: 800; font-size: 15px; padding: 4px 0; }
+      #medidas { white-space: pre; font: 11px/1.35 ui-monospace, monospace; }
+      input { width: 100%; font-size: 16px; padding: 10px; border: 1px solid #bbb; border-radius: 999px; box-sizing: border-box; margin-top: 8px; }
     </style>
   </head>
   <body>
     <div id="raiz">
       <div id="topo">TOPO — este bloco tem de continuar visível</div>
-      <div class="aviso">Toque no campo lá embaixo e tire um print desta tela.</div>
-      <div id="meio"><div id="medidas">carregando…</div></div>
-      <div id="baixo"><input id="campo" type="text" placeholder="Toque aqui" /></div>
+      <div id="meio">Toque no campo e tire um print. O painel de medidas fica logo acima do campo, então aparece no print.</div>
+      <div id="baixo">
+        <div id="veredito">—</div>
+        <div id="medidas">carregando…</div>
+        <input id="campo" type="text" placeholder="Toque aqui" />
+      </div>
     </div>
     <script>
       var vv = window.visualViewport;
       var topo = document.getElementById('topo');
       var saida = document.getElementById('medidas');
+      var veredito = document.getElementById('veredito');
       var raiz = document.documentElement;
-      var maiorCoberto = 0;
+      var ate = 0;
+
+      function focado() {
+        var a = document.activeElement;
+        return !!a && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA');
+      }
 
       function medir() {
         if (!vv) { saida.textContent = 'sem visualViewport'; return; }
-        var coberto = window.innerHeight - vv.height;
-        if (coberto > maiorCoberto) maiorCoberto = coberto;
 
-        // A MESMA regra do app hoje.
-        if (coberto > 150) {
+        // A MESMA regra nova do app: gatilho é o foco, não a altura.
+        if (focado()) {
           raiz.style.setProperty('--altura', vv.height + 'px');
           raiz.style.setProperty('--desloc', vv.offsetTop + 'px');
+          if (window.scrollY !== 0) window.scrollTo(0, 0);
         } else {
           raiz.style.removeProperty('--altura');
           raiz.style.removeProperty('--desloc');
         }
 
         var r = topo.getBoundingClientRect();
+        var ok = r.top >= -1 && r.bottom <= vv.height + 1;
+        veredito.textContent = ok ? 'TOPO VISÍVEL: SIM' : 'TOPO VISÍVEL: NÃO';
+        veredito.style.color = ok ? '#0a7d2b' : '#c62828';
+
         saida.textContent = [
-          'innerHeight      ' + window.innerHeight,
-          'vv.height        ' + Math.round(vv.height),
-          'vv.offsetTop     ' + Math.round(vv.offsetTop),
-          'vv.pageTop       ' + Math.round(vv.pageTop),
-          'vv.scale         ' + vv.scale,
-          'scrollY          ' + Math.round(window.scrollY),
-          'doc.scrollTop    ' + Math.round(raiz.scrollTop),
-          'body.scrollTop   ' + Math.round(document.body.scrollTop),
-          '',
-          'coberto agora    ' + Math.round(coberto),
-          'maior coberto    ' + Math.round(maiorCoberto),
-          '',
-          'TOPO .top        ' + Math.round(r.top),
-          'TOPO .bottom     ' + Math.round(r.bottom),
-          '',
-          '--altura         ' + (raiz.style.getPropertyValue('--altura') || '(sem)'),
-          '--desloc         ' + (raiz.style.getPropertyValue('--desloc') || '(sem)'),
+          'innerHeight ' + window.innerHeight + '   vv.height ' + Math.round(vv.height),
+          'vv.offsetTop ' + Math.round(vv.offsetTop) + '   vv.pageTop ' + Math.round(vv.pageTop),
+          'scrollY ' + Math.round(window.scrollY) + '   foco ' + (focado() ? 'sim' : 'nao'),
+          'TOPO top ' + Math.round(r.top) + '   bottom ' + Math.round(r.bottom),
+          '--altura ' + (raiz.style.getPropertyValue('--altura') || '(sem)'),
+          '--desloc ' + (raiz.style.getPropertyValue('--desloc') || '(sem)'),
         ].join('\n');
+      }
+
+      function insistir() {
+        medir();
+        if (performance.now() < ate) requestAnimationFrame(insistir);
       }
 
       if (vv) {
@@ -75,12 +83,9 @@
         vv.addEventListener('scroll', medir);
       }
       window.addEventListener('scroll', medir);
-      document.getElementById('campo').addEventListener('focus', function () {
-        // Mede várias vezes: o teclado sobe animado, e o valor logo após o
-        // toque não é o mesmo de meio segundo depois.
-        [0, 100, 300, 600, 1000].forEach(function (t) { setTimeout(medir, t); });
-      });
-      setInterval(medir, 500);
+      document.addEventListener('focusin', function () { ate = performance.now() + 900; insistir(); });
+      document.addEventListener('focusout', function () { ate = 0; setTimeout(medir, 120); });
+      setInterval(medir, 400);
       medir();
     </script>
   </body>
