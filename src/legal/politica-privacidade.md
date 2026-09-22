@@ -1,7 +1,7 @@
 # Política de Privacidade — Lovi
 
 **Última atualização:** 25 de setembro de 2026
-**Versão:** 1.3
+**Versão:** 1.4
 
 Esta política explica quais dados o Lovi coleta, por que coleta e o que você
 pode fazer a respeito. Ela segue a Lei Geral de Proteção de Dados (Lei
@@ -73,7 +73,7 @@ análise, o arquivo é **apagado** (veja a seção 6.2).
 
 | Dado | Finalidade | Base legal |
 |---|---|---|
-| E-mail e senha | Autenticar seu acesso | Execução de contrato |
+| E-mail e senha | Autenticar seu acesso e identificar sua conta quando a moderação analisa algo sobre ela | Execução de contrato |
 | Nome, foto, bio, idade | Exibir seu perfil a outros usuários | Execução de contrato |
 | Data de nascimento | Verificar que você tem 18+ e calcular sua idade | Obrigação legal |
 | Telefone | Segurança da conta e recuperação de acesso | Execução de contrato |
@@ -115,6 +115,9 @@ suficiente para decidir. Nessa análise, e **somente** nela, temos acesso a:
 - O perfil denunciado por inteiro, incluindo **todas as fotos**, mesmo as que
   estão ocultas ou já foram reprovadas
 - O motivo e a descrição escritos por quem denunciou
+- O **e-mail da sua conta**, que serve para identificá-la com certeza — nomes
+  de perfil se repetem — ao aplicar uma decisão, conferir uma exclusão de conta
+  ou responder a uma contestação
 - Uma **cópia das mensagens trocadas entre as duas pessoas**, feita no momento
   em que a denúncia é aberta
 
@@ -123,7 +126,7 @@ conversa, e quem cometeu o abuso podia apagá-la depois de ser denunciado. A
 cópia fica presa à denúncia e **não muda** se a conversa for apagada em
 seguida.
 
-A moderação **não** vê seu telefone, seu e-mail, suas coordenadas, suas
+A moderação **não** vê seu telefone, suas coordenadas, suas
 preferências de busca nem conversas suas com outras pessoas — só a conversa
 que faz parte daquela denúncia.
 
@@ -136,6 +139,10 @@ app e pode contestar pelo e-mail de contato desta política.
 ---
 
 ## 6.2. Verificação de perfil e moderação de fotos
+
+Nas duas análises abaixo, quem analisa vê também o seu perfil (nome, idade,
+cidade, profissão, descrição) e o e-mail da sua conta, pelo mesmo motivo da
+seção 6.1: saber com certeza de qual conta se trata.
 
 **A selfie de verificação.** Se você pedir o selo de perfil verificado, uma
 pessoa da nossa equipe abre a sua selfie ao lado das fotos do seu perfil e

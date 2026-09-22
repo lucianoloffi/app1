@@ -13,6 +13,7 @@ import {
 import { mensagemDeErro } from "../lib/errors";
 import { dataCurta, dataHora, horaCurta } from "./datas";
 import { PhotoGrid } from "./PhotoGrid";
+import { AccountEmail } from "./AccountEmail";
 import styles from "./ModerationScreen.module.css";
 
 const FILTROS: { valor: FiltroDaModeracao; rotulo: string }[] = [
@@ -279,6 +280,7 @@ function CartaoDeDenuncia({
             {pessoa.verificado && <span className={styles.selo}>perfil verificado</span>}
             {pessoa.visivel === false && <span className={styles.selo}>perfil oculto</span>}
           </div>
+          <AccountEmail email={pessoa.email} />
           {ficha.length > 0 && <p className={styles.ficha}>{ficha.join(" · ")}</p>}
           {pessoa.bio && <p className={styles.bio}>{pessoa.bio}</p>}
         </div>

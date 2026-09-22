@@ -104,6 +104,8 @@ export interface DenunciadoDoPainel {
   id: string | null;
   nome: string;
   contaExcluida: boolean;
+  /** E-mail da conta (0026), para achá-la no Supabase; null se a conta foi excluída. */
+  email: string | null;
   idade: number | null;
   cidade: string | null;
   bio: string | null;
@@ -158,6 +160,7 @@ interface LinhaDaDenuncia {
     id: string | null;
     nome: string;
     conta_excluida: boolean;
+    email?: string | null;
     idade: number | null;
     cidade: string | null;
     bio: string | null;
@@ -203,6 +206,7 @@ export async function carregarModeracao(filtro: FiltroDaModeracao): Promise<Fila
         id: item.denunciado.id,
         nome: item.denunciado.nome,
         contaExcluida: item.denunciado.conta_excluida,
+        email: item.denunciado.email ?? null,
         idade: item.denunciado.idade,
         cidade: item.denunciado.cidade,
         bio: item.denunciado.bio,
@@ -282,6 +286,8 @@ export async function carregarEsperaDasDenuncias(): Promise<EsperaDasDenuncias> 
 export interface PessoaDoPainel {
   id: string;
   nome: string;
+  /** E-mail da conta (0026), para achá-la no Supabase. */
+  email: string | null;
   idade: number | null;
   cidade: string | null;
   profissao: string | null;
@@ -299,6 +305,7 @@ export interface PessoaDoPainel {
 interface LinhaDaPessoa {
   id: string;
   nome: string;
+  email?: string | null;
   idade: number | null;
   cidade: string | null;
   profissao: string | null;
@@ -316,6 +323,7 @@ function paraPessoa(linha: LinhaDaPessoa): PessoaDoPainel {
   return {
     id: linha.id,
     nome: linha.nome,
+    email: linha.email ?? null,
     idade: linha.idade,
     cidade: linha.cidade,
     profissao: linha.profissao,

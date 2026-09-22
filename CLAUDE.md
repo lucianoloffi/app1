@@ -177,6 +177,12 @@ sob o filtro novo depois de um erro, e o retângulo cinza em volta das ilustraç
   ('pendente','aprovada','rejeitada'), com `profiles.verificacao_status` nem
   com `profiles.visivel` — esta última é escolha da própria pessoa, e por isso
   banir não mexe nela.
+- **E-mail da conta no painel** (migration `0026`): a ficha da pessoa, nas três
+  filas, mostra o e-mail com botão de copiar — é por ele que se acha a conta em
+  Authentication → Users; nome de perfil é livre e se repete. Vem de `auth.users`
+  dentro de `ficha_do_painel` e de `painel_moderacao` (security definer, conferindo
+  `is_admin()`). Conta excluída não tem e-mail: ele não é copiado para a denúncia
+  como o nome. Continua fora de tudo que outro usuário vê.
 - **Espera das denúncias no painel** (migration `0025`). Sem aviso por e-mail
   (depende de SMTP próprio, ver Pendências), é o painel que avisa: uma faixa
   abaixo do topo, em qualquer aba, diz quantas denúncias estão abertas e há quanto
@@ -387,12 +393,16 @@ Em ordem de importância:
   `LEGAL_UPDATED_AT` não é lida por nenhum código; o que o usuário vê é o texto dos
   `.md`, e o consentimento registra só a `versao`. Antes de lançar, os **textos** (não
   só a data) precisam de revisão jurídica: o app trata dado sensível sob a LGPD.
-- **Privacidade está na 1.2 e diretrizes na 1.1.** A 1.1 (21/09) trouxe a moderação:
+- **Privacidade está na 1.4 e diretrizes na 1.1.** A 1.1 (21/09) trouxe a moderação:
   cópia da conversa na denúncia, o que o admin enxerga, e a denúncia que sobrevive à
   exclusão da conta. A 1.2 (21/09, junto da `0021`) trouxe a selfie de verificação —
   que ela é coletada, que uma pessoa a compara com as fotos do perfil, que não passa
   por reconhecimento facial e que é apagada ao fim da análise — e a moderação de
-  fotos. **Não existe fluxo de reconsentimento**: quem aceitou antes tem `1.0`
+  fotos. A 1.3 corrigiu a lista de fornecedores, mas só no `.md`: `versions.ts`
+  ficou em `1.2`, e quem aceitou nesse meio-tempo tem `1.2` gravado. A 1.4 (22/09,
+  junto da `0026`) diz que a moderação vê o **e-mail da conta** — antes a 6.1
+  prometia o contrário — em denúncias, verificação e fotos. Versão nova de documento
+  legal é o `.md` E o `versions.ts`, no mesmo commit. **Não existe fluxo de reconsentimento**: quem aceitou antes tem `1.0`
   gravado em `consents` e nunca vê o texto novo. Pré-lançamento isso passa; antes de
   abrir ao público, decidir se é preciso pedir o aceite de novo — e aí a tela de
   reconsentimento é trabalho novo.

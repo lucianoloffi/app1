@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import type { PessoaDoPainel } from "../lib/api/admin";
+import { AccountEmail } from "./AccountEmail";
 import { dataCurta, dataHora } from "./datas";
 import styles from "./PersonSummary.module.css";
 
@@ -51,6 +52,7 @@ export function PersonSummary({ pessoa, children }: PersonSummaryProps) {
         {!pessoa.visivel && <span className={styles.selo}>perfil oculto</span>}
         {children}
       </div>
+      <AccountEmail email={pessoa.email} />
       {ficha.length > 0 && <p className={styles.ficha}>{ficha.join(" · ")}</p>}
       {pessoa.bio && <p className={styles.bio}>{pessoa.bio}</p>}
     </div>
