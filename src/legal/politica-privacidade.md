@@ -1,7 +1,7 @@
 # Política de Privacidade — Lovi
 
 **Última atualização:** 25 de setembro de 2026
-**Versão:** 1.2
+**Versão:** 1.3
 
 Esta política explica quais dados o Lovi coleta, por que coleta e o que você
 pode fazer a respeito. Ela segue a Lei Geral de Proteção de Dados (Lei
@@ -163,9 +163,8 @@ Utilizamos os seguintes fornecedores de infraestrutura, que processam dados em
 nosso nome:
 
 - **Supabase** — banco de dados, autenticação e armazenamento de fotos
-- **Vercel** — hospedagem da aplicação
-- **Vercel Analytics** — métricas agregadas de uso do aplicativo
-- **Sentry** — monitoramento de erros técnicos
+- **GitHub Pages** — hospedagem da aplicação
+- **Cloudflare** — domínio e entrega do site
 
 Também podemos compartilhar dados quando exigido por autoridade judicial ou
 obrigação legal.
