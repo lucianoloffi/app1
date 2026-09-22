@@ -33,9 +33,18 @@ button {
   font-family: inherit;
 }
 
+/* As duas variáveis só existem enquanto o teclado está aberto (lib/teclado.ts);
+   sem elas vale o 100dvh de sempre, no lugar de sempre.
+
+   position: fixed é o que faz o `top` valer: com o teclado aberto, o navegador
+   desliza a janela visual sobre a página para revelar o campo, e devolver esse
+   deslocamento ao `top` é o que mantém o app — e o cabeçalho da conversa —
+   dentro da faixa que dá para ver. */
 #root {
-  /* --altura-visivel só existe enquanto o teclado está aberto (lib/teclado.ts);
-     sem ele vale o 100dvh de sempre. */
+  position: fixed;
+  top: var(--deslocamento-visivel, 0px);
+  left: 0;
+  width: 100%;
   height: var(--altura-visivel, 100dvh);
   display: flex;
   justify-content: center;
