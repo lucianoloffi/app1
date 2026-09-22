@@ -34,7 +34,9 @@ button {
 }
 
 #root {
-  height: 100dvh;
+  /* --altura-visivel só existe enquanto o teclado está aberto (lib/teclado.ts);
+     sem ele vale o 100dvh de sempre. */
+  height: var(--altura-visivel, 100dvh);
   display: flex;
   justify-content: center;
 }
@@ -42,7 +44,7 @@ button {
 .app-shell {
   width: 100%;
   max-width: 430px;
-  height: 100dvh;
+  height: var(--altura-visivel, 100dvh);
   background: var(--color-bg);
   display: flex;
   flex-direction: column;

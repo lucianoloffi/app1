@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App.tsx";
 import { LegalScreen, type DocumentoLegal } from "./screens/LegalScreen";
+import { acompanharTeclado } from "./lib/teclado";
 
 /**
  * Atalho por endereço: /termos, /privacidade e /diretrizes abrem o documento
@@ -14,6 +15,10 @@ const ROTAS_LEGAIS: Record<string, DocumentoLegal> = {
   privacidade: "privacidade",
   diretrizes: "diretrizes",
 };
+
+// Vale para o app inteiro, inclusive para a rota dos documentos legais, por
+// isso fica aqui e não dentro do App.
+acompanharTeclado();
 
 const base = import.meta.env.BASE_URL;
 const caminho = window.location.pathname.startsWith(base)
