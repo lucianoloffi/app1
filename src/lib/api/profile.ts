@@ -76,7 +76,10 @@ export async function carregarMeuPerfil(): Promise<MeuPerfilCompleto | null> {
       birthdate: paraDataDaTela(perfil.data_nascimento),
       gender: perfil.genero ?? "outros",
       bio: perfil.bio ?? "",
-      photos: fotos.map((foto) => foto.url).filter(Boolean),
+      // Com o status: é por ele que a dona fica sabendo de uma foto reprovada.
+      photos: fotos
+        .filter((foto) => foto.url)
+        .map((foto) => ({ url: foto.url, status: foto.status })),
       intention: perfil.intencao ?? "conhecer",
       interestedIn: prefs?.interesse_em ?? "todos",
       interests: (interesses ?? []).map((linha) => linha.interesse),

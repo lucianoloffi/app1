@@ -1,6 +1,7 @@
 import { supabase } from "../supabaseClient";
 import { lancaSeErro, ErroDeApp } from "../errors";
 import { comprimeImagem, TAMANHO_MAXIMO_BYTES, validaArquivoDeImagem } from "../imagem";
+import type { PhotoStatus } from "../../types";
 
 const BUCKET = "fotos";
 const BUCKET_VERIFICACAO = "verificacoes";
@@ -12,7 +13,7 @@ export interface FotoDoPerfil {
   url: string;
   ordem: number;
   principal: boolean;
-  status: "pendente" | "aprovada" | "rejeitada";
+  status: PhotoStatus;
 }
 
 async function assinarArquivos(bucket: string, paths: string[]): Promise<Map<string, string>> {

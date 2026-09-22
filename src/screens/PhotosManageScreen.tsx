@@ -1,19 +1,25 @@
 import { useRef } from "react";
 import { PhotoCropSheet } from "../components/PhotoCropSheet";
+import {
+  RejectedPhotoBadge,
+  RejectedPhotoNotice,
+} from "../components/RejectedPhotoNotice";
 import { ScreenHeader } from "../components/ScreenHeader";
 import { Spinner } from "../components/Spinner";
 import { useEscolhaDeFoto } from "../hooks/useEscolhaDeFoto";
 import { MAX_PROFILE_PHOTOS } from "../onboarding/constants";
+import type { MyPhoto } from "../types";
 import styles from "./PhotosManageScreen.module.css";
 
 interface PhotosManageScreenProps {
-  photos: string[];
+  photos: MyPhoto[];
   busy?: boolean;
   onAddPhoto: (image: Blob) => Promise<void>;
   onRemovePhoto: (index: number) => void;
   onMakeMain: (index: number) => void;
   onBack: () => void;
   onShowToast: (message: string) => void;
+  onOpenGuidelines?: () => void;
 }
 
 function photoHint(count: number): string {
@@ -33,6 +39,7 @@ export function PhotosManageScreen({
   onMakeMain,
   onBack,
   onShowToast,
+  onOpenGuidelines,
 }: PhotosManageScreenProps) {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const slots = [...photos, ...Array(MAX_PROFILE_PHOTOS).fill(null)].slice(0, MAX_PROFILE_PHOTOS);
@@ -64,9 +71,11 @@ export function PhotosManageScreen({
           A primeira foto é a principal e aparece no card de descoberta. Use os botões sobre cada
           foto para reordenar ou remover.
         </p>
+        <RejectedPhotoNotice photos={photos} onOpenGuidelines={onOpenGuidelines} />
         <div className={styles.grid}>
           {slots.map((photo, index) => {
             const enviando = foto.envio?.indice === index ? foto.envio.previa : null;
+            const reprovada = photo?.status === "rejeitada";
             return (
               <div
                 key={index}
@@ -89,13 +98,18 @@ export function PhotosManageScreen({
                   </>
                 ) : photo ? (
                   <>
-                    <img className={styles.photo} src={photo} alt={`Foto ${index + 1}`} />
+                    <img
+                      className={styles.photo}
+                      src={photo.url}
+                      alt={reprovada ? `Foto ${index + 1}, reprovada pela moderação` : `Foto ${index + 1}`}
+                    />
+                    {reprovada && <RejectedPhotoBadge />}
                     {index === 0 && <span className={styles.mainBadge}>Principal</span>}
                     <button
                       type="button"
                       className={styles.removeButton}
                       onClick={() => handleRemove(index)}
-                      aria-label="Remover foto"
+                      aria-label={reprovada ? "Remover foto reprovada" : "Remover foto"}
                     >
                       <svg
                         width="11"
@@ -112,7 +126,9 @@ export function PhotosManageScreen({
                         />
                       </svg>
                     </button>
-                    {index > 0 && (
+                    {/* Foto reprovada como principal não serviria de nada: os
+                        outros não a veem. */}
+                    {index > 0 && !reprovada && (
                       <button
                         type="button"
                         className={styles.makeMainButton}

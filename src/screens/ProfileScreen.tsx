@@ -1,4 +1,5 @@
 import { LoviMark } from "../components/icons/LoviMark";
+import { RejectedPhotoNotice } from "../components/RejectedPhotoNotice";
 import type { Filters, Intention, MyProfile, VerificationStatus } from "../types";
 import { ageFromBirthdate } from "../utils/age";
 import { computeCompleteness } from "../utils/completeness";
@@ -48,6 +49,7 @@ interface ProfileScreenProps {
   onOpenSettings: () => void;
   onVerifyProfile: () => void;
   onLogout: () => void;
+  onOpenGuidelines?: () => void;
 }
 
 export function ProfileScreen({
@@ -59,6 +61,7 @@ export function ProfileScreen({
   onOpenSettings,
   onVerifyProfile,
   onLogout,
+  onOpenGuidelines,
 }: ProfileScreenProps) {
   const age = myProfile ? ageFromBirthdate(myProfile.birthdate) : null;
   const photosCount = myProfile?.photos.length ?? 0;
@@ -106,7 +109,7 @@ export function ProfileScreen({
           {myProfile?.photos[0] ? (
             <img
               className={styles.avatar}
-              src={myProfile.photos[0]}
+              src={myProfile.photos[0].url}
               alt={myProfile.name || "Você"}
             />
           ) : (
@@ -147,6 +150,13 @@ export function ProfileScreen({
       </button>
 
       <div className={styles.section}>
+        {/* Aqui também, e não só em Editar perfil: é esta a tela que a pessoa
+            abre, e quem teve a foto reprovada não teria motivo para ir além. */}
+        <RejectedPhotoNotice
+          photos={myProfile?.photos ?? []}
+          onOpenGuidelines={onOpenGuidelines}
+          action={{ label: "Ver minhas fotos", onClick: onOpenEdit }}
+        />
         <button
           type="button"
           className={styles.filtersCard}

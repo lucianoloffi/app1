@@ -10,6 +10,11 @@
 
   --color-coral: #ff5a5f;
 
+  /* Erro e aviso de moderação — o mesmo vermelho das mensagens de erro. */
+  --color-danger: #c8353c;
+  --color-danger-rgb: 200, 53, 60;
+  --color-danger-soft: #fdf0f0;
+
   --color-ink: #16211a;
   --color-ink-60: #5c6660;
   --color-ink-40: #8a928b;

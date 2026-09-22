@@ -601,6 +601,7 @@ export default function App() {
         <EditProfileScreen
           profile={myProfile}
           onCancel={() => setEditingProfile(false)}
+          onOpenGuidelines={() => setDocumentoLegal("diretrizes")}
           onSave={(edicao) => {
             void (async () => {
               try {
@@ -726,7 +727,7 @@ export default function App() {
     if (verifyOpen) {
       return (
         <VerifyProfileScreen
-          photo={myProfile?.photos[0]}
+          photo={myProfile?.photos[0]?.url}
           status={myProfile?.verificationStatus ?? "nao_solicitada"}
           onClose={() => setVerifyOpen(false)}
           onSent={() =>
@@ -832,6 +833,7 @@ export default function App() {
                 onOpenSettings={() => setSettingsOpen(true)}
                 onVerifyProfile={() => setVerifyOpen(true)}
                 onLogout={() => void logout()}
+                onOpenGuidelines={() => setDocumentoLegal("diretrizes")}
               />
             )}
           </>
@@ -850,7 +852,7 @@ export default function App() {
       {discover.matchProfile && (
         <MatchOverlay
           profile={discover.matchProfile}
-          myPhoto={myProfile?.photos[0]}
+          myPhoto={myProfile?.photos[0]?.url}
           onOpenChat={() => {
             const profileId = discover.matchProfile!.id;
             discover.dismissMatch();

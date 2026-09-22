@@ -1,0 +1,77 @@
+.notice {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-field);
+  background: var(--color-danger-soft);
+  border: 1.5px solid rgba(var(--color-danger-rgb), 0.35);
+}
+
+.title {
+  margin: 0;
+  font: 700 14px/1.35 var(--font-ui);
+  color: var(--color-danger);
+}
+
+.text {
+  margin: 0;
+  font: 400 13px/1.5 var(--font-ui);
+  color: var(--color-ink-60);
+}
+
+.strong {
+  margin: 0;
+  font: 600 13px/1.5 var(--font-ui);
+  color: var(--color-ink);
+}
+
+.link {
+  border: 0;
+  padding: 0;
+  background: none;
+  font: inherit;
+  font-weight: 600;
+  color: var(--color-accent-2);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.action {
+  align-self: flex-start;
+  min-height: var(--tap-min);
+  border: 0;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-pill);
+  background: var(--color-danger);
+  color: #fff;
+  font: 700 13px var(--font-ui);
+  cursor: pointer;
+}
+
+/* Marca sobre a própria foto reprovada, nas grades de fotos. */
+/* Sem caixa-alta e com pouca margem: tem de caber inteira nos quadros
+   pequenos da grade de Editar perfil (uns 55px de largura). */
+.badge {
+  position: absolute;
+  left: 3px;
+  right: 3px;
+  top: 50%;
+  transform: translateY(-50%);
+  text-align: center;
+  white-space: nowrap;
+  padding: 3px 2px;
+  border-radius: var(--radius-pill);
+  background: var(--color-danger);
+  color: #fff;
+  font: 700 9px var(--font-ui);
+  pointer-events: none;
+}
+
+/* Véu sobre a foto reprovada: ela fica esmaecida, e não passa por foto que conta. */
+.veil {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.55);
+  pointer-events: none;
+}

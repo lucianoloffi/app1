@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import { HeightSheet } from "../components/HeightSheet";
 import { InterestBottomSheet } from "../components/InterestBottomSheet";
+import {
+  RejectedPhotoBadge,
+  RejectedPhotoNotice,
+} from "../components/RejectedPhotoNotice";
 import { RowBottomSheet } from "../components/RowBottomSheet";
 import { SelectedInterests } from "../components/SelectedInterests";
 import { LIFE_GROUPS, STATUS_SHEET_OPTIONS } from "../data/lifestyle";
@@ -42,9 +46,16 @@ interface EditProfileScreenProps {
   /** Só os campos editáveis: o que é do servidor o App preserva. */
   onSave: (edicao: PerfilEditavel) => void;
   onShowToast: (message: string) => void;
+  onOpenGuidelines?: () => void;
 }
 
-export function EditProfileScreen({ profile, onCancel, onSave, onShowToast }: EditProfileScreenProps) {
+export function EditProfileScreen({
+  profile,
+  onCancel,
+  onSave,
+  onShowToast,
+  onOpenGuidelines,
+}: EditProfileScreenProps) {
   const [name, setName] = useState(profile.name);
   const [city, setCity] = useState(profile.city);
   const [birthdate, setBirthdate] = useState(profile.birthdate);
@@ -54,7 +65,7 @@ export function EditProfileScreen({ profile, onCancel, onSave, onShowToast }: Ed
   const [bio, setBio] = useState(profile.bio);
   const [fotos, setFotos] = useState<FotoDoPerfil[]>([]);
   const [fotosOcupado, setFotosOcupado] = useState(false);
-  const photos = fotos.map((foto) => foto.url);
+  const photos = fotos.map((foto) => ({ url: foto.url, status: foto.status }));
   const [interests, setInterests] = useState<string[]>(profile.interests);
   const [lifestyle, setLifestyle] = useState<Lifestyle>(profile.lifestyle);
   const [relationshipStatus, setRelationshipStatus] = useState<RelationshipStatus | null>(
@@ -142,6 +153,11 @@ export function EditProfileScreen({ profile, onCancel, onSave, onShowToast }: Ed
               Gerenciar ›
             </button>
           </div>
+          <RejectedPhotoNotice
+            photos={photos}
+            onOpenGuidelines={onOpenGuidelines}
+            action={{ label: "Gerenciar fotos", onClick: () => setPhotosManageOpen(true) }}
+          />
           <div className={styles.photosGrid}>
             {displaySlots.map((photo, index) => (
               <div
@@ -154,7 +170,16 @@ export function EditProfileScreen({ profile, onCancel, onSave, onShowToast }: Ed
               >
                 {photo && (
                   <>
-                    <img className={styles.photoTileImg} src={photo} alt={`Foto ${index + 1}`} />
+                    <img
+                      className={styles.photoTileImg}
+                      src={photo.url}
+                      alt={
+                        photo.status === "rejeitada"
+                          ? `Foto ${index + 1}, reprovada pela moderação`
+                          : `Foto ${index + 1}`
+                      }
+                    />
+                    {photo.status === "rejeitada" && <RejectedPhotoBadge />}
                     {index === 0 && <span className={styles.coverBadge}>capa</span>}
                   </>
                 )}
@@ -299,6 +324,7 @@ export function EditProfileScreen({ profile, onCancel, onSave, onShowToast }: Ed
       {photosManageOpen && (
         <PhotosManageScreen
           onShowToast={onShowToast}
+          onOpenGuidelines={onOpenGuidelines}
           photos={photos}
           busy={fotosOcupado}
           onAddPhoto={(imagem) =>

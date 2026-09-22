@@ -105,13 +105,30 @@ export type VerificationStatus = "nao_solicitada" | "pendente" | "aprovada" | "r
  */
 export type ModerationStatus = "ativo" | "suspenso" | "banido";
 
+/**
+ * Decisão da moderação sobre UMA foto (`photos.status_moderacao`). Não
+ * confundir com ModerationStatus, que é sobre a conta inteira.
+ */
+export type PhotoStatus = "pendente" | "aprovada" | "rejeitada";
+
+/**
+ * Foto do próprio perfil. Leva o status junto porque a dona precisa saber
+ * quando uma foto dela foi reprovada: antes só a URL chegava à tela, e a foto
+ * reprovada continuava aparecendo para ela como se nada tivesse acontecido,
+ * enquanto os outros já não a viam.
+ */
+export interface MyPhoto {
+  url: string;
+  status: PhotoStatus;
+}
+
 export interface MyProfile {
   name: string;
   city: string;
   birthdate: string;
   gender: Gender;
   bio: string;
-  photos: string[];
+  photos: MyPhoto[];
   intention: Intention;
   interestedIn: FilterGender;
   interests: string[];
