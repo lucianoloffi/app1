@@ -1,5 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
-import { contarDenunciasAbertas, contarVerificacoesPendentes, souAdmin } from "../lib/api/admin";
+import {
+  carregarEsperaDasDenuncias,
+  contarVerificacoesPendentes,
+  souAdmin,
+} from "../lib/api/admin";
 import { aoMudarSessao, sair, usuarioAtual } from "../lib/api/auth";
 import { mensagemDeErro } from "../lib/errors";
 import { erroDeConfiguracao } from "../lib/supabaseClient";
@@ -11,7 +15,18 @@ import { PhotosScreen } from "./PhotosScreen";
 import { VerificationScreen } from "./VerificationScreen";
 import styles from "./AdminApp.module.css";
 
-const SEM_AVISOS: AvisosDoPainel = { denunciasAbertas: null, verificacoesPendentes: null };
+const SEM_AVISOS: AvisosDoPainel = {
+  denunciasAbertas: null,
+  minutosDaDenunciaMaisAntiga: null,
+  verificacoesPendentes: null,
+};
+
+/**
+ * De quanto em quanto tempo a espera das denúncias é relida com o painel
+ * aberto. Sem isso, quem deixasse o painel aberto de um dia para o outro veria
+ * a mesma espera de quando abriu, e o destaque das 24 h nunca acenderia.
+ */
+const RELER_DENUNCIAS_MS = 5 * 60 * 1000;
 
 type Etapa =
   | { tipo: "carregando" }
@@ -31,9 +46,30 @@ export function AdminApp() {
   /** null = o número ainda não chegou; o aviso na aba só aparece com número. */
   const [avisos, setAvisos] = useState<AvisosDoPainel>(SEM_AVISOS);
 
+  /** Número e espera da mais antiga juntos, da mesma consulta. */
+  const lerEsperaDasDenuncias = useCallback(() => {
+    void carregarEsperaDasDenuncias()
+      .then((espera) =>
+        setAvisos((atual) => ({
+          ...atual,
+          denunciasAbertas: espera.abertas,
+          minutosDaDenunciaMaisAntiga: espera.minutosDaMaisAntiga,
+        })),
+      )
+      .catch(() => {
+        /* o número é um aviso; a tela de Moderação mostra o erro de verdade */
+      });
+  }, []);
+
+  // A tela de Moderação devolve o total a cada carga da fila — inclusive
+  // depois de uma decisão. O número vale na hora; a espera da mais antiga
+  // pode ter mudado com a decisão (se foi ela a resolvida), então é relida.
   const anotarDenuncias = useCallback(
-    (valor: number) => setAvisos((atual) => ({ ...atual, denunciasAbertas: valor })),
-    [],
+    (valor: number) => {
+      setAvisos((atual) => ({ ...atual, denunciasAbertas: valor }));
+      lerEsperaDasDenuncias();
+    },
+    [lerEsperaDasDenuncias],
   );
   const anotarVerificacoes = useCallback(
     (valor: number) => setAvisos((atual) => ({ ...atual, verificacoesPendentes: valor })),
@@ -69,17 +105,15 @@ export function AdminApp() {
   // for aberta.
   useEffect(() => {
     if (etapa.tipo !== "painel") return;
-    void contarDenunciasAbertas()
-      .then(anotarDenuncias)
-      .catch(() => {
-        /* o número é um aviso; a tela de Moderação mostra o erro de verdade */
-      });
+    lerEsperaDasDenuncias();
     void contarVerificacoesPendentes()
       .then(anotarVerificacoes)
       .catch(() => {
         /* idem: quem mostra o erro é a tela de Verificação */
       });
-  }, [etapa.tipo, anotarDenuncias, anotarVerificacoes]);
+    const relogio = window.setInterval(lerEsperaDasDenuncias, RELER_DENUNCIAS_MS);
+    return () => window.clearInterval(relogio);
+  }, [etapa.tipo, lerEsperaDasDenuncias, anotarVerificacoes]);
 
   async function aoSair() {
     try {

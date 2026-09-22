@@ -34,3 +34,17 @@ export function horaCurta(iso: string): string {
   const minuto = String(data.getMinutes()).padStart(2, "0");
   return `${dia}/${mes} ${hora}:${minuto}`;
 }
+
+/**
+ * "12 min", "5 h", "2 dias e 3 h" — há quanto tempo algo espera. Horas cheias
+ * a partir de uma hora e dias a partir de 48 h: "30 h" ainda se lê de relance
+ * contra o prazo de 24 h, e é essa a comparação que importa.
+ */
+export function duracao(minutos: number): string {
+  if (minutos < 60) return `${Math.max(minutos, 0)} min`;
+  const horas = Math.floor(minutos / 60);
+  if (horas < 48) return `${horas} h`;
+  const dias = Math.floor(horas / 24);
+  const resto = horas % 24;
+  return resto === 0 ? `${dias} dias` : `${dias} dias e ${resto} h`;
+}

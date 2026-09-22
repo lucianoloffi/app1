@@ -243,11 +243,34 @@ export async function moderar(
   lancaSeErro(error);
 }
 
-/** Só o número da fila, para o aviso na aba. Não carrega as denúncias. */
-export async function contarDenunciasAbertas(): Promise<number> {
-  const { data, error } = await supabase.rpc("painel_denuncias_abertas");
+/**
+ * Prazo de resposta a uma denúncia que a App Store exige de app de namoro.
+ * Passou disso, o painel destaca a espera em vermelho.
+ */
+export const PRAZO_DA_DENUNCIA_HORAS = 24;
+
+export interface EsperaDasDenuncias {
+  abertas: number;
+  /** Há quantos minutos a denúncia aberta mais antiga espera; null sem nenhuma aberta. */
+  minutosDaMaisAntiga: number | null;
+}
+
+/**
+ * Quantas denúncias estão abertas e há quanto tempo a mais antiga espera, para
+ * o selo da aba e o aviso na entrada do painel (migration 0025). Não carrega
+ * as denúncias. A conta do tempo é feita no banco, com o relógio dele.
+ */
+export async function carregarEsperaDasDenuncias(): Promise<EsperaDasDenuncias> {
+  const { data, error } = await supabase.rpc("painel_espera_das_denuncias");
   lancaSeErro(error);
-  return Number(data ?? 0);
+  const linha = (data ?? {}) as { abertas?: number; minutos_da_mais_antiga?: number | null };
+  return {
+    abertas: Number(linha.abertas ?? 0),
+    minutosDaMaisAntiga:
+      linha.minutos_da_mais_antiga === null || linha.minutos_da_mais_antiga === undefined
+        ? null
+        : Number(linha.minutos_da_mais_antiga),
+  };
 }
 
 // ───────────────────── fotos e verificação (entrega 3) ─────────────────────

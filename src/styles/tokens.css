@@ -9,6 +9,8 @@
   --color-bubble-sent-text: #3b2568;
 
   --color-coral: #ff5a5f;
+  --color-coral-rgb: 255, 90, 95;
+  --color-coral-soft: #fff4f4;
 
   /* Erro e aviso de moderação — o mesmo vermelho das mensagens de erro. */
   --color-danger: #c8353c;

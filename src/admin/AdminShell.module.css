@@ -76,6 +76,67 @@
   justify-content: center;
 }
 
+/* Passou do prazo de resposta: vermelho de erro, mais forte que o coral, e
+   com "!" — a cor sozinha não pode ser a única pista. */
+.contadorUrgente {
+  background: var(--color-danger);
+  gap: 2px;
+}
+
+.somenteLeitor {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Faixa das denúncias abertas, logo abaixo do topo. */
+.faixa {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 40px;
+  background: var(--color-coral-soft);
+  border-bottom: 1px solid rgba(var(--color-coral-rgb), 0.3);
+  position: sticky;
+  top: 76px;
+  z-index: 1;
+}
+
+.faixaUrgente {
+  background: var(--color-danger-soft);
+  border-bottom-color: rgba(var(--color-danger-rgb), 0.45);
+}
+
+.faixaTexto {
+  margin: 0;
+  font: 500 15px/1.4 var(--font-ui);
+  color: var(--color-ink);
+}
+
+.faixaUrgente .faixaTexto {
+  color: var(--color-danger);
+}
+
+.faixaBotao {
+  margin-left: auto;
+  flex: none;
+  height: 36px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--color-coral);
+  color: #fff;
+  font: 700 14px var(--font-ui);
+  cursor: pointer;
+}
+
+.faixaUrgente .faixaBotao {
+  background: var(--color-danger);
+}
+
 .conta {
   margin-left: auto;
   font: 600 14px var(--font-ui);
