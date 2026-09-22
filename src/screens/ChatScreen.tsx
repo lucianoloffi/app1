@@ -74,7 +74,8 @@ export function ChatScreen({
   }
 
   return (
-    <div className={styles.screen}>
+    // Liga o ajuste do teclado de lib/teclado.ts — só aqui, de propósito.
+    <div className={styles.screen} data-teclado-fixo>
       <div className={styles.header}>
         <button type="button" className={styles.backButton} onClick={onBack} aria-label="Voltar">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">

@@ -92,7 +92,12 @@ sob o filtro novo depois de um erro, e o retângulo cinza em volta das ilustraç
   porque `html, body` são `overflow: hidden` e quem se move é a janela visual, não o
   documento. **Toda medida é contra a altura cheia guardada no instante do foco**,
   nunca contra o `innerHeight` do momento, que já está encolhido.
-  `#root` é `position: fixed` com `top` vindo de `--deslocamento-visivel`: `top` e não
+  **Vale só na conversa**, marcada com `data-teclado-fixo`: ligado no app inteiro, o
+  campo de senha do cadastro sumia sob o teclado — encolher antes e anular a rolagem
+  do Safari só dá certo com o campo no rodapé; num formulário, o navegador precisa
+  rolar até o campo. Tela nova com campo no rodapé que precise do mesmo comportamento
+  ganha o atributo; formulário, nunca.
+  Na conversa, `#root` é `position: fixed` (via `:has([data-teclado-fixo])`) com `top` vindo de `--deslocamento-visivel`: `top` e não
   `transform`, senão viraria bloco de contenção e as folhas em `position: fixed`
   passariam a se ancorar nele em vez da tela.
 - **`src/lib/errors.ts`** — tradução centralizada dos erros do Supabase. `ErroDeApp`

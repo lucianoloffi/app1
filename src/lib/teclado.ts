@@ -33,6 +33,13 @@ import { gravarLocal, lerLocal } from "./storage";
  * comportamento é o da etapa 2 — e a medida daquela vez já fica guardada para
  * as próximas.
  *
+ * Vale SÓ dentro de um elemento com `data-teclado-fixo` (hoje, a conversa).
+ * Ligado no app inteiro, quebrou o cadastro: encolher antes do teclado e
+ * anular a rolagem do Safari só funciona quando o campo mora no rodapé. Num
+ * formulário, o campo da senha ficava abaixo da faixa que sobra, o Safari já
+ * não podia rolar até ele, e ele sumia debaixo do teclado. Fora da conversa,
+ * quem cuida de revelar o campo é o próprio navegador, como sempre foi.
+ *
  * Abstração fina de propósito, como storage.ts e geo.ts: no Capacitor quem
  * resolve isso é o @capacitor/keyboard, e a troca fica restrita a este arquivo.
  */
@@ -61,6 +68,7 @@ function campoEmFoco(): boolean {
   const alvo = document.activeElement as HTMLInputElement | null;
   if (!alvo || !CAMPOS_DE_TEXTO.has(alvo.tagName)) return false;
   if (alvo.readOnly || alvo.disabled) return false;
+  if (!alvo.closest("[data-teclado-fixo]")) return false;
   return alvo.tagName === "TEXTAREA" || !TIPOS_SEM_TECLADO.includes(alvo.type);
 }
 

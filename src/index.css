@@ -33,21 +33,27 @@ button {
   font-family: inherit;
 }
 
-/* As duas variáveis só existem enquanto o teclado está aberto (lib/teclado.ts);
-   sem elas vale o 100dvh de sempre, no lugar de sempre.
+#root {
+  height: 100dvh;
+  display: flex;
+  justify-content: center;
+}
+
+/* Só na conversa (`data-teclado-fixo`, ver lib/teclado.ts). As duas variáveis
+   existem enquanto o teclado está aberto ali; sem elas vale o 100dvh de
+   sempre, no lugar de sempre.
 
    position: fixed é o que faz o `top` valer: com o teclado aberto, o navegador
    desliza a janela visual sobre a página para revelar o campo, e devolver esse
-   deslocamento ao `top` é o que mantém o app — e o cabeçalho da conversa —
-   dentro da faixa que dá para ver. */
-#root {
+   deslocamento ao `top` é o que mantém o cabeçalho da conversa dentro da faixa
+   que dá para ver. Nas outras telas fica de fora: preso assim, o app impedia o
+   Safari de rolar até o campo, e a senha do cadastro sumia sob o teclado. */
+#root:has([data-teclado-fixo]) {
   position: fixed;
   top: var(--deslocamento-visivel, 0px);
   left: 0;
   width: 100%;
   height: var(--altura-visivel, 100dvh);
-  display: flex;
-  justify-content: center;
 }
 
 .app-shell {
