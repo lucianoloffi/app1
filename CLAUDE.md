@@ -316,32 +316,26 @@ Em ordem de importância:
    status por essa cadeia (`minhasFotos` já devolve, é de lá para baixo que se
    perde) e escrever o aviso. A App Store exige moderação com resposta em 24h para
    app de namoro, e "reprovamos sua foto sem avisar" não é resposta.
-2. **O app promete prioridade na fila que não existe.** `VerifyProfileScreen` diz,
-   para quem recebe o selo: "Perfis verificados aparecem com prioridade na fila."
-   A `fila_descobrir` ordena por modo cidade, distância e data de cadastro —
-   verificação não entra em lugar nenhum. Ou a ordenação entra (uma linha no `order
-   by`, e aí é decisão de produto: verificado na frente muda quem aparece para quem),
-   ou a frase sai da tela (uma linha). O que não dá é seguir prometendo.
-3. **Painel admin completo:** funil, retenção D7, ranking de 10 cidades e contas
+2. **Painel admin completo:** funil, retenção D7, ranking de 10 cidades e contas
    excluídas. Os registros já existem desde a `0013`; falta só consultar e desenhar.
-4. **Provas de assédio: o que ainda falta.** A denúncia já guarda cópia da conversa
+3. **Provas de assédio: o que ainda falta.** A denúncia já guarda cópia da conversa
    e sobrevive à exclusão da conta do denunciado (`0015`). O que continua em aberto:
    `desfazer_match` apaga as mensagens de conversas que **nunca** foram denunciadas,
    e a cópia pega só as 200 últimas mensagens. Também não há prazo de descarte
    automático — a decisão de 21/09 foi guardar sem prazo fixo, enquanto houver conta
    envolvida, e está escrita na política de privacidade (seção 8). Se um dia virar
    prazo fixo, vai precisar de agendamento no banco (pg_cron), que hoje não existe.
-5. **iOS via Capacitor.** Depois do empacotamento vêm: plugins nativos (Preferences,
+4. **iOS via Capacitor.** Depois do empacotamento vêm: plugins nativos (Preferences,
    Geolocation, Camera) com as strings de permissão no `Info.plist`, deep link para a
    confirmação de e-mail (hoje o `redirectTo` usa `window.location.origin`), push via
    APNs, e as exigências da App Store para app de namoro (18+, moderação com resposta
    em 24h, exclusão de conta no app — essa já existe).
-6. **Duas branches `claude/*` no remoto que NÃO foram mescladas** e precisam de
+5. **Duas branches `claude/*` no remoto que NÃO foram mescladas** e precisam de
    decisão: `focused-cannon-5w5jyw` ("Implement Lovi app: full design system,
    onboarding…", de 13/09) pode ter trabalho que nunca entrou, e
    `ecstatic-faraday-iwlow6` ("Remove all repository content", de 09/09) parece
    engano. As mescladas já foram apagadas, local e no remoto, em 22/09.
-7. **Detalhes da auditoria que ficaram para depois:** a Edge Function `delete-account`
+6. **Detalhes da auditoria que ficaram para depois:** a Edge Function `delete-account`
    lista no máximo 100 arquivos por pasta (quem pediu muitas verificações deixa selfies
    para trás — a `0021` alivia, porque a selfie some ao fim da análise, mas não
    resolve para quem excluir a conta com pedido ainda pendente) e precisa de novo

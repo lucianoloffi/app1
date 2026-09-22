@@ -59,8 +59,11 @@ export function VerifyProfileScreen({
           ? "Precisamos de outra selfie"
           : "Tire uma selfie agora";
 
+  // Aqui dizia que "perfis verificados aparecem com prioridade na fila", o que
+  // nunca existiu: a fila_descobrir não olha a verificação. Decisão do Lu foi
+  // tirar a promessa, não criar a prioridade. Só dizer o que o selo faz.
   const body = aprovada
-    ? "Seu perfil recebeu o selo de verificado. Perfis verificados aparecem com prioridade na fila."
+    ? "Seu perfil recebeu o selo de verificado. Quem abrir o seu perfil vai ver o selo ao lado do seu nome."
     : emAnalise
       ? "Uma pessoa da nossa equipe compara a selfie com as fotos do seu perfil. A análise não é automática e pode levar até 24 horas — avisamos por aqui quando terminar."
       : enviando
