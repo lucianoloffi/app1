@@ -402,10 +402,12 @@ Em ordem de importância:
   ficou em `1.2`, e quem aceitou nesse meio-tempo tem `1.2` gravado. A 1.4 (22/09,
   junto da `0026`) diz que a moderação vê o **e-mail da conta** — antes a 6.1
   prometia o contrário — em denúncias, verificação e fotos. Versão nova de documento
-  legal é o `.md` E o `versions.ts`, no mesmo commit. **Não existe fluxo de reconsentimento**: quem aceitou antes tem `1.0`
-  gravado em `consents` e nunca vê o texto novo. Pré-lançamento isso passa; antes de
-  abrir ao público, decidir se é preciso pedir o aceite de novo — e aí a tela de
-  reconsentimento é trabalho novo.
+  legal é o `.md` E o `versions.ts`, no mesmo commit. **Não existe fluxo de reconsentimento, e
+  não vai existir** (decisão do Lu em 22/09): quem aceitou antes fica com a versão
+  antiga gravada em `consents` e não é levado a aceitar o texto novo. Não propor a
+  tela de novo aceite. A seção 11 da política continua prometendo avisar "pelo app ou
+  por e-mail" antes de mudança relevante — esse aviso, sem pedir aceite, é o que
+  sobra para cumprir a promessa.
 - **Validação no cliente é UX, não segurança.** O mínimo de senha real é o do Supabase
   Auth; o cliente só antecipa a mensagem.
 - **Dado sensível.** Interesse (indica orientação sexual), cidade, fotos e telefone
