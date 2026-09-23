@@ -14,7 +14,7 @@ pode fazer a respeito. Ela segue a Lei Geral de Proteção de Dados (Lei
 O Lovi é operado por Softers Sistemas Ltda., CNPJ 10.759.168/0001-39, com sede em Rua Dona Francisca, 8.300, Bloco Ágora Hub, Ágora Share, EFI00, Distrito Industrial, Joinville/SC, CEP 89.219-600.
 
 **Encarregado de Dados (DPO):** Luciano Faust
-**Contato para assuntos de privacidade:** lucianoloffi@gmail.com
+**Contato para assuntos de privacidade:** privacidade@lovidates.com
 
 ---
 
@@ -215,7 +215,7 @@ Pela LGPD, você pode a qualquer momento:
 - Saber com quem compartilhamos seus dados
 
 Para exercer qualquer um desses direitos, use as opções nas configurações do app
-ou escreva para lucianoloffi@gmail.com. Respondemos em até 15 dias.
+ou escreva para privacidade@lovidates.com. Respondemos em até 15 dias.
 
 ---
 
@@ -245,7 +245,7 @@ para você depois que você concordar.
 
 ## 12. Dúvidas
 
-lucianoloffi@gmail.com
+privacidade@lovidates.com
 
 Você também pode apresentar reclamação à Autoridade Nacional de Proteção de
 Dados (ANPD), em gov.br/anpd.

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { momentoPorExtenso, type SituacaoDeModeracao } from "../lib/moderacao";
 import styles from "./ModerationBlockedScreen.module.css";
 
-const EMAIL_DE_CONTATO = "lucianoloffi@gmail.com";
+const EMAIL_DE_CONTATO = "contato@lovidates.com";
 
 interface ModerationBlockedScreenProps {
   /** Nunca null aqui: a tela só aparece quando há sanção. */

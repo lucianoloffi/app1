@@ -34,7 +34,7 @@ Uma pessoa, uma conta.
 
 Você é responsável por manter sua senha em sigilo e por tudo que acontecer na
 sua conta. Se suspeitar de acesso indevido, altere a senha e nos avise em
-lucianoloffi@gmail.com.
+contato@lovidates.com.
 
 Você pode excluir sua conta a qualquer momento nas configurações do app.
 
@@ -141,4 +141,4 @@ seu domicílio.
 
 ## 12. Contato
 
-lucianoloffi@gmail.com
+contato@lovidates.com

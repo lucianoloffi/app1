@@ -83,7 +83,7 @@ app e procure as autoridades. Em situação de emergência, ligue **190**.
 
 Para violência contra a mulher, a **Central 180** atende 24 horas.
 
-Se precisar de registros para uma ocorrência, escreva para lucianoloffi@gmail.com e faremos o
+Se precisar de registros para uma ocorrência, escreva para contato@lovidates.com e faremos o
 possível para colaborar dentro da lei.
 
 ---
@@ -96,9 +96,9 @@ podem ser recriadas.
 
 Se sua conta for suspensa ou encerrada, você é avisado ao abrir o app, com a
 data em que a suspensão termina. Achou que houve engano? Escreva para
-lucianoloffi@gmail.com contando o que aconteceu — toda decisão pode ser
+contato@lovidates.com contando o que aconteceu — toda decisão pode ser
 revista.
 
 ---
 
-**Dúvidas:** lucianoloffi@gmail.com
+**Dúvidas:** contato@lovidates.com
