@@ -13,8 +13,7 @@ pode fazer a respeito. Ela segue a Lei Geral de Proteção de Dados (Lei
 
 O Lovi é operado por Softers Sistemas Ltda., CNPJ 10.759.168/0001-39, com sede em Rua Dona Francisca, 8.300, Bloco Ágora Hub, Ágora Share, EFI00, Distrito Industrial, Joinville/SC, CEP 89.219-600.
 
-**Encarregado de Dados (DPO):** Luciano Faust
-**Contato para assuntos de privacidade:** privacidade@lovidates.com
+   **Encarregado de Dados (DPO) e contato para assuntos de privacidade:** privacidade@lovidates.com
 
 ---
 
