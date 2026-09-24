@@ -16,8 +16,11 @@ interface DiscoverScreenProps {
   hasAnyMatch: boolean;
   offline: boolean;
   filters: Filters;
-  /** Distância até a pessoa mais próxima fora do raio; null = ninguém, nem longe. */
-  distanciaDoMaisProximoKm: number | null;
+  /**
+   * Distância até a pessoa mais próxima fora do raio; null = ninguém, nem longe;
+   * undefined = ainda não se sabe (a conta chega depois da fila).
+   */
+  distanciaDoMaisProximoKm: number | null | undefined;
   /** Cidade do perfil, oferecida como posição quando o GPS deixou a pessoa longe. */
   city: string;
   /** false = a posição é o GPS, e trocar pela cidade ainda é uma opção. */
@@ -72,14 +75,26 @@ export function DiscoverScreen({
     return current.interests.filter((interest) => !commonInterests.includes(interest));
   }, [current, commonInterests]);
 
+  /**
+   * Sem card e ainda sem resposta: nenhuma mensagem, só o espaço vazio. Antes
+   * o "Por hoje é isso" aparecia enquanto a fila recarregava depois de mudar
+   * o filtro e, um instante depois, dava lugar a outra tela — piscava. A
+   * distância também conta: sem ela não dá para saber se a tela certa é a de
+   * "ninguém por perto", e mostrar outra antes seria a mesma piscada.
+   */
+  const aguardando =
+    !current && (carregando || (!hasAnyMatch && distanciaDoMaisProximoKm === undefined));
   const emptyByFilter = !current && !hasAnyMatch && !carregando;
+  /** Só o nome, sem o estado: "Joinville", não "Joinville, SC". */
+  const cidadeCurta = city.split(",")[0].trim();
   /**
    * Existe gente, mas toda ela mais longe do que o filtro permite — então o
    * problema é a distância, não o filtro. Só vale quando passa do raio
    * escolhido: assim o número nunca fala de alguém que a fila já mostraria.
    */
   const foraDeAlcance =
-    distanciaDoMaisProximoKm !== null && distanciaDoMaisProximoKm > filters.distanceKm;
+    typeof distanciaDoMaisProximoKm === "number" &&
+    distanciaDoMaisProximoKm > filters.distanceKm;
   /**
    * Está longe, mas dentro do que o filtro consegue alcançar: aí mexer no
    * filtro resolve mesmo, e mandar "o app está chegando na sua região" seria
@@ -314,56 +329,49 @@ export function DiscoverScreen({
             Tentar de novo
           </button>
         </div>
-      ) : emptyByFilter ? (
+      ) : aguardando ? (
+        <div className={styles.emptyWrap} aria-busy="true" />
+      ) : emptyByFilter && foraDeAlcance ? (
         <div className={styles.emptyWrap}>
           <img className={styles.emptyArt} src={semPerfis} alt="" aria-hidden="true" />
-          {foraDeAlcance ? (
-            <>
-              {/* Mexer no filtro não resolve: não há ninguém perto. Dizer
-                  "seus filtros estão estreitos" aqui manda a pessoa ajustar
-                  uma coisa que não é o problema. */}
-              <p className={styles.emptyTitle}>Ninguém por perto ainda</p>
-              <p className={styles.emptySupport}>
-                A pessoa mais próxima do Lovi está a{" "}
-                {distanciaDoMaisProximoKm?.toLocaleString("pt-BR")} km de você.{" "}
-                {alcancavelPeloFiltro
-                  ? "Aumentar a distância nos filtros traz ela para a sua fila."
-                  : "O app ainda está chegando na sua região."}
-              </p>
-              {alcancavelPeloFiltro ? (
-                <button type="button" className={styles.primaryButton} onClick={onOpenFilters}>
-                  Ajustar filtros
-                </button>
-              ) : (
-                podeUsarCidade && (
-                  <button type="button" className={styles.primaryButton} onClick={onUseCity}>
-                    Usar {city} como minha localização
-                  </button>
-                )
-              )}
-            </>
+          {/* Mexer no filtro não resolve: não há ninguém perto. Dizer "seus
+              filtros estão estreitos" aqui manda a pessoa ajustar uma coisa
+              que não é o problema. */}
+          <p className={styles.emptyTitle}>Ninguém por perto ainda</p>
+          <p className={styles.emptySupport}>
+            A pessoa mais próxima do Lovi está a{" "}
+            {distanciaDoMaisProximoKm?.toLocaleString("pt-BR")} km de você.{" "}
+            {alcancavelPeloFiltro
+              ? "Aumentar a distância nos filtros traz ela para a sua fila."
+              : "O app ainda está chegando na sua região."}
+          </p>
+          {alcancavelPeloFiltro ? (
+            <button type="button" className={styles.primaryButton} onClick={onOpenFilters}>
+              Ajustar filtros
+            </button>
           ) : (
-            <>
-              <p className={styles.emptyTitle}>Poucos perfis por aqui</p>
-              <p className={styles.emptySupport}>
-                Seus filtros estão bem estreitos: até {filters.distanceKm} km e {filters.minAge}–
-                {filters.maxAge} anos. Ampliar a distância ou a faixa de idade traz mais gente.
-              </p>
-              <button type="button" className={styles.primaryButton} onClick={onOpenFilters}>
-                Ajustar filtros
+            podeUsarCidade && (
+              <button type="button" className={styles.primaryButton} onClick={onUseCity}>
+                Usar {city} como minha localização
               </button>
-            </>
+            )
           )}
         </div>
       ) : (
+        // Uma tela só para "o filtro não trouxe ninguém" e "acabaram os perfis":
+        // eram duas, escolhidas por um sinal que mudava durante o carregamento,
+        // e para quem usa as duas dizem a mesma coisa.
         <div className={styles.emptyWrap}>
           <img className={styles.emptyArt} src={perfisVistos} alt="" aria-hidden="true" />
-          <p className={styles.emptyTitle}>Por hoje é isso</p>
+          <p className={styles.emptyTitle}>Poucos perfis por aqui</p>
           <p className={styles.emptySupport}>
-            Você viu todos os perfis de Joinville que combinam com o que busca.
+            Você viu todos os perfis {cidadeCurta ? `de ${cidadeCurta}` : "da sua região"} que
+            combinam com o que busca.
+            <br />
+            Ampliar a distância ou a faixa de idade traz mais pessoas ;)
           </p>
           <button type="button" className={styles.primaryButton} onClick={onOpenFilters}>
-            Rever os perfis
+            Ajustar filtros
           </button>
         </div>
       )}

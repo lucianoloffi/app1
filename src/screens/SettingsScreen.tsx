@@ -85,7 +85,7 @@ export function SettingsScreen({
           <div className={styles.card}>
             <ToggleRow
               label="Novos matches"
-              sub="Avisa quando alguém combina com você"
+              sub="Por e-mail, assim que alguém combina com você"
               on={notifications.notifMatch}
               onToggle={() => onToggleNotification("notifMatch", !notifications.notifMatch)}
             />

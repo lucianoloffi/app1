@@ -111,7 +111,10 @@ export default function App() {
   const [permissaoLocal, setPermissaoLocal] = useState<EstadoDaPermissao>("perguntar");
   const [localGateAberto, setLocalGateAberto] = useState(false);
   /** km até a pessoa mais próxima fora do raio; null = ninguém, ou ainda não perguntamos. */
-  const [distanciaDoMaisProximoKm, setDistanciaDoMaisProximoKm] = useState<number | null>(null);
+  /** undefined = ainda não se sabe; a tela da fila vazia espera por ela. */
+  const [distanciaDoMaisProximoKm, setDistanciaDoMaisProximoKm] = useState<
+    number | null | undefined
+  >(undefined);
 
   const { message: toastMessage, showToast } = useToast();
 
@@ -236,6 +239,10 @@ export default function App() {
   // sem erro nenhum. Sem esta checagem, ela veria "não há mais perfis" e
   // nenhuma explicação, até tentar curtir alguém ou sair e voltar ao app.
   useEffect(() => {
+    // Fila recarregando (filtro novo): a distância antiga não vale mais, e
+    // usá-la mostraria por um instante a tela da fila vazia errada.
+    // oxlint-disable-next-line react/set-state-in-effect
+    if (discover.carregando) setDistanciaDoMaisProximoKm(undefined);
     if (!appLiberado || discover.carregando || discover.hasAnyMatch) return;
     void conferirModeracao();
     // Fila vazia tem duas causas bem diferentes, e a tela precisa saber qual:

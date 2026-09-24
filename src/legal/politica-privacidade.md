@@ -1,7 +1,7 @@
 # Política de Privacidade — Lovi
 
 **Última atualização:** 25 de setembro de 2026
-**Versão:** 1.5
+**Versão:** 1.6
 
 Esta política explica quais dados o Lovi coleta, por que coleta e o que você
 pode fazer a respeito. Ela segue a Lei Geral de Proteção de Dados (Lei
@@ -73,6 +73,7 @@ análise, o arquivo é **apagado** (veja a seção 6.2).
 | Dado | Finalidade | Base legal |
 |---|---|---|
 | E-mail e senha | Autenticar seu acesso e identificar sua conta quando a moderação analisa algo sobre ela | Execução de contrato |
+| E-mail | Avisar quando você tem um match novo, se o aviso estiver ligado em Ajustes › Notificações. O e-mail não diz quem é a pessoa nem mostra foto | Execução de contrato |
 | Nome, foto, bio, idade | Exibir seu perfil a outros usuários | Execução de contrato |
 | Data de nascimento | Verificar que você tem 18+ e calcular sua idade | Obrigação legal |
 | Telefone | Segurança da conta e recuperação de acesso | Execução de contrato |
@@ -169,6 +170,7 @@ Utilizamos os seguintes fornecedores de infraestrutura, que processam dados em
 nosso nome:
 
 - **Supabase** — banco de dados, autenticação e armazenamento de fotos
+- **Resend** — envio dos e-mails de aviso (recebe só o seu e-mail e o texto do aviso)
 - **GitHub Pages** — hospedagem da aplicação
 - **Cloudflare** — domínio e entrega do site
 
