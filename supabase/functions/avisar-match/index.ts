@@ -12,12 +12,12 @@
 // Segredos da função (Edge Functions → Secrets):
 //   RESEND_API_KEY       chave do Resend, só com permissão de envio
 //   AVISO_MATCH_SEGREDO  texto aleatório longo, igual ao 'aviso_match_segredo' do Vault
-//   AVISO_REMETENTE      opcional; padrão "Lovi <ola@lovidates.com>"
+//   AVISO_REMETENTE      opcional; padrão "Lovi <avisos@lovidates.com>"
 //   APP_URL              opcional; padrão "https://lovidates.com/app1/"
 
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
-const REMETENTE_PADRAO = "Lovi <ola@lovidates.com>";
+const REMETENTE_PADRAO = "Lovi <avisos@lovidates.com>";
 const APP_URL_PADRAO = "https://lovidates.com/app1/";
 /** Resposta a quem escreve de volta: o remetente é só de envio. */
 const RESPONDER_PARA = "contato@lovidates.com";
@@ -45,28 +45,53 @@ function mesmoSegredo(recebido: string, esperado: string): boolean {
  * vezes é compartilhada ou aparece na tela de bloqueio, e um match revela
  * interesse — e, pelo gênero, orientação sexual. O nome fica para dentro do app.
  *
- * E é de propósito que parece uma mensagem escrita à mão, sem cartão, cor,
- * botão nem emoji no assunto: a primeira versão tinha tudo isso e o Gmail a
- * pôs em Promoções, onde um aviso de match se perde. Não há como mandar para a
- * caixa Principal; parecer mensagem, e não propaganda, é o que aumenta a chance.
+ * O Gmail põe este e-mail em Promoções. Uma versão só em texto, sem cartão,
+ * botão nem emoji, foi testada em 24/09 e caiu em Promoções do mesmo jeito,
+ * então ficou este layout, que é mais bonito. Quem decide a aba é o Gmail.
  */
 function mensagem(appUrl: string) {
-  const assunto = "Você tem um match novo no Lovi";
+  const assunto = "Deu match no Lovi 💜";
   const texto =
-    "Oi!\n\n" +
-    "Alguém que você curtiu no Lovi também curtiu você.\n\n" +
-    `Abra o app para ver quem é e puxar conversa: ${appUrl}\n\n` +
-    "Equipe Lovi\n\n" +
-    "Para não receber mais este aviso, desligue em Ajustes › Notificações › Novos matches.";
+    "Deu match!\n\n" +
+    "Alguém que você curtiu também curtiu você. Abra o Lovi para ver quem é e começar a conversa:\n" +
+    `${appUrl}\n\n` +
+    "—\n" +
+    "Você recebeu este e-mail porque tem uma conta no Lovi com o aviso de novos matches ligado. " +
+    "Para não receber mais, desligue em Ajustes › Notificações › Novos matches.";
 
   const html = `<!doctype html>
 <html lang="pt-BR">
-  <body>
-    <p>Oi!</p>
-    <p>Alguém que você curtiu no Lovi também curtiu você.</p>
-    <p>Abra o app para ver quem é e puxar conversa: <a href="${appUrl}">${appUrl}</a></p>
-    <p>Equipe Lovi</p>
-    <p style="color:#6b746e;font-size:12px;">Para não receber mais este aviso, desligue em Ajustes › Notificações › Novos matches.</p>
+  <body style="margin:0;padding:0;background:#f4f6f3;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6f3;padding:32px 16px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background:#ffffff;border-radius:20px;padding:32px 28px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#16211a;">
+            <tr>
+              <td style="font-size:28px;font-weight:900;color:#8b5cf6;padding-bottom:20px;">lovi</td>
+            </tr>
+            <tr>
+              <td style="font-size:24px;font-weight:800;padding-bottom:10px;">Deu match! 💜</td>
+            </tr>
+            <tr>
+              <td style="font-size:16px;line-height:1.5;padding-bottom:24px;">
+                Alguém que você curtiu também curtiu você. Abra o Lovi para ver quem é e começar a conversa.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <a href="${appUrl}" style="display:inline-block;background:#8b5cf6;color:#ffffff;text-decoration:none;font-weight:700;font-size:16px;padding:14px 28px;border-radius:999px;">Ver match</a>
+              </td>
+            </tr>
+            <tr>
+              <td style="font-size:12px;line-height:1.5;color:#6b746e;padding-top:28px;">
+                Você recebeu este e-mail porque tem uma conta no Lovi com o aviso de novos matches ligado.
+                Para não receber mais, desligue em Ajustes › Notificações › Novos matches.
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
   </body>
 </html>`;
 

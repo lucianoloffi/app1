@@ -238,9 +238,9 @@ sob o filtro novo depois de um erro, e o retângulo cinza em volta das ilustraç
   ninguém se o match foi desfeito, se um dos dois está sob sanção ou se há bloqueio —
   os mesmos casos em que `meus_matches` esconde o match. Sai na hora, mesmo com o app
   aberto (decisão do Lu em 24/09). O texto não traz nome nem foto: um match revela
-  interesse e, pelo gênero, orientação sexual. E é texto simples de propósito, sem
-  cartão, botão nem emoji no assunto: a primeira versão, colorida, caiu em Promoções
-  no Gmail. Envio pelo **Resend** (plano gratuito:
+  interesse e, pelo gênero, orientação sexual. O Gmail põe o e-mail em Promoções;
+  uma versão só em texto foi testada em 24/09 e caiu lá do mesmo jeito, então ficou
+  o layout com cartão e botão. Envio pelo **Resend** (plano gratuito:
   100 e-mails por dia). URL da função e segredo ficam no **Vault**
   (`aviso_match_url`, `aviso_match_segredo`) — sem os dois, o gatilho não faz nada e
   o match nasce normalmente; qualquer falha do envio é engolida pelo mesmo motivo.
