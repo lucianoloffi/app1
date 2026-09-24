@@ -68,6 +68,13 @@ sob o filtro novo depois de um erro, e o retângulo cinza em volta das ilustraç
   isso também, `atualizarLocalizacaoNaAbertura` **não roda** para quem está em modo
   cidade (`approximateLocation`) — senão o GPS devolveria a posição no próximo abrir
   e a escolha sumiria sozinha. Para voltar ao GPS existe Ajustes › Permissões.
+  Fora esse caso, a fila vazia tem **uma tela só**, "Poucos perfis por aqui" (em
+  24/09 ela absorveu o "Por hoje é isso"). Eram duas, escolhidas por `hasAnyMatch`,
+  e a tela piscava de uma para a outra ao mudar o filtro. Enquanto a fila recarrega,
+  ou a distância ainda não chegou, a tela fica **vazia**: mostrar qualquer mensagem
+  antes da resposta é a mesma piscada. Por isso `distanciaDoMaisProximoKm` tem três
+  estados (número, `null`, `undefined` = ainda não se sabe) e volta a `undefined` a
+  cada recarga.
 - **`src/lib/storage.ts`, `src/lib/geo.ts` e `src/lib/teclado.ts`** — abstrações finas
   sobre localStorage, geolocalização e teclado, pelo mesmo motivo (viram
   `@capacitor/preferences`, `@capacitor/geolocation` e `@capacitor/keyboard` sem tocar
