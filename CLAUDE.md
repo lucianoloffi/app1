@@ -298,6 +298,12 @@ sob o filtro novo depois de um erro, e o retângulo cinza em volta das ilustraç
   de vida e estado civil. Antes o topo dizia "Faltam 3 interesses" e quem tocava
   não achava onde preencher. A porcentagem do anel continua contando o perfil
   inteiro. Com campo novo, pôr a dica na lista da tela onde ele é preenchido.
+- **Selo de verificado no topo do Perfil** é só um escudo com check num círculo
+  (22 px, escudo de 13 px), sem texto: "verificado" já aparece em "Verificar meu
+  perfil", logo abaixo. Ele fica **dentro** do parágrafo do nome, não ao lado, e
+  por isso vem depois da última palavra. Numa coluna própria, ele prendia espaço
+  à direita e um nome como "Luciano Marques da Silva" quebrava em três linhas.
+  Leitor de tela ouve "Perfil verificado" (`role="img"` + `aria-label`).
 
 ## Convenções
 
@@ -315,6 +321,9 @@ motivou a regra. Veja o comentário sobre chave do Supabase copiada truncada em
 comum vive em `src/styles/tokens.css` (cor, tipografia, espaçamento, raios, sombras),
 `src/styles/motion.css` e `src/onboarding/fields.module.css`. Não escrever valores de
 cor ou espaçamento direto no componente quando existe token.
+Texto dentro de `<button>` precisa de `color` explícita (`var(--color-ink)` ou
+outra): sem ela, o Safari do iPhone pinta o texto de azul do sistema, e no
+computador nada aparece. Foi assim com o nome e os títulos dos cartões do Perfil.
 
 **Constantes em um lugar só.** `src/onboarding/constants.ts` (`MAX_INTERESTS`,
 `MIN_ONBOARDING_PHOTOS`, `CITY_OPTIONS`, `INTEREST_OPTIONS`, os limites de tamanho
