@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type {
   FilterGender,
   Gender,
@@ -79,6 +79,11 @@ export function OnboardingFlow({
   /** Erro do servidor ao concluir o cadastro que pertence a um campo de texto do perfil. */
   const [erroDoPerfil, setErroDoPerfil] = useState<ErroNoFormulario | null>(null);
   const [aguardandoEmail, setAguardandoEmail] = useState<string | null>(null);
+  /**
+   * Conta já criada nesta tela, com login feito. Guarda a senha para só pular
+   * o cadastro se nada mudou: com outra senha digitada, a conta não seria a dela.
+   */
+  const contaCriada = useRef<{ email: string; senha: string } | null>(null);
 
   function goTo(step: OnboardingStep) {
     setState((prev) => ({ ...prev, step }));
@@ -95,11 +100,19 @@ export function OnboardingFlow({
     setOcupado(true);
     setErroDaConta(null);
     try {
-      const { precisaConfirmarEmail } = await cadastrar({
-        email: state.email,
-        senha: state.password,
-        telefone: state.phone,
-      });
+      // A conta pode já existir: o cadastro deu certo e o que falhou foi o passo
+      // seguinte. Chamar cadastrar de novo respondia "e-mail já cadastrado" e
+      // prendia a pessoa nesta tela; com a sessão aberta, basta continuar.
+      const jaCriada =
+        contaCriada.current?.email === state.email.trim() &&
+        contaCriada.current.senha === state.password;
+      const { precisaConfirmarEmail } = jaCriada
+        ? { precisaConfirmarEmail: false }
+        : await cadastrar({
+            email: state.email,
+            senha: state.password,
+            telefone: state.phone,
+          });
 
       if (precisaConfirmarEmail) {
         // Sem sessão ainda: os consentimentos ficam para quando ela existir,
@@ -108,6 +121,7 @@ export function OnboardingFlow({
         return;
       }
 
+      contaCriada.current = { email: state.email.trim(), senha: state.password };
       await registrarConsentimentos(["termos", "diretrizes", "privacidade", "dados_sensiveis"]);
       goTo("name-birthdate");
     } catch (problema) {
