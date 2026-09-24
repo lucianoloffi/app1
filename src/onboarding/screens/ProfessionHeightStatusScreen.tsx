@@ -1,7 +1,7 @@
 import { LimitedTextField } from "../../components/LimitedTextField";
 import { PillChipRow } from "../../components/PillChip";
 import { RangeSlider } from "../../components/RangeSlider";
-import { ONBOARDING_STATUS_OPTIONS } from "../../data/lifestyle";
+import { STATUS_OPTIONS } from "../../data/lifestyle";
 import type { ErroNoFormulario } from "../../lib/errors";
 import { heightLabel, type RelationshipStatus } from "../../types";
 import { PROFISSAO_MAXIMA } from "../constants";
@@ -87,7 +87,7 @@ export function ProfessionHeightStatusScreen({
         <div className={fieldStyles.fieldGroup}>
           <span className={fieldStyles.label}>Status de relacionamento</span>
           <PillChipRow
-            options={ONBOARDING_STATUS_OPTIONS}
+            options={STATUS_OPTIONS}
             selected={relationshipStatus}
             onSelect={(value) => onChangeStatus(relationshipStatus === value ? null : value)}
             size="xs"

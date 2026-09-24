@@ -2,7 +2,7 @@ import { useState } from "react";
 import { InterestBottomSheet } from "../components/InterestBottomSheet";
 import { RowBottomSheet } from "../components/RowBottomSheet";
 import { SelectedInterests } from "../components/SelectedInterests";
-import { LIFE_GROUPS, STATUS_SHEET_OPTIONS } from "../data/lifestyle";
+import { LIFE_GROUPS, STATUS_OPTIONS } from "../data/lifestyle";
 import type { ErroNoFormulario } from "../lib/errors";
 import { MAX_INTERESTS } from "../onboarding/constants";
 import type { Lifestyle, MyProfile, RelationshipStatus } from "../types";
@@ -79,7 +79,7 @@ export function InterestsScreen({
             label="Status de relacionamento"
             iconPath="M9.6 14.8a4.2 4.2 0 110-8.4 4.2 4.2 0 010 8.4zm0-1.8a2.4 2.4 0 100-4.8 2.4 2.4 0 000 4.8zm4.8 4.8a4.2 4.2 0 110-8.4 4.2 4.2 0 010 8.4zm0-1.8a2.4 2.4 0 100-4.8 2.4 2.4 0 000 4.8z"
             value={relationshipStatus}
-            options={STATUS_SHEET_OPTIONS}
+            options={STATUS_OPTIONS}
             onChange={(value) => setRelationshipStatus(value as RelationshipStatus | null)}
           />
           {LIFE_GROUPS.map((group) => (

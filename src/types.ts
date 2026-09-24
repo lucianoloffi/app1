@@ -15,13 +15,16 @@ export interface Lifestyle {
   filhos: Kids | null;
 }
 
+/**
+ * Mesmas chaves do check de `profiles.status_relacionamento` (migration 0029).
+ * "Prefiro não dizer" não é valor: é o campo vazio (null).
+ */
 export type RelationshipStatus =
   | "solteiro"
-  | "namorando"
-  | "casado"
-  | "divorciado"
   | "separado"
-  | "viuvo";
+  | "divorciado"
+  | "viuvo"
+  | "em_relacionamento";
 
 export interface Profile {
   id: string;
@@ -225,11 +228,10 @@ export const KIDS_LABEL: Record<Kids, string> = {
 
 export const RELATIONSHIP_STATUS_LABEL: Record<RelationshipStatus, string> = {
   solteiro: "Solteiro(a)",
-  namorando: "Namorando",
-  casado: "Casado(a)",
-  divorciado: "Divorciado(a)",
   separado: "Separado(a)",
+  divorciado: "Divorciado(a)",
   viuvo: "Viúvo(a)",
+  em_relacionamento: "Em um relacionamento",
 };
 
 export function heightLabel(meters: number): string {

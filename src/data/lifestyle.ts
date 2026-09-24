@@ -41,12 +41,11 @@ export const LIFE_GROUPS = [
   { key: "filhos" as const, title: "Filhos", icon: LIFE_ICON_PATH.filhos, options: KIDS_OPTIONS },
 ];
 
-/** Ordem das chips no passo 8 do cadastro (sem "Prefiro não dizer"). */
-export const ONBOARDING_STATUS_OPTIONS: { value: RelationshipStatus; label: string }[] = (
-  ["solteiro", "divorciado", "viuvo", "separado", "namorando", "casado"] as RelationshipStatus[]
-).map((value) => ({ value, label: RELATIONSHIP_STATUS_LABEL[value] }));
-
-/** Ordem das opções na folha "Status de relacionamento" (Editar perfil). */
-export const STATUS_SHEET_OPTIONS: { value: RelationshipStatus; label: string }[] = (
-  ["solteiro", "namorando", "casado", "divorciado", "separado", "viuvo"] as RelationshipStatus[]
+/**
+ * Status de relacionamento, na mesma ordem no cadastro e na tela Interesses.
+ * Eram duas listas, cada uma numa ordem. "Prefiro não dizer" não entra: na
+ * folha ele é a opção vazia do RowBottomSheet, e no cadastro é desmarcar.
+ */
+export const STATUS_OPTIONS: { value: RelationshipStatus; label: string }[] = (
+  Object.keys(RELATIONSHIP_STATUS_LABEL) as RelationshipStatus[]
 ).map((value) => ({ value, label: RELATIONSHIP_STATUS_LABEL[value] }));
