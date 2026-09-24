@@ -229,6 +229,21 @@ sob o filtro novo depois de um erro, e o retângulo cinza em volta das ilustraç
   depois que os arquivos saíram; se o Storage falhar, devolve erro e a conta fica,
   para a pessoa poder tentar de novo. Bucket novo com arquivo de usuário entra nessa
   lista. Mudou a função? Ela não sai no push: `supabase functions deploy delete-account`.
+- **E-mail de match novo** (migration `0027` + Edge Function `avisar-match`). O
+  gatilho `matches_aviso_por_email` dispara nas mesmas condições do histórico (linha
+  nova ou par voltando a dar match) e chama a função pelo `pg_net`, com **só o id do
+  match** e o segredo no cabeçalho `x-aviso-segredo`. Quem recebe é o banco que diz
+  (`destinatarios_do_aviso_de_match`, só para service role): os dois lados, cada um
+  num e-mail, se `settings.notif_match` estiver ligado (sem linha = ligado), e
+  ninguém se o match foi desfeito, se um dos dois está sob sanção ou se há bloqueio —
+  os mesmos casos em que `meus_matches` esconde o match. Sai na hora, mesmo com o app
+  aberto (decisão do Lu em 24/09). O texto não traz nome nem foto: um match revela
+  interesse e, pelo gênero, orientação sexual. Envio pelo **Resend** (plano gratuito:
+  100 e-mails por dia). URL da função e segredo ficam no **Vault**
+  (`aviso_match_url`, `aviso_match_segredo`) — sem os dois, o gatilho não faz nada e
+  o match nasce normalmente; qualquer falha do envio é engolida pelo mesmo motivo.
+  Deploy com `supabase functions deploy avisar-match --no-verify-jwt` (quem chama é o
+  banco, sem JWT). O interruptor "Mensagens" em Ajustes continua sem envio.
 - **`src/screens/`** e **`src/onboarding/screens/`** — uma tela por arquivo.
 - **`src/components/`** — componentes compartilhados.
 - **Foto reprovada chega à dona** (migration `0023`). `MyProfile.photos` é
@@ -352,8 +367,9 @@ Em ordem de importância:
 1. **E-mail próprio (SMTP) no Supabase Auth.** O e-mail padrão do Supabase manda
    pouquíssimas mensagens por hora e costuma cair no spam: com gente de verdade se
    cadastrando, a confirmação de cadastro falha. O aviso de denúncia nova por e-mail
-   (hoje só existe a faixa no painel, `0025`) depende disso. Decisão do Lu em 22/09:
-   fica para depois.
+   (hoje só existe a faixa no painel, `0025`) depende disso. Decisão do Lu em 22/09,
+   mantida em 24/09: fica para depois. O caminho natural é o mesmo Resend do aviso de
+   match (Auth › SMTP), lembrando que os dois dividem o limite diário do plano.
 2. **Plano pago do Supabase.** No gratuito o projeto é pausado depois de alguns dias
    sem uso e não há backup automático — um beta com gente real não pode acordar com
    o app fora do ar nem perder dados. Decisão do Lu em 22/09: fica para depois.
@@ -393,7 +409,7 @@ Em ordem de importância:
   `LEGAL_UPDATED_AT` não é lida por nenhum código; o que o usuário vê é o texto dos
   `.md`, e o consentimento registra só a `versao`. Antes de lançar, os **textos** (não
   só a data) precisam de revisão jurídica: o app trata dado sensível sob a LGPD.
-- **Privacidade está na 1.5 e diretrizes na 1.1.** A 1.1 (21/09) trouxe a moderação:
+- **Privacidade está na 1.6 e diretrizes na 1.1.** A 1.1 (21/09) trouxe a moderação:
   cópia da conversa na denúncia, o que o admin enxerga, e a denúncia que sobrevive à
   exclusão da conta. A 1.2 (21/09, junto da `0021`) trouxe a selfie de verificação —
   que ela é coletada, que uma pessoa a compara com as fotos do perfil, que não passa
@@ -410,7 +426,9 @@ Em ordem de importância:
   tem como mandar nenhum dos dois. A versão nova vale ao ser publicada. A única
   exceção, que a LGPD exige e o texto mantém: uso NOVO de dado tratado por
   consentimento só vale depois que a pessoa concordar. Se isso um dia acontecer,
-  aí é preciso pedir o aceite — só nesse caso.
+  aí é preciso pedir o aceite — só nesse caso. A 1.6 (24/09, junto da `0027`) pôs
+  o e-mail de aviso de match e o Resend como fornecedor; o e-mail é tratado por
+  execução de contrato, não por consentimento, então não caiu nessa exceção.
 - **Validação no cliente é UX, não segurança.** O mínimo de senha real é o do Supabase
   Auth; o cliente só antecipa a mensagem.
 - **Dado sensível.** Interesse (indica orientação sexual), cidade, fotos e telefone
