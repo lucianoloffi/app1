@@ -351,3 +351,25 @@
   background: #fdecec;
   color: #8a1c15;
 }
+
+/* ───────── celular ───────── */
+@media (max-width: 720px) {
+  .conteudo {
+    padding: 20px 16px 32px;
+    gap: 16px;
+  }
+
+  .h1 {
+    font-size: 26px;
+  }
+
+  .titulo {
+    flex-wrap: wrap;
+    row-gap: 2px;
+  }
+
+  .cartao {
+    padding: 16px;
+    border-radius: 16px;
+  }
+}

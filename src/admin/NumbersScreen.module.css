@@ -257,3 +257,56 @@
   font: 400 13px var(--font-ui);
   color: var(--color-ink-60);
 }
+
+/* ───────── celular ───────── */
+@media (max-width: 720px) {
+  .conteudo {
+    padding: 20px 16px 32px;
+    gap: 16px;
+  }
+
+  .h1 {
+    font-size: 26px;
+  }
+
+  .titulo {
+    flex-wrap: wrap;
+    row-gap: 2px;
+  }
+
+  .periodos {
+    width: 100%;
+  }
+
+  .periodo {
+    flex: 1;
+    padding: 0 8px;
+    white-space: nowrap;
+  }
+
+  /* Duas colunas: quatro lado a lado dava um número por linha de texto. */
+  .cartoes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .cartao,
+  .bloco {
+    padding: 16px;
+    border-radius: 16px;
+  }
+
+  .cartaoValor {
+    font-size: 32px;
+  }
+
+  .linhaDeBaixo {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .blocoTopo {
+    flex-wrap: wrap;
+    row-gap: 8px;
+  }
+}
