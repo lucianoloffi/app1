@@ -1,7 +1,79 @@
+/* Âncora do balão: o SVG é desenhado na largura real, então 1 unidade = 1 px. */
+.area {
+  position: relative;
+}
+
 .grafico {
   width: 100%;
   height: auto;
   display: block;
+  /* O dedo que arrasta de lado escolhe o dia; o de cima para baixo rola a página. */
+  touch-action: pan-y;
+}
+
+.guia {
+  stroke: var(--color-line-2);
+  stroke-width: 1;
+}
+
+.pontoAtivos,
+.pontoNovos {
+  stroke: var(--color-surface);
+  stroke-width: 2;
+}
+
+.pontoAtivos {
+  fill: var(--color-accent);
+}
+
+.pontoNovos {
+  fill: var(--color-coral);
+}
+
+/* Mesmo visual do balão de ajuda da Moderação. */
+.balao {
+  position: absolute;
+  z-index: 5;
+  width: max-content;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: var(--color-ink);
+  color: #fff;
+  font: 500 13px/1.45 var(--font-ui);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  pointer-events: none;
+}
+
+.balaoDia {
+  font-weight: 700;
+  margin-bottom: var(--space-1);
+}
+
+.balaoLinha {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.balaoLinha strong {
+  margin-left: auto;
+  padding-left: var(--space-3);
+  font-weight: 700;
+}
+
+.marcaAtivos,
+.marcaNovos {
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-pill);
+}
+
+.marcaAtivos {
+  background: var(--color-accent);
+}
+
+.marcaNovos {
+  background: var(--color-coral);
 }
 
 .grade {

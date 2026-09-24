@@ -26,6 +26,16 @@ function diaCurto(iso: string): string {
   return `${dia}/${mes}`;
 }
 
+const DIAS_DA_SEMANA = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+
+/** "Qua, 24/09" — no balão, onde o dia da semana explica os vales do fim de semana. */
+function diaDoBalao(iso: string): string {
+  const [ano, mes, dia] = iso.split("-").map(Number);
+  // Em UTC para o fuso de quem olha não empurrar o dia para trás.
+  const semana = DIAS_DA_SEMANA[new Date(Date.UTC(ano, mes - 1, dia)).getUTCDay()];
+  return `${semana}, ${diaCurto(iso)}`;
+}
+
 interface DailyChartProps {
   dias: DiaDoPainel[];
 }
@@ -47,6 +57,9 @@ export function DailyChart({ dias }: DailyChartProps) {
     observador.observe(svg);
     return () => observador.disconnect();
   }, []);
+  // Dia sob o ponteiro, para o balão com os números. No mouse ele some ao sair
+  // do gráfico; no toque fica até o próximo toque, senão sumiria ao tirar o dedo.
+  const [destaque, setDestaque] = useState<number | null>(null);
   const altura = Math.min(ALTURA_MAXIMA, Math.max(ALTURA_MINIMA, Math.round(largura * 0.35)));
 
   const larguraUtil = largura - MARGEM.esquerda - MARGEM.direita;
@@ -69,6 +82,19 @@ export function DailyChart({ dias }: DailyChartProps) {
         i === dias.length - 1 || (i % 5 === 0 && x(dias.length - 1) - x(i) >= ESPACO_ENTRE_ROTULOS),
     );
 
+  function apontar(evento: React.PointerEvent<SVGSVGElement>) {
+    if (!dias.length) return;
+    const caixa = evento.currentTarget.getBoundingClientRect();
+    const px = ((evento.clientX - caixa.left) * largura) / caixa.width;
+    const i = Math.round(((px - MARGEM.esquerda) / larguraUtil) * ultimo);
+    setDestaque(Math.min(dias.length - 1, Math.max(0, i)));
+  }
+
+  const dia = destaque !== null ? dias[destaque] : undefined;
+  // O balão fica ao lado da linha-guia, para não cobrir os pontos do dia; na
+  // metade direita ele passa para a esquerda, senão sairia do gráfico.
+  const balaoAEsquerda = dia !== undefined && x(destaque!) > largura / 2;
+
   const descricao = dias.length
     ? `De ${diaCurto(dias[0].dia)} a ${diaCurto(dias[dias.length - 1].dia)}: ` +
       `${dias.reduce((s, d) => s + d.novos, 0)} novos usuários; ` +
@@ -76,40 +102,84 @@ export function DailyChart({ dias }: DailyChartProps) {
     : "Sem dados.";
 
   return (
-    <svg
-      ref={ref}
-      className={styles.grafico}
-      viewBox={`0 0 ${largura} ${altura}`}
-      role="img"
-      aria-label={descricao}
-    >
-      {marcas.map((v) => (
-        <g key={v}>
-          <line
-            x1={MARGEM.esquerda}
-            x2={largura - MARGEM.direita}
-            y1={y(v)}
-            y2={y(v)}
-            className={styles.grade}
-          />
-          <text x={MARGEM.esquerda - 10} y={y(v) + 4} textAnchor="end" className={styles.rotulo}>
-            {v}
+    <div className={styles.area}>
+      <svg
+        ref={ref}
+        className={styles.grafico}
+        viewBox={`0 0 ${largura} ${altura}`}
+        role="img"
+        aria-label={descricao}
+        onPointerMove={apontar}
+        onPointerDown={apontar}
+        onPointerLeave={(e) => {
+          if (e.pointerType === "mouse") setDestaque(null);
+        }}
+      >
+        {marcas.map((v) => (
+          <g key={v}>
+            <line
+              x1={MARGEM.esquerda}
+              x2={largura - MARGEM.direita}
+              y1={y(v)}
+              y2={y(v)}
+              className={styles.grade}
+            />
+            <text x={MARGEM.esquerda - 10} y={y(v) + 4} textAnchor="end" className={styles.rotulo}>
+              {v}
+            </text>
+          </g>
+        ))}
+        {rotulos.map(({ i, texto }) => (
+          <text
+            key={i}
+            x={x(i)}
+            y={altura - 10}
+            textAnchor={i === dias.length - 1 ? "end" : "middle"}
+            className={styles.rotulo}
+          >
+            {texto}
           </text>
-        </g>
-      ))}
-      {rotulos.map(({ i, texto }) => (
-        <text
-          key={i}
-          x={x(i)}
-          y={altura - 10}
-          textAnchor={i === dias.length - 1 ? "end" : "middle"}
-          className={styles.rotulo}
+        ))}
+        <polyline points={linha((d) => d.ativos)} className={styles.linhaAtivos} />
+        {dia && (
+          <line
+            x1={x(destaque!)}
+            x2={x(destaque!)}
+            y1={MARGEM.topo}
+            y2={altura - MARGEM.base}
+            className={styles.guia}
+          />
+        )}
+        <polyline points={linha((d) => d.ativos)} className={styles.linhaAtivos} />
+        <polyline points={linha((d) => d.novos)} className={styles.linhaNovos} />
+        {dia && (
+          <>
+            <circle cx={x(destaque!)} cy={y(dia.ativos)} r={5} className={styles.pontoAtivos} />
+            <circle cx={x(destaque!)} cy={y(dia.novos)} r={5} className={styles.pontoNovos} />
+          </>
+        )}
+      </svg>
+      {dia && (
+        <div
+          className={styles.balao}
+          style={{
+            left: x(destaque!),
+            top: MARGEM.topo,
+            transform: balaoAEsquerda ? "translateX(calc(-100% - 12px))" : "translateX(12px)",
+          }}
+          aria-hidden="true"
         >
-          {texto}
-        </text>
-      ))}
-      <polyline points={linha((d) => d.ativos)} className={styles.linhaAtivos} />
-      <polyline points={linha((d) => d.novos)} className={styles.linhaNovos} />
-    </svg>
+          <div className={styles.balaoDia}>{diaDoBalao(dia.dia)}</div>
+          <div className={styles.balaoLinha}>
+            <span className={styles.marcaAtivos} />
+            Usuários ativos <strong>{dia.ativos}</strong>
+          </div>
+          <div className={styles.balaoLinha}>
+            <span className={styles.marcaNovos} />
+            Novos usuários <strong>{dia.novos}</strong>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
