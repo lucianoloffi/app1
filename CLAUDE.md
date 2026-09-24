@@ -252,8 +252,8 @@ sob o filtro novo depois de um erro, e o retângulo cinza em volta das ilustraç
   (`aviso_match_url`, `aviso_match_segredo`) — sem os dois, o gatilho não faz nada e
   o match nasce normalmente; qualquer falha do envio é engolida pelo mesmo motivo.
   Deploy com `supabase functions deploy avisar-match --no-verify-jwt` (quem chama é o
-  banco, sem JWT). O interruptor "Mensagens" em Ajustes continua sem envio (ver
-  Pendências).
+  banco, sem JWT). Os interruptores "Mensagens" e "Novidades" estão escondidos
+  em Ajustes até terem envio (ver Pendências).
 - **`src/screens/`** e **`src/onboarding/screens/`** — uma tela por arquivo.
 - **`src/components/`** — componentes compartilhados.
 - **Foto reprovada chega à dona** (migration `0023`). `MyProfile.photos` é
@@ -381,8 +381,8 @@ Em ordem de importância:
    mantida em 24/09: fica para depois. O caminho natural é o mesmo Resend do aviso de
    match (Auth › SMTP), lembrando que os dois dividem o limite diário do plano.
 2. **E-mail de mensagem nova** (combinado em 24/09, fica para depois). O interruptor
-   "Mensagens" em Ajustes não envia nada — e o texto dele ("Avisa a cada mensagem
-   recebida") promete mais do que o plano. Regra combinada: **um e-mail por
+   "Mensagens" em Ajustes não enviava nada, e foi escondido em 24/09 junto com o
+   "Novidades do Lovi", que também não; volta quando o envio existir. Regra combinada: **um e-mail por
    conversa, só se a pessoa não abriu em 10 minutos**; enquanto a conversa seguir sem
    ser aberta, não sai outro, e abrir (`messages.lida_em`) zera. Quem conversa com o
    app aberto não recebe nada. Mesmo visual e mesmas regras do aviso de match (sem

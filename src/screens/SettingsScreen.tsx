@@ -79,20 +79,10 @@ export function SettingsScreen({
               on={notifications.notifMatch}
               onToggle={() => onToggleNotification("notifMatch", !notifications.notifMatch)}
             />
-            <ToggleRow
-              label="Mensagens"
-              sub="Avisa a cada mensagem recebida"
-              on={notifications.notifMensagem}
-              onToggle={() => onToggleNotification("notifMensagem", !notifications.notifMensagem)}
-            />
-            <ToggleRow
-              label="Novidades do Lovi"
-              sub="Dicas e recursos novos, no máximo uma vez por mês"
-              on={notifications.notifNovidades}
-              onToggle={() =>
-                onToggleNotification("notifNovidades", !notifications.notifNovidades)
-              }
-            />
+            {/* "Mensagens" e "Novidades do Lovi" ficam escondidos até existir o
+                envio: prometiam um aviso que nada mandava. As colunas continuam
+                em settings (notif_mensagem, notif_novidades); o e-mail de
+                mensagem está nas Pendências do CLAUDE.md. */}
           </div>
         </div>
 
