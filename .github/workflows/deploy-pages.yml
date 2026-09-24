@@ -4,11 +4,13 @@ on:
   push:
     branches:
       - fase1-supabase
-    # Mudou só migration ou documentação? O bundle é o mesmo, não há o que
-    # publicar. As migrations são aplicadas à mão no Supabase de qualquer jeito.
+    # Mudou só migration, documentação ou o site? O bundle é o mesmo, não há o
+    # que publicar. As migrations são aplicadas à mão no Supabase, e o site
+    # (web/) sai pelo `wrangler deploy`, não por aqui.
     paths-ignore:
       - "supabase/**"
       - "**.md"
+      - "web/**"
   workflow_dispatch:
 
 permissions:

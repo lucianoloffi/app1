@@ -37,3 +37,6 @@ fotos-de-teste/
 # Estado local da CLI do Supabase (criado pelo `supabase link`): liga ESTE
 # computador ao projeto, não é do repositório.
 supabase/.temp/
+
+# Estado local do wrangler (cache e arquivos temporários do deploy do site).
+web/.wrangler/

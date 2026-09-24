@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /app1/
+
+Sitemap: https://lovidates.com/sitemap.xml

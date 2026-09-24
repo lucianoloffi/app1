@@ -479,9 +479,12 @@ esperado (a chave anon é pública por design) — quem protege os dados é a RL
 ### Site lovidates.com (Cloudflare)
 
 O site de fora do app (página inicial, `/termos/`, `/privacidade/`, `/diretrizes/`)
-é uma Worker da Cloudflare, na pasta **`web/`**. Essa pasta **não está no Git**:
-nada ali tem histórico, e ela só existe no Mac do Lu. O app não mora lá: a Worker
-busca `/app1` no GitHub Pages. Detalhes em `web/LEIA-ME.md`.
+é uma Worker da Cloudflare, na pasta **`web/`**, no repositório desde 24/09 (antes
+só existia no Mac do Lu, sem histórico). O app não mora lá: a Worker busca `/app1`
+no GitHub Pages. Detalhes em `web/LEIA-ME.md`. O push **não** publica o site:
+`web/**` está no `paths-ignore` do workflow do app, e o site só vai para o ar pelo
+`wrangler deploy`. Commitar sem publicar deixa o site para trás, e publicar sem
+commitar deixa o repositório para trás.
 
 **Os documentos legais do site são gerados** a partir dos mesmos `.md` do app
 (`src/legal/`), por `web/gerar-documentos.mjs`. Ele troca só o `<main>` de cada

@@ -1,0 +1,15 @@
+{
+  "name": "website",
+  "main": "src/index.js",
+  "compatibility_date": "2026-09-22",
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+
+    // Sem esta linha, a página de erro personalizada faz com que pedidos de
+    // navegação nem cheguem ao código do Worker — e /app1 cairia no 404.
+    // Aqui dizemos que só esses caminhos passam pelo código primeiro.
+    "run_worker_first": ["/app1", "/app1/*"]
+  }
+}
