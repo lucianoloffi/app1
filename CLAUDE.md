@@ -328,6 +328,17 @@ sob o filtro novo depois de um erro, e o retângulo cinza em volta das ilustraç
   Tirar uma opção não apaga o interesse de quem já o tem: ele continua no perfil
   e pode ser removido, só não pode ser escolhido de novo. O banco não tem lista
   fixa de interesses, só o limite de tamanho (`INTERESSE_MAXIMO`).
+- **Status de relacionamento: cinco valores** (migration `0029`): `solteiro`,
+  `separado`, `divorciado`, `viuvo` e `em_relacionamento`. `namorando` e `casado`
+  viraram `em_relacionamento`: a diferença entre os dois não ajudava ninguém a
+  decidir um match. "Prefiro não dizer" **não é valor**, é o campo vazio (`null`).
+  Na folha da tela Interesses ele é a opção vazia do `RowBottomSheet`; no cadastro,
+  desmarcar a chip escolhida.
+  A lista é uma só, `STATUS_OPTIONS` em `src/data/lifestyle.ts`, na ordem de
+  `RELATIONSHIP_STATUS_LABEL` (`src/types.ts`). Antes eram duas, uma para o
+  cadastro e outra para a folha, cada uma numa ordem. Mudar a lista pede migration
+  nova com o mesmo conjunto no check de `profiles.status_relacionamento`, com a
+  mesma ordem de deploy da intenção: migration e, logo em seguida, o push.
 
 ## Convenções
 
