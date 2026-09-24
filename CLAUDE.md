@@ -304,6 +304,30 @@ sob o filtro novo depois de um erro, e o retângulo cinza em volta das ilustraç
   por isso vem depois da última palavra. Numa coluna própria, ele prendia espaço
   à direita e um nome como "Luciano Marques da Silva" quebrava em três linhas.
   Leitor de tela ouve "Perfil verificado" (`role="img"` + `aria-label`).
+- **Intenção: quatro opções** (migration `0028`): `serio` (Relacionamento sério),
+  `conhecer` (Conhecer alguém), `casual` (Algo casual) e `nao_sei` (Ainda não sei).
+  Antes eram três, com `amizade`. A `0028` passou quem tinha `amizade` para
+  `conhecer`, a opção que sobrou mais próxima. No filtro, quem tinha as três
+  marcadas ganhou as quatro, porque marcar tudo sempre quis dizer "não filtrar".
+  A lista mora em **um lugar só**: `INTENTION_LABEL` em `src/types.ts`, de onde
+  sai `TODAS_AS_INTENCOES`. Cadastro, filtros, cartões e o resumo do Perfil leem
+  dali. Mudar a lista pede migration nova com o mesmo conjunto nos dois checks
+  (`profiles.intencao` e `profile_preferences.intencao_filtro`, que também limita
+  o tamanho do array). Entre a migration e o push, um dos lados recusa o valor do
+  outro: aplique a migration e faça o push logo em seguida. As funções da fila
+  não têm a lista fixa (`o.intencao = any(eu.intencao_filtro)`) e não mudam.
+- **Cadastro: intenção e interesses em telas separadas.** "O que você busca?"
+  (`IntentionScreen`, passo `intention`) tem só a intenção, obrigatória. "Do que
+  você gosta?" (`ChooseInterestsScreen`, passo `interests`) mostra todas as opções
+  à vista, com contador de `MAX_INTERESTS`, e é opcional. Juntas numa tela só, os
+  interesses apareciam como um botão "Adicionar" no fim, que abria uma folha à
+  parte. Depois do cadastro, a mesma escolha é feita pela folha
+  (`InterestBottomSheet`), na tela Interesses do Perfil.
+  `INTEREST_OPTIONS` foi dimensionada para caber inteira numa tela de 390×844,
+  sem rolar (36 opções, 24/09). Musculação entrou e Jardinagem saiu para isso.
+  Tirar uma opção não apaga o interesse de quem já o tem: ele continua no perfil
+  e pode ser removido, só não pode ser escolhido de novo. O banco não tem lista
+  fixa de interesses, só o limite de tamanho (`INTERESSE_MAXIMO`).
 
 ## Convenções
 
