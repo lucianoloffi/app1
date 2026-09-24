@@ -1,14 +1,10 @@
 import { useEffect, useState } from "react";
 import { HeightSheet } from "../components/HeightSheet";
-import { InterestBottomSheet } from "../components/InterestBottomSheet";
 import { LimitedTextField } from "../components/LimitedTextField";
 import {
   RejectedPhotoBadge,
   RejectedPhotoNotice,
 } from "../components/RejectedPhotoNotice";
-import { RowBottomSheet } from "../components/RowBottomSheet";
-import { SelectedInterests } from "../components/SelectedInterests";
-import { LIFE_GROUPS, STATUS_SHEET_OPTIONS } from "../data/lifestyle";
 import {
   definirPrincipal,
   minhasFotos,
@@ -24,7 +20,7 @@ import {
   PROFISSAO_MAXIMA,
 } from "../onboarding/constants";
 import { formatBirthdate, onlyDigits } from "../onboarding/phoneFormat";
-import type { Gender, Lifestyle, MyProfile, PerfilEditavel, RelationshipStatus } from "../types";
+import type { Gender, MyProfile, PerfilEditavel } from "../types";
 import { heightLabel } from "../types";
 import { PhotosManageScreen } from "./PhotosManageScreen";
 import styles from "./EditProfileScreen.module.css";
@@ -49,8 +45,11 @@ function photosHint(count: number): string {
 interface EditProfileScreenProps {
   profile: MyProfile;
   onCancel: () => void;
-  /** Só os campos editáveis: o que é do servidor o App preserva. */
-  onSave: (edicao: PerfilEditavel) => void;
+  /**
+   * Só os campos editáveis: o que é do servidor o App preserva. Interesses e
+   * estilo de vida têm tela própria (`InterestsScreen`) e não passam por aqui.
+   */
+  onSave: (edicao: Omit<PerfilEditavel, "interests" | "lifestyle" | "relationshipStatus">) => void;
   onShowToast: (message: string) => void;
   onOpenGuidelines?: () => void;
   /** Erro do servidor ao salvar que pertence a um campo: aparece embaixo dele. */
@@ -78,11 +77,6 @@ export function EditProfileScreen({
   const [fotos, setFotos] = useState<FotoDoPerfil[]>([]);
   const [fotosOcupado, setFotosOcupado] = useState(false);
   const photos = fotos.map((foto) => ({ url: foto.url, status: foto.status }));
-  const [interests, setInterests] = useState<string[]>(profile.interests);
-  const [lifestyle, setLifestyle] = useState<Lifestyle>(profile.lifestyle);
-  const [relationshipStatus, setRelationshipStatus] = useState<RelationshipStatus | null>(
-    profile.relationshipStatus,
-  );
 
   const [photosManageOpen, setPhotosManageOpen] = useState(false);
 
@@ -105,7 +99,6 @@ export function EditProfileScreen({
     }
   }
   const [heightSheetOpen, setHeightSheetOpen] = useState(false);
-  const [interestSheetOpen, setInterestSheetOpen] = useState(false);
 
   const displaySlots = [...photos, ...Array(MAX_PROFILE_PHOTOS).fill(null)].slice(
     0,
@@ -146,11 +139,8 @@ export function EditProfileScreen({
       photos,
       intention: profile.intention,
       interestedIn: profile.interestedIn,
-      interests,
-      lifestyle,
       profession,
       height,
-      relationshipStatus,
     });
   }
 
@@ -312,58 +302,7 @@ export function EditProfileScreen({
           labelClassName={styles.label}
           inputClassName={`${styles.input} ${styles.textarea}`}
         />
-
-        <div className={styles.interestsGroup}>
-          <span className={styles.label}>Interesses</span>
-          <SelectedInterests
-            interests={interests}
-            onRemove={(interest) => {
-              if (error?.campo === "interesses") onClearError?.();
-              setInterests((prev) => prev.filter((item) => item !== interest));
-            }}
-            onAdd={() => setInterestSheetOpen(true)}
-          />
-          {erroDo("interesses") && (
-            <p className={styles.fieldNote} role="alert">
-              {erroDo("interesses")}
-            </p>
-          )}
-        </div>
-
-        <RowBottomSheet
-          label="Status de relacionamento"
-          iconPath="M9.6 14.8a4.2 4.2 0 110-8.4 4.2 4.2 0 010 8.4zm0-1.8a2.4 2.4 0 100-4.8 2.4 2.4 0 000 4.8zm4.8 4.8a4.2 4.2 0 110-8.4 4.2 4.2 0 010 8.4zm0-1.8a2.4 2.4 0 100-4.8 2.4 2.4 0 000 4.8z"
-          value={relationshipStatus}
-          options={STATUS_SHEET_OPTIONS}
-          onChange={(value) => setRelationshipStatus(value as RelationshipStatus | null)}
-        />
-        {LIFE_GROUPS.map((group) => (
-          <RowBottomSheet
-            key={group.key}
-            label={group.title}
-            iconPath={group.icon}
-            value={lifestyle[group.key]}
-            options={group.options}
-            onChange={(value) =>
-              setLifestyle((prev) => ({ ...prev, [group.key]: value }) as Lifestyle)
-            }
-          />
-        ))}
       </div>
-
-      {interestSheetOpen && (
-        <InterestBottomSheet
-          interests={interests}
-          onToggle={(interest) => {
-            if (error?.campo === "interesses") onClearError?.();
-            setInterests((prev) =>
-              prev.includes(interest) ? prev.filter((item) => item !== interest) : [...prev, interest],
-            );
-          }}
-          onOverMax={() => onShowToast("Máximo de 6 interesses")}
-          onClose={() => setInterestSheetOpen(false)}
-        />
-      )}
 
       {heightSheetOpen && (
         <HeightSheet

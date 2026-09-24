@@ -45,6 +45,7 @@ interface ProfileScreenProps {
   filters: Filters;
   verified: boolean;
   onOpenEdit: () => void;
+  onOpenInterests: () => void;
   onOpenFilters: () => void;
   onOpenSettings: () => void;
   onVerifyProfile: () => void;
@@ -57,6 +58,7 @@ export function ProfileScreen({
   filters,
   verified,
   onOpenEdit,
+  onOpenInterests,
   onOpenFilters,
   onOpenSettings,
   onVerifyProfile,
@@ -65,10 +67,13 @@ export function ProfileScreen({
 }: ProfileScreenProps) {
   const age = myProfile ? ageFromBirthdate(myProfile.birthdate) : null;
   const photosCount = myProfile?.photos.length ?? 0;
-  const { pct, hint } = computeCompleteness(myProfile, photosCount);
+  const { pct, hint, interestsHint } = computeCompleteness(myProfile, photosCount);
   const dashOffset = RING_CIRCUMFERENCE * (1 - pct / 100);
   const aviso = AVISO_DA_VERIFICACAO[myProfile?.verificationStatus ?? "nao_solicitada"];
 
+  const interessesSummary = myProfile?.interests.length
+    ? myProfile.interests.join(" · ")
+    : "Conte do que você gosta e como é seu dia a dia";
   const filtersSummary = `${GENDER_FILTER_LABEL[filters.interestedIn]} · ${filters.minAge}–${filters.maxAge} anos · até ${filters.distanceKm} km · ${resumoDeIntencoes(filters.intentions)}`;
 
   return (
@@ -130,7 +135,7 @@ export function ProfileScreen({
             {myProfile?.city ?? "Sua cidade"}
             {age !== null ? ` · ${age} anos` : ""}
           </p>
-          <p className={styles.hint}>{hint}</p>
+          {hint && <p className={styles.hint}>{hint}</p>}
         </div>
         <svg
           className={styles.chevron}
@@ -157,12 +162,48 @@ export function ProfileScreen({
           onOpenGuidelines={onOpenGuidelines}
           action={{ label: "Ver minhas fotos", onClick: onOpenEdit }}
         />
+        {/* Do que a pessoa gosta e como vive saíram de Editar perfil: lá
+            ficavam no fim de um formulário comprido, depois de nome, cidade
+            e bio, e pouca gente rolava até eles. */}
         <button
           type="button"
-          className={styles.filtersCard}
+          className={styles.card}
+          onClick={onOpenInterests}
+        >
+          <span className={styles.cardIcon}>
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden="true"
+            >
+              <path
+                d="M12 20.5s-7.5-4.6-7.5-10.2A4.3 4.3 0 0112 7.6a4.3 4.3 0 017.5 2.7c0 5.6-7.5 10.2-7.5 10.2z"
+                stroke="#5B34C9"
+                strokeWidth={1.8}
+                strokeLinejoin="round"
+              />
+            </svg>
+          </span>
+          <span className={styles.cardMain}>
+            <p className={styles.cardTitle}>Interesses</p>
+            {/* Sem interesses, o convite e o "Faltam 3 interesses" diriam o
+                mesmo em duas linhas: fica só o que falta. */}
+            {(myProfile?.interests.length || !interestsHint) && (
+              <p className={styles.cardSummary}>{interessesSummary}</p>
+            )}
+            {interestsHint && <p className={styles.cardHint}>{interestsHint}</p>}
+          </span>
+          <span className={styles.rowChevron}>›</span>
+        </button>
+
+        <button
+          type="button"
+          className={styles.card}
           onClick={onOpenFilters}
         >
-          <span className={styles.filtersIcon}>
+          <span className={styles.cardIcon}>
             <svg
               width="20"
               height="20"
@@ -194,9 +235,9 @@ export function ProfileScreen({
               />
             </svg>
           </span>
-          <span className={styles.filtersMain}>
-            <p className={styles.filtersTitle}>Filtros de busca</p>
-            <p className={styles.filtersSummary}>{filtersSummary}</p>
+          <span className={styles.cardMain}>
+            <p className={styles.cardTitle}>Filtros de busca</p>
+            <p className={styles.cardSummary}>{filtersSummary}</p>
           </span>
           <span className={styles.rowChevron}>›</span>
         </button>

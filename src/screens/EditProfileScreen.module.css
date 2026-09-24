@@ -197,18 +197,6 @@
   border-color: #c4a6f3;
 }
 
-.interestsGroup {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.lifeGroup {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
 /* Aviso embaixo do campo de cidade. Fica sempre à vista enquanto a cidade não
    for uma da lista: o botão Concluído continua clicável de propósito, para o
    botão apagado não ser a única pista de que falta algo. */

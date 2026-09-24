@@ -113,7 +113,7 @@
   flex: none;
 }
 
-.filtersCard {
+.card {
   width: 100%;
   border: 0;
   background: #fff;
@@ -126,7 +126,7 @@
   text-align: left;
 }
 
-.filtersIcon {
+.cardIcon {
   flex: none;
   width: 42px;
   height: 42px;
@@ -137,17 +137,17 @@
   justify-content: center;
 }
 
-.filtersMain {
+.cardMain {
   flex: 1;
   min-width: 0;
 }
 
-.filtersTitle {
+.cardTitle {
   margin: 0;
   font: 600 15px var(--font-ui);
 }
 
-.filtersSummary {
+.cardSummary {
   margin: 2px 0 0;
   font: 400 13px var(--font-ui);
   color: var(--color-ink-40);
@@ -199,6 +199,13 @@
 .rowChevronDestructive {
   font: 500 14px var(--font-ui);
   color: #c8353c;
+}
+
+/* O que falta na tela Interesses: o mesmo roxo da dica do topo. */
+.cardHint {
+  margin: 4px 0 0;
+  font: 600 12px var(--font-ui);
+  color: var(--color-accent-2);
 }
 
 /* O quadro do avatar quando não há foto: mesma medida, com a marca centrada. */

@@ -39,6 +39,7 @@ import { ChatsScreen } from "./screens/ChatsScreen";
 import { DiscoverScreen } from "./screens/DiscoverScreen";
 import { EditProfileScreen } from "./screens/EditProfileScreen";
 import { FiltersScreen } from "./screens/FiltersScreen";
+import { InterestsScreen } from "./screens/InterestsScreen";
 import { LegalScreen, type DocumentoLegal } from "./screens/LegalScreen";
 import { LocationBlockedScreen } from "./screens/LocationBlockedScreen";
 import { MatchOverlay } from "./screens/MatchOverlay";
@@ -53,7 +54,7 @@ import { ProfileDetailScreen } from "./screens/ProfileDetailScreen";
 import { ProfileScreen } from "./screens/ProfileScreen";
 import { SettingsScreen } from "./screens/SettingsScreen";
 import { VerifyProfileScreen } from "./screens/VerifyProfileScreen";
-import type { Filters, MyProfile, OnboardingStep, Profile, Tab } from "./types";
+import type { Filters, MyProfile, OnboardingStep, PerfilEditavel, Profile, Tab } from "./types";
 
 type Stage = "carregando" | "onboarding" | "main";
 
@@ -87,6 +88,7 @@ export default function App() {
   const [chatProfile, setChatProfile] = useState<Profile | null>(null);
 
   const [editingProfile, setEditingProfile] = useState(false);
+  const [interestsOpen, setInterestsOpen] = useState(false);
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -408,11 +410,47 @@ export default function App() {
     chats.resetChats();
     setSettingsOpen(false);
     setEditingProfile(false);
+    setInterestsOpen(false);
     setFiltersOpen(false);
     setActiveChatId(null);
     setDetailProfile(null);
     setVerifyOpen(false);
     setLocalGateAberto(false);
+  }
+
+  /** Salva o que Editar perfil ou Interesses devolveu e fecha a tela. */
+  async function salvarEdicaoDoPerfil(edicao: Partial<PerfilEditavel>, fechar: () => void) {
+    if (!myProfile) return;
+    try {
+      // Mesclar, nunca trocar: o que volta da tela são os campos
+      // editáveis, e o resto do perfil é do servidor — selo de
+      // verificado, sanção da moderação, modo cidade, telefone.
+      // Trocando o estado inteiro, o selo sumia da tela de Perfil até
+      // a pessoa recarregar a página; junto iam a sanção (quem estava
+      // suspenso voltava a ver o app) e o modo cidade (o GPS
+      // sobrescrevia a escolha no abrir seguinte).
+      //
+      // A ordem também importa: os campos do servidor vêm de `prev`,
+      // que é o valor mais novo que o app tem. A tela de edição
+      // carrega uma cópia ao abrir, e a moderação pode ter agido no
+      // meio da edição.
+      const atualizado = { ...myProfile, ...edicao };
+      setErroDaEdicao(null);
+      await salvarPerfil(atualizado);
+      setMyProfile(atualizado);
+      fechar();
+      showToast("Perfil atualizado");
+    } catch (problema) {
+      // Erro de um campo (texto longo demais, cidade fora da lista)
+      // vai para baixo do campo; o aviso diz só que não salvou.
+      const erro = erroNoFormulario(problema);
+      if (erro.campo) {
+        setErroDaEdicao(erro);
+        showToast("Não deu para salvar. Confira o campo marcado.");
+      } else {
+        showToast(erro.texto);
+      }
+    }
   }
 
   async function baixarMeusDados() {
@@ -613,40 +651,23 @@ export default function App() {
           onOpenGuidelines={() => setDocumentoLegal("diretrizes")}
           error={erroDaEdicao}
           onClearError={() => setErroDaEdicao(null)}
-          onSave={(edicao) => {
-            void (async () => {
-              try {
-                // Mesclar, nunca trocar: o que volta da tela são os campos
-                // editáveis, e o resto do perfil é do servidor — selo de
-                // verificado, sanção da moderação, modo cidade, telefone.
-                // Trocando o estado inteiro, o selo sumia da tela de Perfil até
-                // a pessoa recarregar a página; junto iam a sanção (quem estava
-                // suspenso voltava a ver o app) e o modo cidade (o GPS
-                // sobrescrevia a escolha no abrir seguinte).
-                //
-                // A ordem também importa: os campos do servidor vêm de `prev`,
-                // que é o valor mais novo que o app tem. A tela de edição
-                // carrega uma cópia ao abrir, e a moderação pode ter agido no
-                // meio da edição.
-                const atualizado = { ...myProfile, ...edicao };
-                setErroDaEdicao(null);
-                await salvarPerfil(atualizado);
-                setMyProfile(atualizado);
-                setEditingProfile(false);
-                showToast("Perfil atualizado");
-              } catch (problema) {
-                // Erro de um campo (texto longo demais, cidade fora da lista)
-                // vai para baixo do campo; o aviso diz só que não salvou.
-                const erro = erroNoFormulario(problema);
-                if (erro.campo) {
-                  setErroDaEdicao(erro);
-                  showToast("Não deu para salvar. Confira o campo marcado.");
-                } else {
-                  showToast(erro.texto);
-                }
-              }
-            })();
+          onSave={(edicao) => void salvarEdicaoDoPerfil(edicao, () => setEditingProfile(false))}
+          onShowToast={showToast}
+        />
+      );
+    }
+
+    if (interestsOpen && myProfile) {
+      return (
+        <InterestsScreen
+          profile={myProfile}
+          onCancel={() => {
+            setErroDaEdicao(null);
+            setInterestsOpen(false);
           }}
+          error={erroDaEdicao}
+          onClearError={() => setErroDaEdicao(null)}
+          onSave={(edicao) => void salvarEdicaoDoPerfil(edicao, () => setInterestsOpen(false))}
           onShowToast={showToast}
         />
       );
@@ -842,6 +863,7 @@ export default function App() {
                 filters={filters}
                 verified={verificado}
                 onOpenEdit={() => setEditingProfile(true)}
+                onOpenInterests={() => setInterestsOpen(true)}
                 onOpenFilters={() => setFiltersOpen(true)}
                 onOpenSettings={() => setSettingsOpen(true)}
                 onVerifyProfile={() => setVerifyOpen(true)}
