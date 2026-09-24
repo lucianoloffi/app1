@@ -1,0 +1,59 @@
+<!--
+  E-mail de recuperação de senha do Supabase Auth.
+
+  Não há deploy: o Supabase não lê este arquivo. Ele fica aqui para ter
+  versão, e vai para o ar colado à mão em Authentication → Emails →
+  Templates → "Reset password" (corpo) — com o assunto:
+
+    Redefina sua senha do Lovi
+
+  Antes era o modelo padrão do Supabase, em inglês e sem marca, com
+  remetente noreply@mail.app.supabase.io. O remetente não se muda aqui:
+  é o SMTP próprio (Authentication → Emails → SMTP Settings, pelo Resend).
+
+  Mesmo visual do e-mail de match (supabase/functions/avisar-match): mudou
+  um, confira o outro. Tudo em estilo inline e tabela, porque o Gmail e o
+  Outlook ignoram <style> e flexbox.
+
+  {{ .ConfirmationURL }} é o link de uso único que o Supabase gera. O texto
+  não promete prazo exato: quem decide é o "Email OTP Expiration" do projeto.
+-->
+<!doctype html>
+<html lang="pt-BR">
+  <body style="margin:0;padding:0;background:#f4f6f3;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6f3;padding:32px 16px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background:#ffffff;border-radius:20px;padding:32px 28px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#16211a;">
+            <tr>
+              <td style="font-size:28px;font-weight:900;color:#8b5cf6;padding-bottom:20px;">lovi</td>
+            </tr>
+            <tr>
+              <td style="font-size:24px;font-weight:800;padding-bottom:10px;">Vamos criar uma senha nova</td>
+            </tr>
+            <tr>
+              <td style="font-size:16px;line-height:1.5;padding-bottom:24px;">
+                Recebemos um pedido para redefinir a senha da sua conta no Lovi. Toque no botão para escolher uma senha nova.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#8b5cf6;color:#ffffff;text-decoration:none;font-weight:700;font-size:16px;padding:14px 28px;border-radius:999px;">Criar nova senha</a>
+              </td>
+            </tr>
+            <tr>
+              <td style="font-size:14px;line-height:1.5;color:#4b544e;padding-top:24px;">
+                Por segurança, o link funciona uma vez só e vale por pouco tempo. Se ele já tiver expirado, peça outro na tela de entrar do app.
+              </td>
+            </tr>
+            <tr>
+              <td style="font-size:12px;line-height:1.5;color:#6b746e;padding-top:28px;">
+                Não foi você que pediu? Pode ignorar este e-mail: sua senha continua a mesma, e ninguém entra na sua conta sem este link.
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

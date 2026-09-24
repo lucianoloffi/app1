@@ -191,7 +191,7 @@ sob o filtro novo depois de um erro, e o retângulo cinza em volta das ilustraç
   `is_admin()`). Conta excluída não tem e-mail: ele não é copiado para a denúncia
   como o nome. Continua fora de tudo que outro usuário vê.
 - **Espera das denúncias no painel** (migration `0025`). Sem aviso por e-mail
-  (depende de SMTP próprio, ver Pendências), é o painel que avisa: uma faixa
+  (ainda não feito, ver Pendências), é o painel que avisa: uma faixa
   abaixo do topo, em qualquer aba, diz quantas denúncias estão abertas e há quanto
   tempo a mais antiga espera, e o selo da aba Moderação acompanha. Passou de
   `PRAZO_DA_DENUNCIA_HORAS` (24 h, o prazo que a App Store exige de app de namoro),
@@ -269,6 +269,29 @@ sob o filtro novo depois de um erro, e o retângulo cinza em volta das ilustraç
   Deploy com `supabase functions deploy avisar-match --no-verify-jwt` (quem chama é o
   banco, sem JWT). Os interruptores "Mensagens" e "Novidades" estão escondidos
   em Ajustes até terem envio (ver Pendências).
+- **E-mails do Supabase Auth pelo Resend** (24/09). Recuperação de senha e
+  confirmação de cadastro saem por SMTP próprio, com remetente
+  `Lovi <avisos@lovidates.com>`, o mesmo do aviso de match. Antes saíam do
+  `noreply@mail.app.supabase.io`, em inglês e sem marca, com limite baixo de envios
+  por hora e tendência a cair no spam. A configuração fica toda no painel do
+  Supabase, não no código:
+  - **Authentication → Emails → SMTP Settings:** host `smtp.resend.com`, porta 465,
+    usuário `resend`, e senha = uma chave do Resend **só para isso** ("Supabase
+    Auth", Sending access). Separada da chave do `avisar-match`: cancelar uma não
+    derruba a outra. O limite por hora fica em Authentication → Rate Limits, e o
+    Auth e o aviso de match dividem o limite diário do plano do Resend.
+  - **Os modelos** estão em `supabase/templates/` (`recuperar-senha.html`,
+    `confirmar-cadastro.html`), com o assunto no comentário do topo. O Supabase
+    **não lê** a pasta: eles vão para o ar colados à mão em Authentication → Emails
+    → Templates (Source), da linha do doctype em diante. O painel só deixa editar
+    modelo depois que o SMTP próprio está ligado. Mudou o arquivo? Cole de novo.
+    Mesmo visual do e-mail de match: tabela e estilo inline, porque o Gmail e o
+    Outlook ignoram `<style>` e flexbox.
+  - **A confirmação de e-mail está desligada** (Authentication → Sign In /
+    Providers → Email → "Confirm email", decisão do Lu em 24/09). O modelo está
+    salvo e sai sozinho quando ela for ligada. O app funciona dos dois jeitos: com
+    ela ligada, `cadastrar` devolve `precisaConfirmarEmail` e aparece a
+    `EmailConfirmationScreen`. Ver Pendências.
 - **`src/screens/`** e **`src/onboarding/screens/`** — uma tela por arquivo.
 - **`src/components/`** — componentes compartilhados.
 - **Foto reprovada chega à dona** (migration `0023`). `MyProfile.photos` é
@@ -457,12 +480,15 @@ esperado (a chave anon é pública por design) — quem protege os dados é a RL
 
 Em ordem de importância:
 
-1. **E-mail próprio (SMTP) no Supabase Auth.** O e-mail padrão do Supabase manda
-   pouquíssimas mensagens por hora e costuma cair no spam: com gente de verdade se
-   cadastrando, a confirmação de cadastro falha. O aviso de denúncia nova por e-mail
-   (hoje só existe a faixa no painel, `0025`) depende disso. Decisão do Lu em 22/09,
-   mantida em 24/09: fica para depois. O caminho natural é o mesmo Resend do aviso de
-   match (Auth › SMTP), lembrando que os dois dividem o limite diário do plano.
+1. **Ligar a confirmação de e-mail antes de abrir para gente de fora.** O SMTP
+   próprio e o modelo já estão prontos desde 24/09 (ver "E-mails do Supabase Auth
+   pelo Resend"), mas a confirmação está desligada. Enquanto isso, dá para criar
+   conta com e-mail de outra pessoa ou digitado errado. O aviso de match e a
+   recuperação de senha vão para quem não pediu, e isso pesa contra a reputação do
+   lovidates.com no envio. Também quem erra o e-mail não recupera a senha. Para
+   teste com gente conhecida, tudo bem. O aviso de denúncia nova por e-mail (hoje só
+   existe a faixa no painel, `0025`) já não depende de nada: dá para mandar pelo
+   Resend, como o de match.
 2. **E-mail de mensagem nova** (combinado em 24/09, fica para depois). O interruptor
    "Mensagens" em Ajustes não enviava nada, e foi escondido em 24/09 junto com o
    "Novidades do Lovi", que também não; volta quando o envio existir. Regra combinada: **um e-mail por

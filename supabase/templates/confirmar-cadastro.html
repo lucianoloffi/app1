@@ -1,0 +1,56 @@
+<!--
+  E-mail de confirmação de cadastro do Supabase Auth.
+
+  Não há deploy: o Supabase não lê este arquivo. Ele fica aqui para ter
+  versão, e vai para o ar colado à mão em Authentication → Emails →
+  Templates → "Confirm sign up" (corpo, a partir da linha do doctype) — com
+  o assunto:
+
+    Confirme seu e-mail no Lovi
+
+  É o primeiro e-mail que todo mundo recebe do Lovi, e era o modelo padrão
+  do Supabase, em inglês. Mesmo visual de recuperar-senha.html e do e-mail
+  de match (supabase/functions/avisar-match): mudou um, confira os outros.
+
+  O texto acompanha a EmailConfirmationScreen, que fica aberta esperando o
+  link: "o cadastro continua de onde parou".
+-->
+<!doctype html>
+<html lang="pt-BR">
+  <body style="margin:0;padding:0;background:#f4f6f3;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f6f3;padding:32px 16px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background:#ffffff;border-radius:20px;padding:32px 28px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#16211a;">
+            <tr>
+              <td style="font-size:28px;font-weight:900;color:#8b5cf6;padding-bottom:20px;">lovi</td>
+            </tr>
+            <tr>
+              <td style="font-size:24px;font-weight:800;padding-bottom:10px;">Falta só confirmar seu e-mail 💜</td>
+            </tr>
+            <tr>
+              <td style="font-size:16px;line-height:1.5;padding-bottom:24px;">
+                Que bom ter você no Lovi! Toque no botão para confirmar este e-mail. O cadastro continua de onde parou.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#8b5cf6;color:#ffffff;text-decoration:none;font-weight:700;font-size:16px;padding:14px 28px;border-radius:999px;">Confirmar e-mail</a>
+              </td>
+            </tr>
+            <tr>
+              <td style="font-size:14px;line-height:1.5;color:#4b544e;padding-top:24px;">
+                Por segurança, o link funciona uma vez só e vale por pouco tempo.
+              </td>
+            </tr>
+            <tr>
+              <td style="font-size:12px;line-height:1.5;color:#6b746e;padding-top:28px;">
+                Não criou uma conta no Lovi? Pode ignorar este e-mail: sem a confirmação, nenhuma conta é ativada com o seu endereço.
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
