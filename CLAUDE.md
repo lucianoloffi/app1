@@ -476,6 +476,36 @@ As variáveis `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY` viram texto no bund
 momento do build; ficam em Settings → Secrets and variables → Actions. Isso é o
 esperado (a chave anon é pública por design) — quem protege os dados é a RLS.
 
+### Site lovidates.com (Cloudflare)
+
+O site de fora do app (página inicial, `/termos/`, `/privacidade/`, `/diretrizes/`)
+é uma Worker da Cloudflare, na pasta **`web/`**. Essa pasta **não está no Git**:
+nada ali tem histórico, e ela só existe no Mac do Lu. O app não mora lá: a Worker
+busca `/app1` no GitHub Pages. Detalhes em `web/LEIA-ME.md`.
+
+**Os documentos legais do site são gerados** a partir dos mesmos `.md` do app
+(`src/legal/`), por `web/gerar-documentos.mjs`. Ele troca só o `<main>` de cada
+página e mantém cabeçalho, rodapé e `<head>`. Antes eram copiados à mão, e em
+24/09 a privacidade do site estava na 1.3 enquanto o app estava na 1.7. Quem
+abria pelo link público, que é o que a App Store pede, lia uma política velha. O
+gerador segue as regras de `src/legal/markdown.ts`. Recurso novo de Markdown num
+`.md` legal entra nos dois. Os números das seções são os do `.md` ("6.1"), porque
+o texto cita seções pelo número. Rodar mais de uma vez não muda nada.
+
+**Documento legal mudou? Publicar o site também:**
+
+```bash
+node web/gerar-documentos.mjs
+cd web && npx wrangler deploy
+```
+
+O `wrangler deploy` roda **de dentro de `web/`**. Na raiz do projeto ele não acha o
+`wrangler.jsonc`, detecta o Vite e se oferece para criar e publicar uma Worker
+nova chamada "app1" com o app. Aconteceu em 24/09 e foi parado a tempo, mas ainda
+reescreveu o `vite.config.ts` (tirou a quebra de linha final). Se aparecer
+"Detected Project Settings", é Ctrl+C. Conferir depois: `curl -s
+https://lovidates.com/privacidade/ | grep -o "Versão [0-9.]*"`.
+
 ## Pendências
 
 Em ordem de importância:
@@ -548,7 +578,8 @@ Em ordem de importância:
   ficou em `1.2`, e quem aceitou nesse meio-tempo tem `1.2` gravado. A 1.4 (22/09,
   junto da `0026`) diz que a moderação vê o **e-mail da conta** — antes a 6.1
   prometia o contrário — em denúncias, verificação e fotos. Versão nova de documento
-  legal é o `.md` E o `versions.ts`, no mesmo commit. **Não existe fluxo de reconsentimento, e
+  legal é o `.md` E o `versions.ts`, no mesmo commit, e depois o site (ver Deploy ›
+  Site lovidates.com). **Não existe fluxo de reconsentimento, e
   não vai existir** (decisão do Lu em 22/09): quem aceitou antes fica com a versão
   antiga gravada em `consents` e não é levado a aceitar o texto novo. Não propor a
   tela de novo aceite. Por isso a seção 11 da política (1.5, 22/09) deixou de
