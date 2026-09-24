@@ -539,7 +539,7 @@ Em ordem de importância:
   `LEGAL_UPDATED_AT` não é lida por nenhum código; o que o usuário vê é o texto dos
   `.md`, e o consentimento registra só a `versao`. Antes de lançar, os **textos** (não
   só a data) precisam de revisão jurídica: o app trata dado sensível sob a LGPD.
-- **Privacidade está na 1.6 e diretrizes na 1.1.** A 1.1 (21/09) trouxe a moderação:
+- **Privacidade está na 1.7 e diretrizes na 1.1.** A 1.1 (21/09) trouxe a moderação:
   cópia da conversa na denúncia, o que o admin enxerga, e a denúncia que sobrevive à
   exclusão da conta. A 1.2 (21/09, junto da `0021`) trouxe a selfie de verificação —
   que ela é coletada, que uma pessoa a compara com as fotos do perfil, que não passa
@@ -559,6 +559,9 @@ Em ordem de importância:
   aí é preciso pedir o aceite — só nesse caso. A 1.6 (24/09, junto da `0027`) pôs
   o e-mail de aviso de match e o Resend como fornecedor; o e-mail é tratado por
   execução de contrato, não por consentimento, então não caiu nessa exceção.
+  A 1.7 (24/09) só corrigiu a linha do Resend na lista de fornecedores: com o
+  SMTP próprio no Auth, ele passou a levar também a confirmação de cadastro e a
+  recuperação de senha, e a 1.6 dizia "e-mails de aviso".
 - **Validação no cliente é UX, não segurança.** O mínimo de senha real é o do Supabase
   Auth; o cliente só antecipa a mensagem.
 - **Dado sensível.** Interesse (indica orientação sexual), cidade, fotos e telefone

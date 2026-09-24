@@ -1,7 +1,7 @@
 # Política de Privacidade — Lovi
 
 **Última atualização:** 25 de setembro de 2026
-**Versão:** 1.6
+**Versão:** 1.7
 
 Esta política explica quais dados o Lovi coleta, por que coleta e o que você
 pode fazer a respeito. Ela segue a Lei Geral de Proteção de Dados (Lei
@@ -170,7 +170,7 @@ Utilizamos os seguintes fornecedores de infraestrutura, que processam dados em
 nosso nome:
 
 - **Supabase** — banco de dados, autenticação e armazenamento de fotos
-- **Resend** — envio dos e-mails de aviso (recebe só o seu e-mail e o texto do aviso)
+- **Resend** — envio dos e-mails do Lovi: confirmação de cadastro, recuperação de senha e avisos (recebe só o seu e-mail e o texto da mensagem)
 - **GitHub Pages** — hospedagem da aplicação
 - **Cloudflare** — domínio e entrega do site
 
