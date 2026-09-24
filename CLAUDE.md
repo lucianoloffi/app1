@@ -270,14 +270,23 @@ sob o filtro novo depois de um erro, e o retângulo cinza em volta das ilustraç
   `src/onboarding/constants.ts`, com o MESMO número em `check (char_length(...))`
   no banco. Mudar um exige migration nova com o outro — se o app deixar passar
   mais do que o banco aceita, quem digita até o fim recebe erro. Na tela,
-  `LimitedTextField` segue o padrão de validação (nota permanente com o limite,
-  contador, erro do servidor com precedência) e o `errors.ts` reconhece o erro
+  `LimitedTextField` segue o padrão de validação (limite sempre à vista, erro do
+  servidor com precedência) e o `errors.ts` reconhece o erro
   pelo nome da constraint, com o campo certo; no cadastro, erro de nome ou bio
   leva de volta à tela deles. O app conta em UTF-16 (`value.length`, como o
   `maxLength`) e o banco em caracteres: emoji vale 2 no app e 1 no banco, então o
   app corta antes, nunca depois. A `0024` cortou os textos antigos maiores que o
   limite em vez de usar `not valid`, porque check `not valid` é conferida em
   qualquer update da linha e travaria o perfil inteiro.
+  **O limite à vista é o contador** ("0/40", à direita, embaixo do campo), sempre
+  presente, e ele faz o papel da nota permanente do padrão de validação. Até 24/09
+  havia também a nota "Até 40 caracteres.", que repetia o contador. Nome e
+  profissão só mostravam o contador faltando 10 caracteres, então tirar a nota
+  sem deixar o contador fixo esconderia o limite de quem ainda não digitou.
+  Leitor de tela: o contador é `aria-hidden` ("32/40" em voz alta não diz nada),
+  e o texto "Até N caracteres." fica só para ele (`paraLeitor`), no elemento para
+  onde aponta o `aria-describedby`. O contador fica vermelho só quando o texto
+  passa do limite. Erro do servidor sobre outra coisa deixa o contador como está.
 - **Foto de perfil nova** (cadastro e edição): arquivo escolhido → `validaFotoEscolhida`
   → `PhotoCropSheet` (recorte 4:5, `PROPORCAO_DA_FOTO`, com a biblioteca
   `react-easy-crop`) → `recortaImagem` (recorta e comprime num passo, JPEG até 1280px)
@@ -399,7 +408,8 @@ anterior.
 3. **Campo vazio nunca reclama**: ainda não foi preenchido, só não foi usado.
 4. Existe uma **nota permanente** embaixo do campo dizendo o requisito, que vira erro
    vermelho quando a validação falha. Não deixe o requisito só no placeholder — ele
-   some justo quando passa a importar.
+   some justo quando passa a importar. Em campo com limite de tamanho, a nota é o
+   contador sempre visível (ver `LimitedTextField`).
 5. `aria-invalid` acompanha o erro e `aria-describedby` aponta para a nota quando não
    há erro, para o erro quando há. Mensagem de erro com `role="alert"`.
 
