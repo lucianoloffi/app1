@@ -298,6 +298,15 @@ sob o filtro novo depois de um erro, e o retângulo cinza em volta das ilustraç
   documentos legais são **gerados** a partir de `src/legal/`, e não se editam à
   mão. A página inicial e a 404 são HTML escrito à mão. Publicação à parte do app:
   ver Deploy › Site lovidates.com.
+  **Página inicial: QR code só no computador** (24/09). O app é feito para o
+  celular, então no computador a página mostra, ao lado do título, um QR code que
+  abre `https://lovidates.com` no telefone (`.lv-qr`). No celular a página é a de
+  antes. Quem decide é o CSS, sem script: `(min-width:901px) and (hover:hover) and
+  (pointer:fine)`. Só a largura não bastava, porque o tablet deitado passa de 900
+  px e ficaria com o QR. O QR é um SVG fixo, gerado uma vez com o pacote `qrcode`
+  do npm e colado na página, sem biblioteca nem serviço externo. Mudou o endereço?
+  Gere o SVG de novo. O botão "Testar agora" do topo saiu nos dois, porque repetia
+  o "Testar a versão web".
   Armadilha na Worker: `IDIOMAS = ['es']`, mas `web/public/es/` não existe. Hoje não
   quebra nada, porque a raiz `/` não está em `run_worker_first` e nem passa pela
   Worker (conferido em 24/09: navegador em espanhol continua no português). Se
