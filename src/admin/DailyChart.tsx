@@ -1,8 +1,13 @@
+import { useEffect, useRef, useState } from "react";
 import type { DiaDoPainel } from "../lib/api/admin";
 import styles from "./DailyChart.module.css";
 
-const LARGURA = 860;
-const ALTURA = 300;
+/** Largura até a primeira medida do bloco; é a do painel no computador. */
+const LARGURA_INICIAL = 860;
+const ALTURA_MAXIMA = 300;
+const ALTURA_MINIMA = 200;
+/** Distância mínima, em px, entre dois rótulos de dia ("dd/mm" tem uns 35). */
+const ESPACO_ENTRE_ROTULOS = 48;
 const MARGEM = { esquerda: 44, direita: 12, topo: 16, base: 34 };
 
 /**
@@ -27,8 +32,25 @@ interface DailyChartProps {
 
 /** Novos usuários e usuários ativos por dia, em linhas, nos dias recebidos. */
 export function DailyChart({ dias }: DailyChartProps) {
-  const larguraUtil = LARGURA - MARGEM.esquerda - MARGEM.direita;
-  const alturaUtil = ALTURA - MARGEM.topo - MARGEM.base;
+  // O desenho é feito na largura real do bloco, e não numa largura fixa
+  // esticada pelo viewBox: no celular o gráfico de 860 encolhia para um terço
+  // e os rótulos dos eixos, junto, para uns 4 px — ilegíveis.
+  const ref = useRef<SVGSVGElement>(null);
+  const [largura, setLargura] = useState(LARGURA_INICIAL);
+  useEffect(() => {
+    const svg = ref.current;
+    if (!svg) return;
+    const observador = new ResizeObserver(([entrada]) => {
+      const medida = Math.round(entrada.contentRect.width);
+      if (medida > 0) setLargura(medida);
+    });
+    observador.observe(svg);
+    return () => observador.disconnect();
+  }, []);
+  const altura = Math.min(ALTURA_MAXIMA, Math.max(ALTURA_MINIMA, Math.round(largura * 0.35)));
+
+  const larguraUtil = largura - MARGEM.esquerda - MARGEM.direita;
+  const alturaUtil = altura - MARGEM.topo - MARGEM.base;
   const passo = passoDoEixo(Math.max(0, ...dias.flatMap((d) => [d.novos, d.ativos])));
   const teto = passo * 4;
   const ultimo = Math.max(1, dias.length - 1);
@@ -38,9 +60,14 @@ export function DailyChart({ dias }: DailyChartProps) {
   const linha = (valor: (d: DiaDoPainel) => number) =>
     dias.map((d, i) => `${x(i).toFixed(1)},${y(valor(d)).toFixed(1)}`).join(" ");
   const marcas = [0, 1, 2, 3, 4].map((i) => i * passo);
+  // O último dia sempre tem rótulo; o de cinco em cinco que cair perto demais
+  // dele sai, senão os dois se sobrepõem no gráfico estreito do celular.
   const rotulos = dias
     .map((d, i) => ({ i, texto: diaCurto(d.dia) }))
-    .filter(({ i }) => i % 5 === 0 || i === dias.length - 1);
+    .filter(
+      ({ i }) =>
+        i === dias.length - 1 || (i % 5 === 0 && x(dias.length - 1) - x(i) >= ESPACO_ENTRE_ROTULOS),
+    );
 
   const descricao = dias.length
     ? `De ${diaCurto(dias[0].dia)} a ${diaCurto(dias[dias.length - 1].dia)}: ` +
@@ -50,8 +77,9 @@ export function DailyChart({ dias }: DailyChartProps) {
 
   return (
     <svg
+      ref={ref}
       className={styles.grafico}
-      viewBox={`0 0 ${LARGURA} ${ALTURA}`}
+      viewBox={`0 0 ${largura} ${altura}`}
       role="img"
       aria-label={descricao}
     >
@@ -59,7 +87,7 @@ export function DailyChart({ dias }: DailyChartProps) {
         <g key={v}>
           <line
             x1={MARGEM.esquerda}
-            x2={LARGURA - MARGEM.direita}
+            x2={largura - MARGEM.direita}
             y1={y(v)}
             y2={y(v)}
             className={styles.grade}
@@ -73,7 +101,7 @@ export function DailyChart({ dias }: DailyChartProps) {
         <text
           key={i}
           x={x(i)}
-          y={ALTURA - 10}
+          y={altura - 10}
           textAnchor={i === dias.length - 1 ? "end" : "middle"}
           className={styles.rotulo}
         >

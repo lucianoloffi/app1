@@ -125,3 +125,27 @@
   background: #fdecec;
   color: #8a1c15;
 }
+
+/* ───────── celular ─────────
+   Três de 108px não cabiam no cartão de um celular e a terceira descia
+   sozinha. Aqui são três colunas que dividem a largura, na proporção 4:5
+   da foto. */
+@media (max-width: 720px) {
+  .grade {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .item {
+    width: auto;
+    min-width: 0;
+  }
+
+  .moldura,
+  .semFoto {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 5;
+  }
+}

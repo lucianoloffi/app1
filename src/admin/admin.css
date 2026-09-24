@@ -1,5 +1,6 @@
 /* Base do painel admin. Não importa o index.css do app: lá o #root tem a
-   largura de um celular (430px) e o body não rola; o painel é de computador. */
+   largura de um celular (430px) e o body não rola. O painel é pensado para o
+   computador e se ajusta no celular abaixo de 720px (@media em cada tela). */
 @import "../styles/tokens.css";
 
 * {

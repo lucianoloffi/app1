@@ -259,3 +259,45 @@
   background: #fdecec;
   color: #8a1c15;
 }
+
+/* ───────── celular ───────── */
+@media (max-width: 720px) {
+  .conteudo {
+    padding: 20px 16px 32px;
+    gap: 16px;
+  }
+
+  .h1 {
+    font-size: 26px;
+  }
+
+  .titulo {
+    flex-wrap: wrap;
+    row-gap: 2px;
+  }
+
+  .cartao {
+    padding: 16px;
+    border-radius: 16px;
+  }
+
+  /* Selfie e fotos do perfil lado a lado, duas por linha, na largura do
+     cartão: a coluna encolhia até caber uma foto só e a comparação virava
+     uma fila de rolar. */
+  .coluna {
+    width: 100%;
+  }
+
+  .selfies,
+  .fotos {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .selfie,
+  .foto {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 5;
+  }
+}
