@@ -10,9 +10,8 @@ interface ChatScreenProps {
   /** Perfil da outra pessoa, para os quebra-gelos. */
   relatedProfile: Profile | null;
   myInterests: string[];
-  offline: boolean;
   onBack: () => void;
-  onSend: (chatId: string, text: string, failed?: boolean) => void;
+  onSend: (chatId: string, text: string) => void;
   onRetryMessage: (chatId: string, index: number) => void;
   onUndoMatch: (chatId: string) => void;
   onLockChat: (chatId: string) => void;
@@ -26,7 +25,6 @@ export function ChatScreen({
   chat,
   relatedProfile,
   myInterests,
-  offline,
   onBack,
   onSend,
   onRetryMessage,
@@ -63,12 +61,6 @@ export function ChatScreen({
   function handleSend(text: string) {
     const trimmed = text.trim();
     if (!trimmed || chat.locked) return;
-    if (offline) {
-      onSend(chat.id, trimmed, true);
-      setDraft("");
-      onShowToast("Sem conexão. A mensagem não foi enviada.");
-      return;
-    }
     onSend(chat.id, trimmed);
     setDraft("");
   }
@@ -213,10 +205,6 @@ export function ChatScreen({
                     type="button"
                     className={styles.retryLink}
                     onClick={() => {
-                      if (offline) {
-                        onShowToast("Ainda sem conexão");
-                        return;
-                      }
                       onRetryMessage(chat.id, index);
                       onShowToast("Mensagem enviada");
                     }}

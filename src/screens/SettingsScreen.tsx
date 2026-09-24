@@ -11,11 +11,9 @@ interface SettingsScreenProps {
   currentPhone: string;
   blockedCount: number;
   grantedPermissions: number;
-  offlineSim: boolean;
   profileVisible: boolean;
   showDistance: boolean;
   notifications: AjustesDeNotificacao;
-  onToggleOfflineSim: () => void;
   onToggleProfileVisible: (valor: boolean) => void;
   onToggleShowDistance: (valor: boolean) => void;
   onToggleNotification: (chave: keyof AjustesDeNotificacao, valor: boolean) => void;
@@ -32,11 +30,9 @@ export function SettingsScreen({
   currentPhone,
   blockedCount,
   grantedPermissions,
-  offlineSim,
   profileVisible,
   showDistance,
   notifications,
-  onToggleOfflineSim,
   onToggleProfileVisible,
   onToggleShowDistance,
   onToggleNotification,
@@ -70,12 +66,6 @@ export function SettingsScreen({
               sub="Exibe a quantos km você está"
               on={showDistance}
               onToggle={() => onToggleShowDistance(!showDistance)}
-            />
-            <ToggleRow
-              label="Simular sem conexão"
-              sub="Só no protótipo: liga os estados de erro de rede"
-              on={offlineSim}
-              onToggle={onToggleOfflineSim}
             />
           </div>
         </div>

@@ -99,7 +99,6 @@ export default function App() {
   const [erroDaEdicao, setErroDaEdicao] = useState<ErroNoFormulario | null>(null);
 
   const [blockedProfiles, setBlockedProfiles] = useState<BlockedProfile[]>([]);
-  const [offlineSim, setOfflineSim] = useState(false);
   const [permissions, setPermissions] = useState<Record<PermissionKey, PermissionState>>({
     local: "ask",
     notif: "ask",
@@ -406,7 +405,6 @@ export default function App() {
     setTab("discover");
     setFilters(INITIAL_FILTERS);
     setBlockedProfiles([]);
-    setOfflineSim(false);
     chats.resetChats();
     setSettingsOpen(false);
     setEditingProfile(false);
@@ -583,7 +581,6 @@ export default function App() {
           chat={activeChat}
           relatedProfile={chatProfile}
           myInterests={myInterests}
-          offline={offlineSim}
           onBack={() => {
             chats.fecharChat();
             setActiveChatId(null);
@@ -767,11 +764,9 @@ export default function App() {
           currentPhone={myProfile?.phone ?? ""}
           blockedCount={blockedProfiles.length}
           grantedPermissions={grantedPermissions}
-          offlineSim={offlineSim}
           profileVisible={myProfile?.visible ?? true}
           showDistance={myProfile?.showDistance ?? true}
           notifications={ajustes}
-          onToggleOfflineSim={() => setOfflineSim((prev) => !prev)}
           onToggleProfileVisible={(valor) => {
             setMyProfile((prev) => (prev ? { ...prev, visible: valor } : prev));
             void definirVisibilidade(valor).catch((problema) =>
@@ -815,7 +810,6 @@ export default function App() {
                 myInterests={myInterests}
                 carregando={discover.carregando}
                 hasAnyMatch={discover.hasAnyMatch}
-                offline={offlineSim}
                 filters={filters}
                 distanciaDoMaisProximoKm={distanciaDoMaisProximoKm}
                 city={myProfile?.city ?? ""}
@@ -828,10 +822,6 @@ export default function App() {
                 onDislike={discover.dislike}
                 onOpenProfile={(profile) => openProfile(profile)}
                 onOpenFilters={() => setFiltersOpen(true)}
-                onRetryConnection={() => {
-                  setOfflineSim(false);
-                  showToast("Conexão restabelecida");
-                }}
                 onBlock={(profile) => void bloquearPerfil(profile)}
                 onReport={(profile, motivo) => void denunciarPerfil(profile.id, motivo)}
                 onShowToast={showToast}

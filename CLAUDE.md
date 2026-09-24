@@ -252,7 +252,8 @@ sob o filtro novo depois de um erro, e o retângulo cinza em volta das ilustraç
   (`aviso_match_url`, `aviso_match_segredo`) — sem os dois, o gatilho não faz nada e
   o match nasce normalmente; qualquer falha do envio é engolida pelo mesmo motivo.
   Deploy com `supabase functions deploy avisar-match --no-verify-jwt` (quem chama é o
-  banco, sem JWT). O interruptor "Mensagens" em Ajustes continua sem envio.
+  banco, sem JWT). O interruptor "Mensagens" em Ajustes continua sem envio (ver
+  Pendências).
 - **`src/screens/`** e **`src/onboarding/screens/`** — uma tela por arquivo.
 - **`src/components/`** — componentes compartilhados.
 - **Foto reprovada chega à dona** (migration `0023`). `MyProfile.photos` é
@@ -379,29 +380,40 @@ Em ordem de importância:
    (hoje só existe a faixa no painel, `0025`) depende disso. Decisão do Lu em 22/09,
    mantida em 24/09: fica para depois. O caminho natural é o mesmo Resend do aviso de
    match (Auth › SMTP), lembrando que os dois dividem o limite diário do plano.
-2. **Plano pago do Supabase.** No gratuito o projeto é pausado depois de alguns dias
+2. **E-mail de mensagem nova** (combinado em 24/09, fica para depois). O interruptor
+   "Mensagens" em Ajustes não envia nada — e o texto dele ("Avisa a cada mensagem
+   recebida") promete mais do que o plano. Regra combinada: **um e-mail por
+   conversa, só se a pessoa não abriu em 10 minutos**; enquanto a conversa seguir sem
+   ser aberta, não sai outro, e abrir (`messages.lida_em`) zera. Quem conversa com o
+   app aberto não recebe nada. Mesmo visual e mesmas regras do aviso de match (sem
+   nome nem texto da mensagem, respeita `notif_mensagem`, ninguém sob sanção ou com
+   bloqueio). Esperar os 10 minutos pede o **pg_cron** (Database → Extensions),
+   rodando a cada 5 minutos, e uma tabela de avisos já enviados por conversa. Mandar
+   na hora, sem esperar, foi descartado: mandaria e-mail a quem está conversando.
+   Precisa de uma linha na política de privacidade.
+3. **Plano pago do Supabase.** No gratuito o projeto é pausado depois de alguns dias
    sem uso e não há backup automático — um beta com gente real não pode acordar com
    o app fora do ar nem perder dados. Decisão do Lu em 22/09: fica para depois.
-3. **Painel admin completo:** funil, retenção D7, ranking de 10 cidades e contas
+4. **Painel admin completo:** funil, retenção D7, ranking de 10 cidades e contas
    excluídas. Os registros já existem desde a `0013`; falta só consultar e desenhar.
-4. **Provas de assédio: o que ainda falta.** A denúncia já guarda cópia da conversa
+5. **Provas de assédio: o que ainda falta.** A denúncia já guarda cópia da conversa
    e sobrevive à exclusão da conta do denunciado (`0015`). O que continua em aberto:
    `desfazer_match` apaga as mensagens de conversas que **nunca** foram denunciadas,
    e a cópia pega só as 200 últimas mensagens. Também não há prazo de descarte
    automático — a decisão de 21/09 foi guardar sem prazo fixo, enquanto houver conta
    envolvida, e está escrita na política de privacidade (seção 8). Se um dia virar
    prazo fixo, vai precisar de agendamento no banco (pg_cron), que hoje não existe.
-5. **iOS via Capacitor.** Depois do empacotamento vêm: plugins nativos (Preferences,
+6. **iOS via Capacitor.** Depois do empacotamento vêm: plugins nativos (Preferences,
    Geolocation, Camera) com as strings de permissão no `Info.plist`, deep link para a
    confirmação de e-mail (hoje o `redirectTo` usa `window.location.origin`), push via
    APNs, e as exigências da App Store para app de namoro (18+, moderação com resposta
    em 24h, exclusão de conta no app — essa já existe).
-6. **Duas branches `claude/*` no remoto que NÃO foram mescladas** e precisam de
+7. **Duas branches `claude/*` no remoto que NÃO foram mescladas** e precisam de
    decisão: `focused-cannon-5w5jyw` ("Implement Lovi app: full design system,
    onboarding…", de 13/09) pode ter trabalho que nunca entrou, e
    `ecstatic-faraday-iwlow6` ("Remove all repository content", de 09/09) parece
    engano. As mescladas já foram apagadas, local e no remoto, em 22/09.
-7. **Detalhes da auditoria que ficaram para depois:** qualquer pessoa logada
+8. **Detalhes da auditoria que ficaram para depois:** qualquer pessoa logada
    consegue listar as fotos dos perfis visíveis — o mesmo que veria rolando a fila,
    mas facilita copiar em massa (pede limite de uso).
 

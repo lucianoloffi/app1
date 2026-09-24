@@ -14,7 +14,6 @@ interface DiscoverScreenProps {
   myInterests: string[];
   carregando?: boolean;
   hasAnyMatch: boolean;
-  offline: boolean;
   filters: Filters;
   /**
    * Distância até a pessoa mais próxima fora do raio; null = ninguém, nem longe;
@@ -33,7 +32,6 @@ interface DiscoverScreenProps {
   onDislike: () => void;
   onOpenProfile: (profile: Profile) => void;
   onOpenFilters: () => void;
-  onRetryConnection: () => void;
   onBlock: (profile: Profile) => void;
   onReport: (profile: Profile, motivo: string) => void;
   onShowToast: (message: string) => void;
@@ -44,7 +42,6 @@ export function DiscoverScreen({
   myInterests,
   carregando = false,
   hasAnyMatch,
-  offline,
   filters,
   distanciaDoMaisProximoKm,
   city,
@@ -57,7 +54,6 @@ export function DiscoverScreen({
   onDislike,
   onOpenProfile,
   onOpenFilters,
-  onRetryConnection,
   onBlock,
   onReport,
   onShowToast,
@@ -106,26 +102,11 @@ export function DiscoverScreen({
 
   return (
     <div className={styles.screen}>
-      {offline && (
-        <div className={styles.offlineBanner}>
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M3 3l18 18" stroke="#fff" strokeWidth={2.4} strokeLinecap="round" />
-            <path
-              d="M5 12.5a10 10 0 0 1 5-2.6M14 10a10 10 0 0 1 5 2.5M8.5 16a5.5 5.5 0 0 1 7 0"
-              stroke="#fff"
-              strokeWidth={2.2}
-              strokeLinecap="round"
-            />
-            <circle cx="12" cy="19.4" r="1.4" fill="#fff" />
-          </svg>
-          <span>Sem conexão. Algumas ações não vão funcionar.</span>
-        </div>
-      )}
       <header className={styles.header}>
         <Logo heartSize={34} textSize={36} />
       </header>
 
-      {current && !offline ? (
+      {current ? (
         <div className={styles.cardArea}>
           <div
             key={current.id}
@@ -307,28 +288,6 @@ export function DiscoverScreen({
             </div>
           </div>
         </div>
-      ) : offline ? (
-        <div className={styles.offlineWrap}>
-          <div className={styles.offlineIcon}>
-            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M3 3l18 18" stroke="#C8353C" strokeWidth={2.4} strokeLinecap="round" />
-              <path
-                d="M5 12.5a10 10 0 0 1 5-2.6M14 10a10 10 0 0 1 5 2.5M8.5 16a5.5 5.5 0 0 1 7 0"
-                stroke="#C8353C"
-                strokeWidth={2.2}
-                strokeLinecap="round"
-              />
-              <circle cx="12" cy="19.4" r="1.4" fill="#C8353C" />
-            </svg>
-          </div>
-          <p className={styles.emptyTitle}>Não deu para carregar</p>
-          <p className={styles.emptySupport}>
-            Verifique sua conexão e tente de novo. Nada do que você curtiu foi perdido.
-          </p>
-          <button type="button" className={styles.primaryButton} onClick={onRetryConnection}>
-            Tentar de novo
-          </button>
-        </div>
       ) : aguardando ? (
         <div className={styles.emptyWrap} aria-busy="true" />
       ) : emptyByFilter && foraDeAlcance ? (
@@ -376,7 +335,7 @@ export function DiscoverScreen({
         </div>
       )}
 
-      {current && !offline && (
+      {current && (
         <div className={styles.actions}>
           <button
             type="button"
