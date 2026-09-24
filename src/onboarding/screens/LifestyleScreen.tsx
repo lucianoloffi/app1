@@ -14,7 +14,7 @@ interface LifestyleScreenProps {
 export function LifestyleScreen({ lifestyle, onChange, onBack, onNext }: LifestyleScreenProps) {
   return (
     <OnboardingLayout
-      progress={7}
+      progress={8}
       onBack={onBack}
       title="Seu estilo de vida"
       support="Opcional. Ajuda quem vê seu perfil a entender sua rotina."

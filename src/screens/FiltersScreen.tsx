@@ -10,7 +10,13 @@ import {
   IDADE_MAX,
   IDADE_MIN,
 } from "../lib/filtros";
-import type { Filters, FilterGender, Intention } from "../types";
+import {
+  INTENTION_LABEL,
+  TODAS_AS_INTENCOES,
+  type Filters,
+  type FilterGender,
+  type Intention,
+} from "../types";
 import styles from "./FiltersScreen.module.css";
 
 const GENDER_OPTIONS: { value: FilterGender; label: string }[] = [
@@ -19,11 +25,9 @@ const GENDER_OPTIONS: { value: FilterGender; label: string }[] = [
   { value: "todos", label: "Todos" },
 ];
 
-const INTENTION_OPTIONS: { value: Intention; label: string }[] = [
-  { value: "serio", label: "Relacionamento sério" },
-  { value: "conhecer", label: "Conhecer pessoas" },
-  { value: "amizade", label: "Amizade" },
-];
+const INTENTION_OPTIONS: { value: Intention; label: string }[] = TODAS_AS_INTENCOES.map(
+  (value) => ({ value, label: INTENTION_LABEL[value] }),
+);
 
 interface FiltersScreenProps {
   filters: Filters;

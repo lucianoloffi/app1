@@ -54,12 +54,20 @@ import { ProfileDetailScreen } from "./screens/ProfileDetailScreen";
 import { ProfileScreen } from "./screens/ProfileScreen";
 import { SettingsScreen } from "./screens/SettingsScreen";
 import { VerifyProfileScreen } from "./screens/VerifyProfileScreen";
-import type { Filters, MyProfile, OnboardingStep, PerfilEditavel, Profile, Tab } from "./types";
+import {
+  TODAS_AS_INTENCOES,
+  type Filters,
+  type MyProfile,
+  type OnboardingStep,
+  type PerfilEditavel,
+  type Profile,
+  type Tab,
+} from "./types";
 
 type Stage = "carregando" | "onboarding" | "main";
 
 const INITIAL_FILTERS: Filters = {
-  intentions: ["serio", "conhecer", "amizade"],
+  intentions: TODAS_AS_INTENCOES,
   distanceKm: 25,
   minAge: 25,
   maxAge: 45,

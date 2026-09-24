@@ -5,15 +5,11 @@ import type {
   MyProfile,
   OnboardingState,
 } from "../../types";
+import { TODAS_AS_INTENCOES } from "../../types";
 import { supabase } from "../supabaseClient";
 import { ErroDeApp, lancaSeErro } from "../errors";
 import { minhasFotos } from "./photos";
 
-/**
- * O cadastro começa aceitando as três: filtrar logo de saída esconderia
- * perfis que a pessoa nem sabe que existem.
- */
-export const TODAS_AS_INTENCOES: Intention[] = ["serio", "conhecer", "amizade"];
 
 /**
  * Lista vazia deixaria a fila sempre sem ninguém, e o banco recusa. Uma linha
@@ -241,6 +237,8 @@ export async function concluirCadastro(estado: OnboardingState): Promise<void> {
     .from("profile_preferences")
     .update({
       interesse_em: estado.interestedIn,
+      // O cadastro começa aceitando todas: filtrar logo de saída esconderia
+      // perfis que a pessoa nem sabe que existem.
       intencao_filtro: TODAS_AS_INTENCOES,
     })
     .eq("user_id", id);

@@ -16,9 +16,10 @@ import { erroNoFormulario, mensagemDeErro, type CampoDeErro, type ErroNoFormular
 import { MAX_INTERESTS, MAX_ONBOARDING_PHOTOS } from "./constants";
 import { LoginFlow } from "./LoginFlow";
 import { AccountScreen, type DocumentoLegal } from "./screens/AccountScreen";
+import { ChooseInterestsScreen } from "./screens/ChooseInterestsScreen";
 import { EmailConfirmationScreen } from "./screens/EmailConfirmationScreen";
 import { GenderInterestCityScreen } from "./screens/GenderInterestCityScreen";
-import { IntentionInterestsScreen } from "./screens/IntentionInterestsScreen";
+import { IntentionScreen } from "./screens/IntentionScreen";
 import { LifestyleScreen } from "./screens/LifestyleScreen";
 import { NameBirthdateScreen } from "./screens/NameBirthdateScreen";
 import { PhotosScreen } from "./screens/PhotosScreen";
@@ -300,16 +301,24 @@ export function OnboardingFlow({
           onRemovePhoto={(index) => void removerFotoDoPasso(index)}
           onShowToast={onShowToast}
           onBack={() => goTo("gender-interest-city")}
-          onNext={() => goTo("intention-interests")}
+          onNext={() => goTo("intention")}
         />
       );
 
-    case "intention-interests":
+    case "intention":
       return (
-        <IntentionInterestsScreen
+        <IntentionScreen
           intention={state.intention}
-          interests={state.interests}
           onChangeIntention={(intention: Intention) => setState((prev) => ({ ...prev, intention }))}
+          onBack={() => goTo("photos")}
+          onNext={() => goTo("interests")}
+        />
+      );
+
+    case "interests":
+      return (
+        <ChooseInterestsScreen
+          interests={state.interests}
           onToggleInterest={(interest) =>
             setState((prev) => ({
               ...prev,
@@ -320,9 +329,9 @@ export function OnboardingFlow({
                   : [...prev.interests, interest],
             }))
           }
-          onOverMax={() => onShowToast("Máximo de 6 interesses")}
-          onBack={() => goTo("photos")}
-          onFinish={() => goTo("lifestyle")}
+          onOverMax={() => onShowToast(`Máximo de ${MAX_INTERESTS} interesses`)}
+          onBack={() => goTo("intention")}
+          onNext={() => goTo("lifestyle")}
         />
       );
 
@@ -331,7 +340,7 @@ export function OnboardingFlow({
         <LifestyleScreen
           lifestyle={state.lifestyle}
           onChange={(lifestyle: Lifestyle) => setState((prev) => ({ ...prev, lifestyle }))}
-          onBack={() => goTo("intention-interests")}
+          onBack={() => goTo("interests")}
           onNext={() => goTo("profession-height-status")}
         />
       );

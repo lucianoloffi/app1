@@ -1,6 +1,13 @@
 import { LoviMark } from "../components/icons/LoviMark";
 import { RejectedPhotoNotice } from "../components/RejectedPhotoNotice";
-import type { Filters, Intention, MyProfile, VerificationStatus } from "../types";
+import {
+  INTENTION_LABEL,
+  TODAS_AS_INTENCOES,
+  type Filters,
+  type Intention,
+  type MyProfile,
+  type VerificationStatus,
+} from "../types";
 import { ageFromBirthdate } from "../utils/age";
 import { computeCompleteness } from "../utils/completeness";
 import styles from "./ProfileScreen.module.css";
@@ -11,16 +18,11 @@ const GENDER_FILTER_LABEL: Record<Filters["interestedIn"], string> = {
   todos: "Todos",
 };
 
-const INTENTION_FILTER_LABEL: Record<Intention, string> = {
-  serio: "Relacionamento sério",
-  conhecer: "Conhecer pessoas",
-  amizade: "Amizade",
-};
-
-/** Com as três marcadas, listar uma a uma só alonga a linha sem dizer mais. */
+/** Com todas marcadas, listar uma a uma só alonga a linha sem dizer mais. */
 function resumoDeIntencoes(intencoes: Intention[]): string {
-  if (intencoes.length >= 3) return "Todas as intenções";
-  return intencoes.map((item) => INTENTION_FILTER_LABEL[item]).join(" e ");
+  if (intencoes.length >= TODAS_AS_INTENCOES.length) return "Todas as intenções";
+  const nomes = intencoes.map((item) => INTENTION_LABEL[item]);
+  return nomes.length > 1 ? `${nomes.slice(0, -1).join(", ")} e ${nomes.at(-1)}` : nomes.join("");
 }
 
 /**

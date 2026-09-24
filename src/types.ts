@@ -1,4 +1,5 @@
-export type Intention = "serio" | "conhecer" | "amizade";
+/** Mesmas chaves do check de `profiles.intencao` (migration 0028). */
+export type Intention = "serio" | "conhecer" | "casual" | "nao_sei";
 
 export type Gender = "homem" | "mulher" | "outros";
 
@@ -69,7 +70,8 @@ export type OnboardingStep =
   | "name-birthdate"
   | "gender-interest-city"
   | "photos"
-  | "intention-interests"
+  | "intention"
+  | "interests"
   | "lifestyle"
   | "profession-height-status"
   | "success"
@@ -191,9 +193,16 @@ export type Tab = "chats" | "discover" | "profile";
 
 export const INTENTION_LABEL: Record<Intention, string> = {
   serio: "Relacionamento sério",
-  conhecer: "Conhecer pessoas",
-  amizade: "Amizade",
+  conhecer: "Conhecer alguém",
+  casual: "Algo casual",
+  nao_sei: "Ainda não sei",
 };
+
+/**
+ * Todas as intenções, na ordem das telas. Filtro sem recorte nenhum: é o que
+ * vale para quem acabou de se cadastrar e nunca abriu os filtros.
+ */
+export const TODAS_AS_INTENCOES = Object.keys(INTENTION_LABEL) as Intention[];
 
 export const DRINK_LABEL: Record<Drink, string> = {
   "nao-bebo": "Não bebo",

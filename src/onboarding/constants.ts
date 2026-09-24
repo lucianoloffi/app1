@@ -5,7 +5,8 @@ export const PROGRESS_STEPS: OnboardingStep[] = [
   "name-birthdate",
   "gender-interest-city",
   "photos",
-  "intention-interests",
+  "intention",
+  "interests",
   "lifestyle",
   "profession-height-status",
 ];
@@ -53,6 +54,7 @@ export const INTEREST_OPTIONS = [
   "Leitura",
   "Café",
   "Academia",
+  "Musculação",
   "Futebol",
   "Vôlei",
   "Surf",
@@ -78,7 +80,6 @@ export const INTEREST_OPTIONS = [
   "Moda",
   "Carros",
   "Pescaria",
-  "Jardinagem",
 ];
 
 export const MAX_INTERESTS = 6;
