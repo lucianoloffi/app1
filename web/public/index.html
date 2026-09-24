@@ -97,6 +97,15 @@
     .lv-botao-loja{padding:15px 24px !important;font-size:14.5px !important}
     .lv-rodape{padding-top:20px !important;gap:11px !important}
   }
+  /* --- QR code: so no computador ---
+     o app e feito para o celular; no computador a pagina mostra o QR
+     que abre lovidates.com no telefone. "hover + pointer fine" separa
+     mouse de dedo: tablet deitado passa de 900px e continua sem o QR */
+  .lv-qr{display:none}
+  @media (min-width:901px) and (hover:hover) and (pointer:fine){
+    .lv-qr{display:flex}
+  }
+
   @media (prefers-reduced-motion: reduce){
     *{animation:none !important}
   }
@@ -117,7 +126,6 @@
       </svg>
       <span style="font:900 25px 'Nunito', sans-serif; letter-spacing:-.02em; color:#5B34C9;">lovi</span>
     </div>
-    <a href="https://lovidates.com/app1" style="font:700 14px 'Plus Jakarta Sans'; color:#5B34C9; background:#fff; border:1px solid #DCCBFB; padding:11px 22px; border-radius:999px;">Testar agora</a>
   </header>
 
   <section class="lv-secao-topo" style="width:100%; box-sizing:border-box; position:relative; padding:64px 56px 80px;">
@@ -139,6 +147,13 @@
             Em breve na App Store
           </span>
         </div>
+      </div>
+
+      <div class="lv-qr" style="flex-direction:column; align-items:center; gap:18px; margin-left:auto; max-width:260px;">
+        <div style="background:#fff; border:1px solid #DCCBFB; border-radius:28px; padding:24px; box-shadow:0 24px 50px -28px rgba(91,52,201,.45);">
+          <svg width="196" height="196" viewBox="0 0 25 25" shape-rendering="crispEdges" role="img" aria-label="QR Code para lovidates.com"><path stroke="#16211A" d="M0 0.5h7m2 0h2m1 0h2m4 0h7M0 1.5h1m5 0h1m2 0h1m1 0h6m1 0h1m5 0h1M0 2.5h1m1 0h3m1 0h1m1 0h5m5 0h1m1 0h3m1 0h1M0 3.5h1m1 0h3m1 0h1m1 0h1m2 0h1m1 0h4m1 0h1m1 0h3m1 0h1M0 4.5h1m1 0h3m1 0h1m1 0h3m1 0h1m3 0h1m1 0h1m1 0h3m1 0h1M0 5.5h1m5 0h1m1 0h1m1 0h1m2 0h1m1 0h2m1 0h1m5 0h1M0 6.5h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7M8 7.5h2m1 0h1m2 0h3M0 8.5h1m1 0h5m6 0h3m2 0h5M0 9.5h3m2 0h1m1 0h2m4 0h1m2 0h1m2 0h1m3 0h1M2 10.5h1m1 0h5m1 0h1m1 0h4m1 0h1m3 0h1m1 0h2M0 11.5h3m1 0h2m1 0h4m3 0h4m1 0h2m3 0h1M0 12.5h4m1 0h2m1 0h2m1 0h8m1 0h1m1 0h3M0 13.5h1m1 0h1m1 0h1m3 0h1m4 0h1m2 0h2m1 0h1m1 0h1m1 0h1M0 14.5h1m1 0h1m1 0h4m1 0h4m1 0h8m1 0h2M0 15.5h1m1 0h1m1 0h2m2 0h1m1 0h2m2 0h2m3 0h2m3 0h1M0 16.5h1m1 0h3m1 0h1m2 0h1m1 0h1m3 0h6m1 0h1M8 17.5h1m3 0h2m1 0h2m3 0h2M0 18.5h7m2 0h2m2 0h2m1 0h1m1 0h1m1 0h1m1 0h3M0 19.5h1m5 0h1m1 0h1m3 0h2m2 0h1m3 0h2m1 0h2M0 20.5h1m1 0h3m1 0h1m1 0h3m1 0h1m1 0h7m1 0h3M0 21.5h1m1 0h3m1 0h1m1 0h1m6 0h1m1 0h2m1 0h5M0 22.5h1m1 0h3m1 0h1m1 0h1m2 0h2m8 0h2m1 0h1M0 23.5h1m5 0h1m2 0h1m1 0h1m2 0h3m2 0h3m2 0h1M0 24.5h7m1 0h1m2 0h1m5 0h8"/></svg>
+        </div>
+        <p style="margin:0; font:600 15px/1.5 'Plus Jakarta Sans'; color:#5C6660; text-align:center; text-wrap:balance;">Faça o teste pelo celular acessando pelo QR Code acima!</p>
       </div>
 
     </div>
