@@ -198,6 +198,21 @@ sob o filtro novo depois de um erro, e o retângulo cinza em volta das ilustraç
   os dois ficam vermelhos com "!". A conta é do banco (`painel_espera_das_denuncias`,
   minutos pelo relógio dele) e o painel relê a cada 5 minutos e depois de cada
   decisão. "Aberta" é `status <> 'resolvida'`, o mesmo critério da fila.
+- **Ajuda dos botões da denúncia** (`ModerationScreen.tsx`, 24/09). Cada botão
+  (Arquivar, Suspender, Banir) tem um **(i)** ao lado que abre um balão com o que
+  ele faz. O texto está em `AJUDA`. Nada na tela dizia a diferença, em especial
+  que a suspensão vence sozinha e o banimento não, e que arquivar não mexe na
+  conta nem desfaz o bloqueio entre as duas pessoas (a frase do bloqueio fica no
+  balão do Arquivar). A primeira versão deixava a explicação escrita embaixo de
+  cada botão, e ela se repetia em toda denúncia da fila. O (i) deixa a tela
+  enxuta.
+  O balão abre embaixo do (i) tocado, com posição **medida no toque**
+  (`offsetLeft`/`offsetTop` dentro de `.acoes`, que é `position: relative`) e
+  limitada à largura da área. Preso por CSS a um lado fixo, o do Banir vazava
+  da tela no celular, quando a linha quebra e ele vai para a esquerda.
+  `LARGURA_DO_BALAO` e o `max-width` do `.balao` no CSS são o mesmo número. Fecha
+  com toque fora, Esc ou no mesmo (i), e só um fica aberto por vez. Mudou o que
+  `moderar` faz? Atualize o texto de `AJUDA` junto.
 - **Verificação e fotos no painel** (migration `0021`): as duas filas que faltavam.
   A de **verificação** é por PESSOA, não por pedido: `solicitar_verificacao` insere
   uma linha por selfie enviada e não impede a segunda, então agrupar evita a mesma
