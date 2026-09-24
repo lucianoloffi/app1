@@ -213,6 +213,16 @@ sob o filtro novo depois de um erro, e o retângulo cinza em volta das ilustraç
   `LARGURA_DO_BALAO` e o `max-width` do `.balao` no CSS são o mesmo número. Fecha
   com toque fora, Esc ou no mesmo (i), e só um fica aberto por vez. Mudou o que
   `moderar` faz? Atualize o texto de `AJUDA` junto.
+- **Balão do gráfico do painel** (`DailyChart.tsx`, 24/09). Passar o mouse
+  sobre o gráfico diário da aba Números mostra uma linha-guia no dia, um ponto em
+  cada linha e um balão com a data ("Seg, 21/09") e os dois números. Antes era
+  preciso estimar pela grade. O SVG é desenhado na largura real do bloco, então
+  uma unidade do `viewBox` vale 1 px e o balão (HTML, sobre o SVG) usa as mesmas
+  coordenadas. Ele fica ao lado da linha-guia, para não cobrir os pontos, e passa
+  para a esquerda na metade direita, senão sairia do gráfico. No mouse, some ao
+  sair. No toque, fica até o próximo toque, senão sumiria ao tirar o dedo, e
+  `touch-action: pan-y` deixa arrastar de lado para trocar o dia sem travar a
+  rolagem da página.
 - **Verificação e fotos no painel** (migration `0021`): as duas filas que faltavam.
   A de **verificação** é por PESSOA, não por pedido: `solicitar_verificacao` insere
   uma linha por selfie enviada e não impede a segunda, então agrupar evita a mesma
