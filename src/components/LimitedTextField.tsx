@@ -11,16 +11,8 @@ interface LimitedTextFieldProps {
   maxLength: number;
   multiline?: boolean;
   placeholder?: string;
-  /** Texto antes do limite na nota permanente (ex.: "Opcional."). */
-  note?: string;
   /** Erro vindo do servidor para este campo: tem precedência sobre a checagem local. */
   serverError?: string | null;
-  /**
-   * "sempre" para textos longos (bio), em que a pessoa escreve e quer saber
-   * quanto falta. "perto" para campos curtos: o contador só aparece quando
-   * faltam poucos caracteres, e antes disso seria ruído.
-   */
-  counter?: "sempre" | "perto";
   /** Classe do campo, para telas com visual próprio (Editar perfil). */
   inputClassName?: string;
   labelClassName?: string;
@@ -28,14 +20,16 @@ interface LimitedTextFieldProps {
   inputRef?: Ref<HTMLInputElement>;
 }
 
-/** A partir de quantos caracteres restantes o contador "perto" aparece. */
-const PERTO_DO_LIMITE = 10;
-
 /**
  * Campo de texto do perfil com limite de tamanho, no padrão de validação do
- * AccountScreen: nota permanente com o limite, que vira erro vermelho quando
- * a validação falha; erro do servidor antes da checagem local; checagem local
- * só depois do blur; campo vazio nunca reclama.
+ * AccountScreen: o limite sempre à vista, erro vermelho quando a validação
+ * falha; erro do servidor antes da checagem local; checagem local só depois
+ * do blur; campo vazio nunca reclama.
+ *
+ * O limite à vista é o contador ("0/40"), sempre presente. Havia também a
+ * nota "Até 40 caracteres." embaixo do campo, que dizia o mesmo que o
+ * contador ao lado — e o contador dos campos curtos só aparecia perto do
+ * fim, então sem ele a nota era a única pista. Agora é um só, sempre.
  *
  * O maxLength já impede passar do limite digitando ou colando. A checagem
  * local existe para o texto que JÁ chegou maior (gravado antes do limite
@@ -50,9 +44,7 @@ export function LimitedTextField({
   maxLength,
   multiline,
   placeholder,
-  note,
   serverError,
-  counter = "perto",
   inputClassName,
   labelClassName,
   groupClassName,
@@ -70,10 +62,8 @@ export function LimitedTextField({
       ? `Passou do limite de ${maxLength} caracteres. Apague ${tamanho - maxLength} para salvar.`
       : null);
 
-  const mostraContador = counter === "sempre" || maxLength - tamanho <= PERTO_DO_LIMITE;
   const idNota = `${id}-nota`;
   const idErro = `${id}-erro`;
-  const textoDaNota = [note, `Até ${maxLength} caracteres.`].filter(Boolean).join(" ");
 
   const classeDoCampo = [
     inputClassName ?? (multiline ? fieldStyles.textarea : fieldStyles.input),
@@ -112,20 +102,18 @@ export function LimitedTextField({
         />
       )}
       <div className={styles.footer}>
-        {erro ? (
+        {erro && (
           <p id={idErro} className={fieldStyles.error} role="alert">
             {erro}
           </p>
-        ) : (
-          <p id={idNota} className={fieldStyles.note}>
-            {textoDaNota}
-          </p>
         )}
-        {mostraContador && (
-          <span className={erro ? styles.counterOver : styles.counter} aria-hidden="true">
+        <p id={idNota} className={tamanho > maxLength ? styles.counterOver : styles.counter}>
+          <span aria-hidden="true">
             {tamanho}/{maxLength}
           </span>
-        )}
+          {/* "32/40" lido em voz alta não diz nada; o leitor de tela ouve o limite. */}
+          <span className={styles.paraLeitor}>Até {maxLength} caracteres.</span>
+        </p>
       </div>
     </div>
   );

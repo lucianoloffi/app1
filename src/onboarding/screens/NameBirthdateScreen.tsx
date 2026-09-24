@@ -98,7 +98,6 @@ export function NameBirthdateScreen({
         id="cadastro-bio"
         label="Sobre você"
         multiline
-        counter="sempre"
         placeholder="Uma frase sobre o que você procura"
         value={bio}
         onChange={onChangeBio}

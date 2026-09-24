@@ -293,7 +293,6 @@ export function EditProfileScreen({
           id="editar-bio"
           label="Sobre você"
           multiline
-          counter="sempre"
           value={bio}
           onChange={aoMudar("bio", setBio)}
           maxLength={BIO_MAXIMA}
