@@ -125,12 +125,32 @@ export function ProfileScreen({
           <span className={styles.pct}>{pct}%</span>
         </div>
         <div className={styles.headerMain}>
-          <div className={styles.nameRow}>
-            <p className={styles.name}>{myProfile?.name || "Você"}</p>
+          {/* O selo vai dentro do parágrafo, e não ao lado: assim ele segue a
+              última palavra do nome, e o nome longo usa a largura toda. */}
+          <p className={styles.name}>
+            {myProfile?.name || "Você"}
             {verified && (
-              <span className={styles.verifiedBadge}>✓ verificado</span>
+              // Só o escudo: o texto "verificado" já aparece em "Verificar meu
+              // perfil", e o espaço no topo é do nome, que quebrava em três linhas.
+              <span className={styles.verifiedBadge} role="img" aria-label="Perfil verificado">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path
+                    d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 01-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 011-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 011.52 0C14.51 3.81 17 5 19 5a1 1 0 011 1z"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M9 12l2 2 4-4"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </span>
             )}
-          </div>
+          </p>
           <p className={styles.meta}>
             {myProfile?.city ?? "Sua cidade"}
             {age !== null ? ` · ${age} anos` : ""}
