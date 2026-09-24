@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   carregarModeracao,
   moderar,
@@ -26,6 +26,36 @@ const RESOLUCAO_LABEL: Record<NonNullable<DenunciaDoPainel["resolucao"]>, string
   suspenso: "Conta suspensa",
   banido: "Conta banida",
 };
+
+type AcaoComAjuda = "arquivar" | "suspender" | "banir";
+
+/**
+ * O que cada botão faz, no balão do (i) ao lado dele. A diferença entre os três
+ * não estava em lugar nenhum da tela, e quem decide uma denúncia precisa saber,
+ * antes de clicar, se a pessoa volta sozinha. Escondida atrás do (i) para a
+ * tela não repetir a mesma explicação em cada denúncia da fila.
+ */
+const AJUDA: Record<AcaoComAjuda, { titulo: string; texto: string }> = {
+  arquivar: {
+    titulo: "Arquivar",
+    texto:
+      "fecha só esta denúncia. A conta da pessoa continua como está, e o bloqueio entre quem denunciou e quem foi denunciado também.",
+  },
+  suspender: {
+    titulo: `Suspender ${DIAS_DE_SUSPENSAO} dias`,
+    texto: `tira a pessoa da fila e das conversas, sem poder curtir nem escrever. Volta sozinha em ${DIAS_DE_SUSPENSAO} dias.`,
+  },
+  banir: {
+    titulo: "Banir",
+    texto:
+      "o mesmo que suspender, mas sem prazo: só volta se alguém clicar em Reativar conta. Nada é apagado.",
+  },
+};
+
+const idDaAjuda = (denunciaId: string) => `ajuda-${denunciaId}`;
+
+/** Mesma largura máxima do .balao no CSS: a conta da posição depende dela. */
+const LARGURA_DO_BALAO = 320;
 
 /** Ações que mexem na conta de alguém pedem confirmação; arquivar não. */
 const PEDE_CONFIRMACAO: AcaoDeModeracao[] = ["suspender", "banir", "reativar"];
@@ -243,6 +273,49 @@ function CartaoDeDenuncia({
   onModerarFotos,
 }: CartaoProps) {
   const pessoa = denuncia.denunciado;
+  const [ajuda, setAjuda] = useState<AcaoComAjuda | null>(null);
+  const [posicaoDaAjuda, setPosicaoDaAjuda] = useState({ top: 0, left: 0, seta: 0 });
+  const areaDasAcoes = useRef<HTMLDivElement>(null);
+
+  /**
+   * Abre o balão embaixo do (i) tocado, sem passar da borda da área. Medido
+   * no toque, e não por CSS: quando a linha quebra no celular, o Banir vai
+   * para a esquerda, e o balão tem de ir junto.
+   */
+  function alternarAjuda(acao: AcaoComAjuda, botao: HTMLButtonElement) {
+    if (ajuda === acao) {
+      setAjuda(null);
+      return;
+    }
+    const larguraDaArea = areaDasAcoes.current?.clientWidth ?? 0;
+    const larguraDoBalao = Math.min(LARGURA_DO_BALAO, larguraDaArea);
+    const centroDoBotao = botao.offsetLeft + botao.offsetWidth / 2;
+    const left = Math.max(0, Math.min(centroDoBotao - 24, larguraDaArea - larguraDoBalao));
+    setPosicaoDaAjuda({
+      top: botao.offsetTop + botao.offsetHeight + 10,
+      left,
+      seta: centroDoBotao - left,
+    });
+    setAjuda(acao);
+  }
+
+  // O balão fecha com um toque fora dos botões ou com Esc, como qualquer dica.
+  useEffect(() => {
+    if (!ajuda) return;
+    function aoTocar(evento: PointerEvent) {
+      if (!areaDasAcoes.current?.contains(evento.target as Node)) setAjuda(null);
+    }
+    function aoTeclar(evento: KeyboardEvent) {
+      if (evento.key === "Escape") setAjuda(null);
+    }
+    document.addEventListener("pointerdown", aoTocar);
+    document.addEventListener("keydown", aoTeclar);
+    return () => {
+      document.removeEventListener("pointerdown", aoTocar);
+      document.removeEventListener("keydown", aoTeclar);
+    };
+  }, [ajuda]);
+
   // Vale o status, e não a resolução: uma denúncia fechada à mão pelo SQL
   // Editor fica sem resolução, e ainda assim não é caso para decidir de novo.
   const resolvida = denuncia.status === "resolvida";
@@ -339,14 +412,14 @@ function CartaoDeDenuncia({
           />
         </div>
       ) : (
-        <div className={styles.acoes}>
+        <div className={styles.acoes} ref={areaDasAcoes}>
           {pessoa.contaExcluida && (
-            <span className={styles.notaAcao}>
+            <span className={`${styles.notaAcao} ${styles.notaLinha}`}>
               A conta não existe mais: só dá para arquivar.
             </span>
           )}
           {pessoa.denunciasAbertas > 1 && !pessoa.contaExcluida && (
-            <span className={styles.notaAcao}>
+            <span className={`${styles.notaAcao} ${styles.notaLinha}`}>
               Suspender ou banir resolve as {pessoa.denunciasAbertas} denúncias abertas contra{" "}
               {pessoa.nome}.
             </span>
@@ -359,6 +432,7 @@ function CartaoDeDenuncia({
           >
             Arquivar
           </button>
+          <BotaoDeAjuda acao="arquivar" aberta={ajuda} idDoBalao={idDaAjuda(denuncia.id)} onAlternar={alternarAjuda} />
           <button
             type="button"
             className={`${styles.botao} ${styles.botaoAlerta}`}
@@ -367,6 +441,7 @@ function CartaoDeDenuncia({
           >
             Suspender {DIAS_DE_SUSPENSAO} dias
           </button>
+          <BotaoDeAjuda acao="suspender" aberta={ajuda} idDoBalao={idDaAjuda(denuncia.id)} onAlternar={alternarAjuda} />
           <button
             type="button"
             className={`${styles.botao} ${styles.botaoGrave}`}
@@ -375,9 +450,50 @@ function CartaoDeDenuncia({
           >
             Banir
           </button>
+          <BotaoDeAjuda acao="banir" aberta={ajuda} idDoBalao={idDaAjuda(denuncia.id)} onAlternar={alternarAjuda} />
+          {ajuda && (
+            <p
+              id={idDaAjuda(denuncia.id)}
+              className={styles.balao}
+              role="status"
+              style={{
+                top: posicaoDaAjuda.top,
+                left: posicaoDaAjuda.left,
+                ["--seta" as string]: `${posicaoDaAjuda.seta}px`,
+              }}
+            >
+              <strong>{AJUDA[ajuda].titulo}:</strong> {AJUDA[ajuda].texto}
+            </p>
+          )}
         </div>
       )}
     </article>
+  );
+}
+
+function BotaoDeAjuda({
+  acao,
+  aberta,
+  idDoBalao,
+  onAlternar,
+}: {
+  acao: AcaoComAjuda;
+  aberta: AcaoComAjuda | null;
+  idDoBalao: string;
+  onAlternar: (acao: AcaoComAjuda, botao: HTMLButtonElement) => void;
+}) {
+  const estaAberta = aberta === acao;
+  return (
+    <button
+      type="button"
+      className={estaAberta ? `${styles.ajuda} ${styles.ajudaAberta}` : styles.ajuda}
+      aria-label={`O que faz ${AJUDA[acao].titulo}`}
+      aria-expanded={estaAberta}
+      aria-controls={estaAberta ? idDoBalao : undefined}
+      onClick={(evento) => onAlternar(acao, evento.currentTarget)}
+    >
+      i
+    </button>
   );
 }
 
