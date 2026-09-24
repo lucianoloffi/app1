@@ -120,20 +120,7 @@ export function useChats({ ativo, onError }: UseChatsOptions) {
     chatAberto.current = null;
   }
 
-  async function sendMessage(id: string, text: string, failed = false) {
-    // Sem conexão: a mensagem aparece marcada como não enviada e fica
-    // disponível para "Tentar de novo".
-    if (failed) {
-      setChats((prev) =>
-        prev.map((chat) =>
-          chat.id === id
-            ? { ...chat, time: "agora", messages: [...chat.messages, { mine: true, text, failed: true }] }
-            : chat,
-        ),
-      );
-      return;
-    }
-
+  async function sendMessage(id: string, text: string) {
     try {
       const mensagem = await enviarMensagem(id, text);
       setChats((prev) =>
@@ -144,6 +131,7 @@ export function useChats({ ativo, onError }: UseChatsOptions) {
         ),
       );
     } catch (problema) {
+      // A mensagem fica na conversa marcada como não enviada, com "Tentar de novo".
       setChats((prev) =>
         prev.map((chat) =>
           chat.id === id
@@ -208,7 +196,7 @@ export function useChats({ ativo, onError }: UseChatsOptions) {
     },
     openChat: (id: string) => void openChat(id),
     fecharChat,
-    sendMessage: (id: string, text: string, failed = false) => void sendMessage(id, text, failed),
+    sendMessage: (id: string, text: string) => void sendMessage(id, text),
     retryMessage: (id: string, index: number) => void retryMessage(id, index),
     removeChat: (id: string) => void removeChat(id),
     lockChat: (id: string) => void definirFinalizada(id, true),
