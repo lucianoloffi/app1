@@ -284,6 +284,20 @@ sob o filtro novo depois de um erro, e o retângulo cinza em volta das ilustraç
   → `enviarFoto(blob)`, que sobe o arquivo como chega. O caminho inteiro, com o
   carregando sobre a prévia, está em `src/hooks/useEscolhaDeFoto.ts`. A selfie de
   verificação não passa por recorte (`enviarSelfieDeVerificacao`).
+- **Perfil em duas telas de edição.** Interesses, status de relacionamento e
+  estilo de vida (bebida, atividade, filhos) saíram de Editar perfil para a
+  `InterestsScreen`, aberta pelo cartão Interesses no Perfil, acima dos Filtros.
+  No fim do formulário comprido, pouca gente rolava até eles. As duas telas salvam
+  pelo mesmo `salvarEdicaoDoPerfil` do `App.tsx`: cada uma devolve só os seus
+  campos, que são mesclados ao perfil. Por isso a `EditProfileScreen` recebe
+  `Omit<PerfilEditavel, ...>`. Campo novo do perfil entra numa das duas, não nas
+  duas.
+  A dica do que falta (`computeCompleteness`) também é por tela. `hint`, embaixo
+  do nome no topo (que abre Editar perfil), lista só fotos, bio, profissão e
+  altura. `interestsHint`, dentro do cartão Interesses, lista interesses, estilo
+  de vida e estado civil. Antes o topo dizia "Faltam 3 interesses" e quem tocava
+  não achava onde preencher. A porcentagem do anel continua contando o perfil
+  inteiro. Com campo novo, pôr a dica na lista da tela onde ele é preenchido.
 
 ## Convenções
 
