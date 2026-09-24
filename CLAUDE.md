@@ -292,6 +292,17 @@ sob o filtro novo depois de um erro, e o retângulo cinza em volta das ilustraç
     salvo e sai sozinho quando ela for ligada. O app funciona dos dois jeitos: com
     ela ligada, `cadastrar` devolve `precisaConfirmarEmail` e aparece a
     `EmailConfirmationScreen`. Ver Pendências.
+- **`web/`** — o site lovidates.com (Worker da Cloudflare), separado do app. Tem a
+  página inicial, a 404 e os três documentos legais em `web/public/`, e a Worker em
+  `web/src/index.js`, que serve o app em `/app1` buscando no GitHub Pages. Os
+  documentos legais são **gerados** a partir de `src/legal/`, e não se editam à
+  mão. A página inicial e a 404 são HTML escrito à mão. Publicação à parte do app:
+  ver Deploy › Site lovidates.com.
+  Armadilha na Worker: `IDIOMAS = ['es']`, mas `web/public/es/` não existe. Hoje não
+  quebra nada, porque a raiz `/` não está em `run_worker_first` e nem passa pela
+  Worker (conferido em 24/09: navegador em espanhol continua no português). Se
+  alguém puser `"/"` ali, como pede o passo 4 do `LEIA-ME.md`, antes de criar a
+  pasta, quem tem o navegador em espanhol cai num 404.
 - **`src/screens/`** e **`src/onboarding/screens/`** — uma tela por arquivo.
 - **`src/components/`** — componentes compartilhados.
 - **Foto reprovada chega à dona** (migration `0023`). `MyProfile.photos` é
