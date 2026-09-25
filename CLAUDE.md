@@ -378,6 +378,18 @@ sob o filtro novo depois de um erro, e o retângulo cinza em volta das ilustraç
   Exceção de propósito: os valores e os dois textos de "Conte mais sobre você"
   não entram na porcentagem nem nas dicas, para não virar pressão para
   responder dado sensível (ver "Valores, fumo e dois textos").
+- **Ver o próprio perfil** (`ProfileScreen` + `ProfileDetailScreen`, 25/09).
+  Abaixo do nome, no topo do Perfil, há dois botões: **Editar perfil** (lilás) e
+  **Visualizar** (branco com borda lilás; só texto roxo foi testado e parecia
+  link). O topo deixou de ser um botão inteiro que abria a edição, porque não
+  cabe botão dentro de botão. Visualizar abre a **mesma** `ProfileDetailScreen`
+  do perfil de outra pessoa, com `bottomAction="own"`: faixa "Assim seu perfil
+  aparece para os outros" no alto, sem curtir nem denunciar, e "Editar perfil"
+  embaixo. Ser a mesma tela é o que garante que o que a pessoa vê é o que os
+  outros veem, então mudança no perfil dos outros aparece aqui sozinha. Quem
+  monta o perfil é `perfilComoOsOutrosVeem` (`App.tsx`): só fotos aprovadas (a
+  reprovada os outros não veem), sem distância (é sempre de quem olha) e sem
+  interesses em comum destacados. Campo novo em `Profile` entra ali também.
 - **Selo de verificado no topo do Perfil** é só um escudo com check num círculo
   (22 px, escudo de 13 px), sem texto: "verificado" já aparece em "Verificar meu
   perfil", logo abaixo. Ele fica **dentro** do parágrafo do nome, não ao lado, e
