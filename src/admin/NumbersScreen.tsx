@@ -138,27 +138,30 @@ export function NumbersScreen() {
             </div>
           </div>
 
-          <Funnel periodo={periodo} />
+          <section className={styles.bloco}>
+            <div className={styles.blocoTopo}>
+              <h2 className={styles.h2}>Últimos 30 dias</h2>
+              <span className={styles.legenda}>
+                <span className={styles.legendaAtivos} aria-hidden="true" />
+                Usuários ativos
+              </span>
+              <span className={styles.legenda}>
+                <span className={styles.legendaNovos} aria-hidden="true" />
+                Novos usuários
+              </span>
+            </div>
+            <DailyChart dias={n.porDia} />
+            <p className={styles.nota}>
+              Os dias de uso passaram a ser registrados em {INICIO_DOS_REGISTROS}. Antes disso,
+              só conta como ativo quem curtiu ou mandou mensagem no dia.
+            </p>
+          </section>
 
+          {/* O funil ao lado das cidades, e o gráfico dos 30 dias em cima, na
+              largura toda (pedido do Lu em 25/09): com o funil sozinho numa
+              linha, as faixas ficavam compridas e sobrava espaço dos lados. */}
           <div className={styles.linhaDeBaixo}>
-            <section className={styles.bloco}>
-              <div className={styles.blocoTopo}>
-                <h2 className={styles.h2}>Últimos 30 dias</h2>
-                <span className={styles.legenda}>
-                  <span className={styles.legendaAtivos} aria-hidden="true" />
-                  Usuários ativos
-                </span>
-                <span className={styles.legenda}>
-                  <span className={styles.legendaNovos} aria-hidden="true" />
-                  Novos usuários
-                </span>
-              </div>
-              <DailyChart dias={n.porDia} />
-              <p className={styles.nota}>
-                Os dias de uso passaram a ser registrados em {INICIO_DOS_REGISTROS}. Antes disso,
-                só conta como ativo quem curtiu ou mandou mensagem no dia.
-              </p>
-            </section>
+            <Funnel periodo={periodo} />
 
             <section className={styles.bloco}>
               <div className={styles.blocoTitulo}>

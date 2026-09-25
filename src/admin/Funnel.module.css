@@ -51,9 +51,9 @@
 .etapa,
 .passagem {
   display: grid;
-  grid-template-columns: 180px minmax(0, 1fr);
+  grid-template-columns: 165px minmax(0, 1fr);
   align-items: center;
-  column-gap: 20px;
+  column-gap: 16px;
 }
 
 .rotulo {
@@ -138,9 +138,11 @@
 
 .semana {
   display: grid;
-  grid-template-columns: 180px minmax(0, 1fr) 210px;
+  /* Agora o funil divide a linha com as cidades: o nome e o texto ficam no
+     tamanho do conteúdo, e a barra com o que sobra. */
+  grid-template-columns: auto minmax(60px, 1fr) auto;
   align-items: center;
-  column-gap: 20px;
+  column-gap: 16px;
 }
 
 .semanaData {
