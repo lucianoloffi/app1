@@ -98,13 +98,13 @@
   text-align: right;
 }
 
+/* Sem cartão: entre as fotos, o texto solto respira melhor, e o itálico o
+   separa da bio e da lista do estilo de vida. */
 .answer {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  background: #fff;
-  border-radius: 14px;
-  padding: 14px 16px;
+  padding: 12px 16px;
 }
 
 .answerLabel {
@@ -116,8 +116,8 @@
 
 .answerText {
   margin: 0;
-  font: 400 15px/1.5 var(--font-ui);
-  color: #3b443e;
+  font: italic 400 20px/1.4 var(--font-ui);
+  color: var(--color-ink);
   overflow-wrap: anywhere;
 }
 

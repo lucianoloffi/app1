@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { CloseIcon, HeartIcon } from "../components/icons/ActionIcons";
 import { ReportSheet } from "../components/ReportSheet";
 import {
@@ -92,6 +92,23 @@ export function ProfileDetailScreen({
   // com a mesma foto repetida três vezes.
   const morePhotos = profile.photos.slice(1);
 
+  // Os textos entremeiam as fotos, para a leitura não ficar só em imagem: com
+  // duas fotos a mais, cada texto vai embaixo de uma; com uma, os dois vão
+  // embaixo dela; sem nenhuma, seguem a lista do estilo de vida.
+  const answersAfterPhoto = morePhotos.map((_, index) =>
+    morePhotos.length === 1 ? answers : answers.slice(index, index + 1),
+  );
+  const answersWithoutPhoto = morePhotos.length === 0 ? answers : [];
+
+  function renderAnswer(answer: { label: string; text: string }) {
+    return (
+      <div key={answer.label} className={styles.answer}>
+        <span className={styles.answerLabel}>{answer.label}</span>
+        <p className={styles.answerText}>{answer.text}</p>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.screen}>
       <button type="button" className={styles.backButton} onClick={onBack} aria-label="Voltar">
@@ -139,13 +156,6 @@ export function ProfileDetailScreen({
 
           <p className={styles.bio}>{profile.bio}</p>
 
-          {answers.map((answer) => (
-            <div key={answer.label} className={styles.answer}>
-              <span className={styles.answerLabel}>{answer.label}</span>
-              <p className={styles.answerText}>{answer.text}</p>
-            </div>
-          ))}
-
           <div className={styles.chipsRow}>
             {profile.interests.map((interest) => {
               const isCommon = commonInterests.has(interest);
@@ -171,16 +181,20 @@ export function ProfileDetailScreen({
             </div>
           )}
 
+          {answersWithoutPhoto.map(renderAnswer)}
+
           {morePhotos.length > 0 && (
             <div className={styles.photoList}>
               {morePhotos.map((photo, index) => (
-                <img
-                  key={photo}
-                  className={styles.morePhoto}
-                  src={photo}
-                  alt={`Foto ${index + 2} de ${profile.name}`}
-                  loading="lazy"
-                />
+                <Fragment key={photo}>
+                  <img
+                    className={styles.morePhoto}
+                    src={photo}
+                    alt={`Foto ${index + 2} de ${profile.name}`}
+                    loading="lazy"
+                  />
+                  {answersAfterPhoto[index].map(renderAnswer)}
+                </Fragment>
               ))}
             </div>
           )}
