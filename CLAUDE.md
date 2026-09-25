@@ -269,10 +269,11 @@ sob o filtro novo depois de um erro, e o retângulo cinza em volta das ilustraç
   quem acabou de entrar. Uma pessoa por linha: avatar com a capa (a principal,
   mesmo reprovada, com anel vermelho; sem foto, iniciais em círculo
   tracejado), nome e idade com o e-mail embaixo, cidade, entrada (ano curto),
-  último acesso (por dia, da `atividade_diaria`), fotos, curtiu / recebeu,
-  matches, conversas, situação e "Ver perfil ↗". Busca por nome, e-mail ou
-  cidade (`strpos`, para `_` e `%` digitados não virarem curinga), sete botões
-  de filtro com contagem (a busca vale dentro deles), três ordens e páginas de
+  último acesso (por dia, da `atividade_diaria`), fotos, % Perfil, curtiu /
+  recebeu, matches, conversas, situação, "Perfil ↗" e os três pontinhos. Busca
+  por nome, e-mail ou cidade (`strpos`, para `_` e `%` digitados não virarem
+  curinga), sete botões de filtro com contagem (a busca vale dentro deles),
+  três ordens (abre em "Último acesso", a primeira de `ORDENS`) e páginas de
   50. Os perfis `@lovi.test` só aparecem no botão "Perfis de teste", como no
   funil. Suspensão vencida aparece como conta ativa.
   **O que cada número conta:** curtidas são os swipes `like` de hoje (desfazer
@@ -282,14 +283,33 @@ sob o filtro novo depois de um erro, e o retângulo cinza em volta das ilustraç
   os mesmos matches com `primeira_mensagem_em`, e por isso também sobrevivem
   ao match desfeito, que apaga as mensagens mas não o histórico. Os quatro
   números são calculados só para as 50 da página.
+  **% Perfil** (migration `0037`) é a mesma porcentagem do anel no Perfil do
+  app. Os pesos continuam **só** em `completeness.ts`: a `painel_usuarios`
+  manda, em `completude`, os dados que a conta usa (tem nome, bio, quantos
+  interesses, respostas de estilo de vida, `prefere_nao_dizer`...), e o painel
+  calcula com `porcentagemDoPerfil`, a mesma função que o anel usa. Copiar os
+  pesos para o SQL faria os dois números divergirem em silêncio na próxima
+  mudança de peso. Por isso `computeCompleteness` foi dividida em
+  `porcentagemDoPerfil(EntradaDaCompletude)` e as dicas; a divisão foi
+  conferida contra a versão anterior em 20.000 perfis aleatórios, sem
+  diferença. **Campo novo que passe a contar na completude entra em três
+  lugares:** `PESO`/`EntradaDaCompletude`, o campo `completude` da
+  `painel_usuarios` (migration nova) e o mapeamento em `carregarUsuarios`.
+  Sem a `0037`, a coluna mostra "—".
   **Decisões do Lu na prévia:** fotos como "2·1", com o número de reprovadas
   em vermelho (ponto no meio da linha, não ponto final, para não ler "dois
   vírgula um"); "Curtiu / recebeu" numa coluna só, com o "recebeu" e os
   números recebidos em azul (`--color-blue`, token criado para isso); os
   filtros continuam botões de uma escolha. Uma versão com quatro menus
   combináveis (Novos usuários, Status, Perfil, Comportamento) foi montada e
-  descartada. No celular, a linha vira cartão só com cidade e último acesso.
-  A tela é mais larga que as outras (1280 px), por causa das onze colunas.
+  descartada. Depois: a coluna do nome ficou mais larga, e o link virou
+  "Perfil ↗". Para caber tudo, a cidade e os selos da situação quebram linha
+  em vez de cortar ("Jaraguá do…") ou invadir a coluna ao lado. No celular, a
+  linha vira cartão só com cidade e último acesso; o CSS escolhe essas
+  colunas pelo `data-rotulo`, não pela posição (`nth-child`), porque coluna
+  nova no meio deslocava as outras. A tela é mais larga que as outras (até
+  1440 px), por causa das treze colunas; a largura foi acertada para o nome e
+  o e-mail caberem inteiros numa tela de 1280 px.
   **"Ver perfil"** abre `?perfil=<id>` na mesma página do painel, em outra aba
   do navegador: passa pelo mesmo login e pela mesma checagem de admin, sem
   página nova no build. `AdminApp` mostra então a `AdminProfilePage`, que usa a
@@ -493,7 +513,8 @@ sob o filtro novo depois de um erro, e o retângulo cinza em volta das ilustraç
   você" 4. Antes cada campo valia o mesmo e o anel parecia não responder:
   estilo de vida só contava com as quatro respostas, um ou dois interesses não
   davam nada, os textos não entravam e 100% pedia seis fotos. Mudou um peso?
-  A soma tem de continuar 100.
+  A soma tem de continuar 100. A mesma conta (`porcentagemDoPerfil`) dá a
+  coluna "% Perfil" do painel admin (ver "Aba Usuários do painel").
   **Religião, política e alimentação valem zero, não menos**: qualquer ponto
   deixaria o anel abaixo de 100% para quem não quer responder dado sensível.
   Não entram nem nas dicas.
