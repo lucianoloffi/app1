@@ -361,8 +361,8 @@ sob o filtro novo depois de um erro, e o retângulo cinza em volta das ilustraç
   → `enviarFoto(blob)`, que sobe o arquivo como chega. O caminho inteiro, com o
   carregando sobre a prévia, está em `src/hooks/useEscolhaDeFoto.ts`. A selfie de
   verificação não passa por recorte (`enviarSelfieDeVerificacao`).
-- **Perfil em duas telas de edição.** Interesses, status de relacionamento e
-  estilo de vida (bebida, atividade, filhos) saíram de Editar perfil para a
+- **Perfil em duas telas de edição.** Interesses, valores, status de relacionamento e
+  estilo de vida (bebida, atividade, filhos, fumo) saíram de Editar perfil para a
   `InterestsScreen`, aberta pelo cartão Interesses no Perfil, acima dos Filtros.
   No fim do formulário comprido, pouca gente rolava até eles. As duas telas salvam
   pelo mesmo `salvarEdicaoDoPerfil` do `App.tsx`: cada uma devolve só os seus
@@ -375,6 +375,9 @@ sob o filtro novo depois de um erro, e o retângulo cinza em volta das ilustraç
   de vida e estado civil. Antes o topo dizia "Faltam 3 interesses" e quem tocava
   não achava onde preencher. A porcentagem do anel continua contando o perfil
   inteiro. Com campo novo, pôr a dica na lista da tela onde ele é preenchido.
+  Exceção de propósito: os valores e os dois textos de "Conte mais sobre você"
+  não entram na porcentagem nem nas dicas, para não virar pressão para
+  responder dado sensível (ver "Valores, fumo e dois textos").
 - **Selo de verificado no topo do Perfil** é só um escudo com check num círculo
   (22 px, escudo de 13 px), sem texto: "verificado" já aparece em "Verificar meu
   perfil", logo abaixo. Ele fica **dentro** do parágrafo do nome, não ao lado, e
@@ -393,7 +396,11 @@ sob o filtro novo depois de um erro, e o retângulo cinza em volta das ilustraç
   o tamanho do array). Entre a migration e o push, um dos lados recusa o valor do
   outro: aplique a migration e faça o push logo em seguida. As funções da fila
   não têm a lista fixa (`o.intencao = any(eu.intencao_filtro)`) e não mudam.
-- **Cadastro: intenção e interesses em telas separadas.** "O que você busca?"
+- **Cadastro: intenção e interesses em telas separadas.** Ordem dos passos desde
+  a `0030` (dez, na barra de progresso): conta → nome → gênero e cidade → fotos →
+  intenção → valores → interesses → "Conte mais sobre você" → estilo de vida →
+  profissão. Os números de `progress` são escritos à mão em cada tela; passo
+  novo mexe nos das telas seguintes. "O que você busca?"
   (`IntentionScreen`, passo `intention`) tem só a intenção, obrigatória. "Do que
   você gosta?" (`ChooseInterestsScreen`, passo `interests`) mostra todas as opções
   à vista, com contador de `MAX_INTERESTS`, e é opcional. Juntas numa tela só, os
@@ -416,6 +423,31 @@ sob o filtro novo depois de um erro, e o retângulo cinza em volta das ilustraç
   cadastro e outra para a folha, cada uma numa ordem. Mudar a lista pede migration
   nova com o mesmo conjunto no check de `profiles.status_relacionamento`, com a
   mesma ordem de deploy da intenção: migration e, logo em seguida, o push.
+- **Valores, fumo e dois textos** (migration `0030`, 24/09). Três perguntas na
+  tela "Seus valores" (`ValuesScreen`, passo `values`): `alimentacao`,
+  `religiao` e `politica` (a importância da política num relacionamento). "Você
+  fuma?" (`fumo`) entrou em `LIFE_GROUPS`, junto de bebida e filhos. Os dois
+  textos, `tempo_livre` e `o_que_valoriza`, ficam em "Conte mais sobre você"
+  (`AboutScreen`, passo `about`) e, depois do cadastro, em Editar perfil,
+  abaixo da bio, com limite `TEXTO_LIVRE_MAXIMO` (200, mesmo número no check).
+  As perguntas e os exemplos moram em `src/data/about.ts`, as opções em
+  `DIET_LABEL`, `RELIGION_LABEL`, `POLITICS_LABEL` e `SMOKE_LABEL`
+  (`src/types.ts`), e os grupos em `VALUE_GROUPS` (`src/data/lifestyle.ts`).
+  Mudar uma lista pede migration nova com o mesmo conjunto no check.
+  Tudo opcional e **sem "prefiro não responder"** (decisão do Lu em 24/09): não
+  responder é não marcar (`null`). Na tela Interesses, a folha dos valores não
+  tem a opção vazia (`RowBottomSheet` com `semOpcaoVazia`), e para deixar em
+  branco toca-se de novo na opção marcada. Fumo continua com "Prefiro não
+  dizer", como bebida e filhos. A ordem de `RELIGION_LABEL` (religiões,
+  "Outra" e, por fim, quem não tem religião) é a que faz as nove opções caberem
+  em três linhas em 390 px. As três perguntas cabem na tela sem rolar.
+  **Os outros veem as respostas**: as seis colunas entram no `perfil_publico`
+  e o `ProfileDetailScreen` mostra as escolhas na lista do estilo de vida e os
+  textos em cartões abaixo da bio ("No tempo livre", "Valoriza em uma pessoa").
+  Nada disso filtra a fila. Religião e política são dado sensível: o
+  consentimento é o ato de responder, como na selfie (política 1.8, seção 4).
+  `ChoiceGroups` (`src/onboarding/`) desenha os grupos de chips de "Seus
+  valores" e do estilo de vida.
 
 ## Convenções
 
@@ -602,7 +634,7 @@ Em ordem de importância:
   `LEGAL_UPDATED_AT` não é lida por nenhum código; o que o usuário vê é o texto dos
   `.md`, e o consentimento registra só a `versao`. Antes de lançar, os **textos** (não
   só a data) precisam de revisão jurídica: o app trata dado sensível sob a LGPD.
-- **Privacidade está na 1.7 e diretrizes na 1.1.** A 1.1 (21/09) trouxe a moderação:
+- **Privacidade está na 1.8 e diretrizes na 1.1.** A 1.1 (21/09) trouxe a moderação:
   cópia da conversa na denúncia, o que o admin enxerga, e a denúncia que sobrevive à
   exclusão da conta. A 1.2 (21/09, junto da `0021`) trouxe a selfie de verificação —
   que ela é coletada, que uma pessoa a compara com as fotos do perfil, que não passa
@@ -626,9 +658,17 @@ Em ordem de importância:
   A 1.7 (24/09) só corrigiu a linha do Resend na lista de fornecedores: com o
   SMTP próprio no Auth, ele passou a levar também a confirmação de cadastro e a
   recuperação de senha, e a 1.6 dizia "e-mails de aviso".
+  A 1.8 (24/09, junto da `0030`) pôs alimentação, fumo, religião, política e os
+  dois textos novos: o que é coletado, que os outros veem e, na seção 4, que
+  religião e política são dado sensível, opcionais, com consentimento pelo ato
+  de responder e apagáveis sem encerrar a conta. Não caiu na exceção acima
+  porque não é uso novo de dado que já existia, é dado novo, pedido com o aviso
+  na hora. Mesmo assim, é um ponto para a revisão jurídica.
 - **Validação no cliente é UX, não segurança.** O mínimo de senha real é o do Supabase
   Auth; o cliente só antecipa a mensagem.
 - **Dado sensível.** Interesse (indica orientação sexual), cidade, fotos e telefone
-  são tratados sob consentimento explícito registrado na tabela `consents`, com os
+  são tratados sob consentimento explícito registrado na tabela `consents`.
+  Religião e política (`0030`) e a selfie de verificação são opcionais, e o
+  consentimento é o ato de informá-las. Tudo isso tem os
   documentos versionados em `src/legal/versions.ts`. Qualquer acesso novo a esses
   dados — moderação inclusive — precisa entrar na política de privacidade.
