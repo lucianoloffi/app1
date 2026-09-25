@@ -448,9 +448,13 @@ sob o filtro novo depois de um erro, e o retângulo cinza em volta das ilustraç
   fotos ou mais além da capa, cada texto vai embaixo de uma (o primeiro sob a
   segunda foto, o outro sob a terceira); com uma só, os dois vão embaixo dela;
   só com a capa, seguem a lista do estilo de vida. Quem respondeu só um tem o
-  texto sob a segunda foto, sem buraco. Sem cartão, com o texto em itálico de
-  20 px. A fonte não tem itálico próprio e o navegador inclina as letras.
-  Antes eram cartões brancos logo abaixo da bio. Nada disso filtra a fila. Religião e política são dado sensível: o
+  texto sob a segunda foto, sem buraco. Sem cartão: texto normal de 18 px e
+  título em roxo (`--color-accent-2`). Antes eram cartões brancos logo abaixo
+  da bio. Houve itálico por uma tarde e saiu: o `index.html` carrega a Plus
+  Jakarta Sans sem a versão itálica, e o navegador só inclinava as letras, que
+  ficavam tortas. Quem quiser itálico de novo precisa carregar o `ital` da
+  fonte no link do Google Fonts (foram testadas também a Fraunces itálica e
+  uma barra roxa à esquerda; o Lu preferiu sem nada). Nada disso filtra a fila. Religião e política são dado sensível: o
   consentimento é o ato de responder, como na selfie (política 1.8, seção 4).
   `ChoiceGroups` (`src/onboarding/`) desenha os grupos de chips de "Seus
   valores" e do estilo de vida.
