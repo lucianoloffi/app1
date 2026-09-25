@@ -8,7 +8,7 @@ import {
   type UsuarioDoPainel,
 } from "../lib/api/admin";
 import { mensagemDeErro } from "../lib/errors";
-import { dataCurta, dataHora, diaDeUso } from "./datas";
+import { dataCurta, dataHora, diaDeUso, usouHoje } from "./datas";
 import { MenuDaConta } from "./MenuDaConta";
 import styles from "./UsersScreen.module.css";
 
@@ -325,7 +325,10 @@ function LinhaDoUsuario({
         {dataCurta(usuario.entrouEm).replace(/(\d{2})(\d{2})$/, "$2")}
       </span>
       <span role="cell" className={styles.texto} data-rotulo="Acesso">
-        {diaDeUso(usuario.ultimoAcesso)}
+        {/* "hoje" em azul: quem está ativo salta aos olhos na lista. */}
+        <span className={usouHoje(usuario.ultimoAcesso) ? styles.hoje : undefined}>
+          {diaDeUso(usuario.ultimoAcesso)}
+        </span>
       </span>
       <span
         role="cell"

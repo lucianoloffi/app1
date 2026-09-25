@@ -49,6 +49,20 @@ export function duracao(minutos: number): string {
   return resto === 0 ? `${dias} dias` : `${dias} dias e ${resto} h`;
 }
 
+/** Quantos dias se passaram desde um dia "AAAA-MM-DD", pelo relógio de quem olha. */
+function diasDesde(dia: string): number {
+  const [ano, mes, d] = dia.split("-").map(Number);
+  const alvo = new Date(ano, mes - 1, d);
+  const hoje = new Date();
+  hoje.setHours(0, 0, 0, 0);
+  return Math.round((hoje.getTime() - alvo.getTime()) / 86_400_000);
+}
+
+/** Abriu o app hoje: é o que a lista de Usuários destaca em azul. */
+export function usouHoje(dia: string | null): boolean {
+  return dia !== null && diasDesde(dia) <= 0;
+}
+
 /**
  * "hoje", "ontem", "há 5 dias", "12/08/2026" — o último dia de uso. O registro
  * é por dia (atividade_diaria), então não há hora para mostrar. Passado um
@@ -57,10 +71,7 @@ export function duracao(minutos: number): string {
 export function diaDeUso(dia: string | null): string {
   if (!dia) return "nunca";
   const [ano, mes, d] = dia.split("-").map(Number);
-  const alvo = new Date(ano, mes - 1, d);
-  const hoje = new Date();
-  hoje.setHours(0, 0, 0, 0);
-  const dias = Math.round((hoje.getTime() - alvo.getTime()) / 86_400_000);
+  const dias = diasDesde(dia);
   if (dias <= 0) return "hoje";
   if (dias === 1) return "ontem";
   if (dias <= 30) return `há ${dias} dias`;

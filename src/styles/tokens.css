@@ -12,7 +12,7 @@
   --color-coral-rgb: 255, 90, 95;
   --color-coral-soft: #fff4f4;
 
-  /* Azul 600: curtidas recebidas no painel. */
+  /* Azul 600: no painel, curtidas recebidas e o "hoje" do último acesso. */
   --color-blue: #2563eb;
 
   /* Erro e aviso de moderação — o mesmo vermelho das mensagens de erro. */

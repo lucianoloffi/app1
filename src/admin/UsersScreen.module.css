@@ -246,6 +246,11 @@
   color: var(--color-blue);
 }
 
+.hoje {
+  color: var(--color-blue);
+  font-weight: 700;
+}
+
 /* A cidade quebra em duas linhas em vez de cortar: "Jaraguá do Sul/SC" não
    cabe na coluna, e "Jaraguá do…" não diz qual cidade é. */
 .cidade {
