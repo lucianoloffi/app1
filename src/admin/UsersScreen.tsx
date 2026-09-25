@@ -27,9 +27,10 @@ const FILTROS: { valor: FiltroDeUsuarios; rotulo: string }[] = [
   { valor: "teste", rotulo: "Perfis de teste" },
 ];
 
+/** A primeira é a que a tela abre: quem usou o app por último vem no topo. */
 const ORDENS: { valor: OrdemDeUsuarios; rotulo: string }[] = [
-  { valor: "recentes", rotulo: "Mais recentes" },
   { valor: "acesso", rotulo: "Último acesso" },
+  { valor: "recentes", rotulo: "Mais recentes" },
   { valor: "denuncias", rotulo: "Mais denunciados" },
 ];
 
@@ -64,7 +65,7 @@ export function UsersScreen() {
   const [consulta, setConsulta] = useState<Consulta>({
     busca: "",
     filtro: "todos",
-    ordem: "recentes",
+    ordem: ORDENS[0].valor,
     pagina: 0,
   });
   // A consulta viaja com os dados, como nas outras telas: é assim que se sabe
@@ -227,6 +228,9 @@ export function UsersScreen() {
               <span role="columnheader">Entrou</span>
               <span role="columnheader">Último acesso</span>
               <span role="columnheader">Fotos</span>
+              <span role="columnheader" title="Quanto do perfil está preenchido, como no anel do app">
+                % Perfil
+              </span>
               <span role="columnheader" title="Curtidas que deu / curtidas que recebeu">
                 Curtiu / <span className={styles.recebeu}>recebeu</span>
               </span>
@@ -314,7 +318,7 @@ function LinhaDoUsuario({
         </span>
         <span className={styles.email}>{usuario.email ?? "sem e-mail"}</span>
       </span>
-      <span role="cell" className={styles.texto} data-rotulo="Cidade">
+      <span role="cell" className={`${styles.texto} ${styles.cidade}`} data-rotulo="Cidade">
         {usuario.cidade?.replace(", ", "/") || "—"}
       </span>
       <span role="cell" className={styles.texto} data-rotulo="Entrou">
@@ -343,6 +347,9 @@ function LinhaDoUsuario({
           </span>
         )}
       </span>
+      <span role="cell" className={styles.texto} data-rotulo="Perfil">
+        {usuario.completude === null ? "—" : `${usuario.completude}%`}
+      </span>
       <span role="cell" className={styles.texto} data-rotulo="Curtidas">
         {usuario.curtidasDadas} /{" "}
         <span className={styles.recebeu}>{usuario.curtidasRecebidas}</span>
@@ -366,7 +373,7 @@ function LinhaDoUsuario({
           rel="noopener"
           aria-label={`Ver perfil de ${nome} (abre em outra aba)`}
         >
-          Ver perfil <span aria-hidden="true">↗</span>
+          Perfil <span aria-hidden="true">↗</span>
         </a>
       </span>
       <span role="cell" className={styles.celulaMenu}>

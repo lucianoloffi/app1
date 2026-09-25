@@ -1,7 +1,8 @@
 import { supabase } from "../supabaseClient";
 import { lancaSeErro } from "../errors";
 import { apagarSelfies, assinarFotos, assinarSelfies } from "./photos";
-import type { Profile, VerificationStatus } from "../../types";
+import type { CampoQuePodeRecusar, Profile, VerificationStatus } from "../../types";
+import { porcentagemDoPerfil } from "../../utils/completeness";
 import { paraPerfis, type LinhaPerfilPublico } from "./mapeamento";
 
 /** Os períodos do painel; todos terminam hoje (dia de São Paulo). */
@@ -674,6 +675,11 @@ export interface UsuarioDoPainel {
    * mensagens já foram apagadas.
    */
   conversas: number;
+  /**
+   * A mesma porcentagem do anel no Perfil do app, calculada com a mesma função
+   * (`porcentagemDoPerfil`). null antes da migration 0037.
+   */
+  completude: number | null;
   cadastroCompleto: boolean;
   visivel: boolean;
   teste: boolean;
@@ -707,6 +713,24 @@ interface LinhaDoUsuario {
   curtidas_recebidas: number;
   matches: number;
   conversas: number;
+  /** Desde a 0037: os dados da conta, não a porcentagem (os pesos ficam no app). */
+  completude?: {
+    tem_nome: boolean;
+    tem_cidade: boolean;
+    tem_nascimento: boolean;
+    tem_genero: boolean;
+    tem_bio: boolean;
+    interesses: number;
+    tem_profissao: boolean;
+    tem_altura: boolean;
+    bebida: string | null;
+    atividade: string | null;
+    filhos: string | null;
+    fumo: string | null;
+    status_relacionamento: string | null;
+    prefere_nao_dizer: CampoQuePodeRecusar[] | null;
+    textos: number;
+  } | null;
   cadastro_completo: boolean;
   visivel: boolean;
   teste: boolean;
@@ -758,6 +782,28 @@ export async function carregarUsuarios(consulta: {
       curtidasRecebidas: linha.curtidas_recebidas,
       matches: linha.matches,
       conversas: linha.conversas,
+      completude: linha.completude
+        ? porcentagemDoPerfil({
+            temNome: linha.completude.tem_nome,
+            temCidade: linha.completude.tem_cidade,
+            temNascimento: linha.completude.tem_nascimento,
+            temGenero: linha.completude.tem_genero,
+            fotos: linha.fotos,
+            temBio: linha.completude.tem_bio,
+            interesses: linha.completude.interesses,
+            temProfissao: linha.completude.tem_profissao,
+            temAltura: linha.completude.tem_altura,
+            lifestyle: {
+              bebida: linha.completude.bebida,
+              atividade: linha.completude.atividade,
+              filhos: linha.completude.filhos,
+              fumo: linha.completude.fumo,
+            },
+            relationshipStatus: linha.completude.status_relacionamento,
+            prefereNaoDizer: linha.completude.prefere_nao_dizer ?? [],
+            textos: linha.completude.textos,
+          })
+        : null,
       cadastroCompleto: linha.cadastro_completo,
       visivel: linha.visivel,
       teste: linha.teste,

@@ -1,4 +1,4 @@
-import type { CampoQuePodeRecusar, MyProfile } from "../types";
+import type { CampoQuePodeRecusar, Lifestyle, MyProfile } from "../types";
 
 export interface Completeness {
   pct: number;
@@ -54,41 +54,90 @@ function frasesDoQueFalta(missing: string[]): string {
   return `${plural ? "Faltam" : "Falta"} ${itens.join(" e ")}`;
 }
 
-export function computeCompleteness(profile: MyProfile | null, photosCount: number): Completeness {
-  if (!profile) return { pct: 0, hint: "Faltam suas informações", interestsHint: "" };
+/**
+ * O que a porcentagem precisa saber de um perfil, e só isso. Existe à parte
+ * para o painel admin (coluna "% Perfil" da aba Usuários) chegar ao MESMO
+ * número do anel sem montar um MyProfile inteiro: os pesos ficam só aqui, e
+ * o banco manda apenas os dados (`painel_usuarios`, migration 0037).
+ */
+export interface EntradaDaCompletude {
+  temNome: boolean;
+  temCidade: boolean;
+  temNascimento: boolean;
+  temGenero: boolean;
+  /** Todas as fotos, aprovadas ou não: é o que o anel do Perfil conta. */
+  fotos: number;
+  temBio: boolean;
+  interesses: number;
+  temProfissao: boolean;
+  temAltura: boolean;
+  lifestyle: Record<keyof Lifestyle, string | null>;
+  relationshipStatus: string | null;
+  prefereNaoDizer: CampoQuePodeRecusar[];
+  /** Quantos dos dois textos de "Conte mais sobre você" estão preenchidos. */
+  textos: number;
+}
 
+function respostas(entrada: EntradaDaCompletude) {
   // "Prefiro não dizer" é resposta (migration 0031): conta como as outras.
-  const recusou = (campo: CampoQuePodeRecusar) => profile.prefereNaoDizer.includes(campo);
-  const respondeuEstadoCivil = Boolean(profile.relationshipStatus) || recusou("relacionamento");
-  const respostasDeEstilo = (["bebida", "atividade", "filhos", "fumo"] as const).filter(
-    (campo) => profile.lifestyle[campo] || recusou(campo),
-  ).length;
-  const interesses = Math.min(profile.interests.length, MIN_INTERESSES);
-  const textos = [profile.about.tempoLivre, profile.about.oQueValoriza].filter((texto) =>
-    texto.trim(),
-  ).length;
+  const recusou = (campo: CampoQuePodeRecusar) => entrada.prefereNaoDizer.includes(campo);
+  return {
+    respondeuEstadoCivil: Boolean(entrada.relationshipStatus) || recusou("relacionamento"),
+    respostasDeEstilo: (["bebida", "atividade", "filhos", "fumo"] as const).filter(
+      (campo) => entrada.lifestyle[campo] || recusou(campo),
+    ).length,
+  };
+}
 
+export function porcentagemDoPerfil(entrada: EntradaDaCompletude): number {
+  const { respondeuEstadoCivil, respostasDeEstilo } = respostas(entrada);
+  const interesses = Math.min(entrada.interesses, MIN_INTERESSES);
   const pontos = [
-    profile.name ? PESO.cadastro : 0,
-    profile.city ? PESO.cadastro : 0,
-    profile.birthdate ? PESO.cadastro : 0,
-    profile.gender ? PESO.cadastro : 0,
-    photosCount >= 1 ? PESO.cadastro : 0,
-    photosCount >= 2 ? PESO.segundaFoto : 0,
-    photosCount >= 3 ? PESO.terceiraFoto : 0,
-    photosCount >= 4 ? PESO.quartaFoto : 0,
-    profile.bio.trim() ? PESO.bio : 0,
+    entrada.temNome ? PESO.cadastro : 0,
+    entrada.temCidade ? PESO.cadastro : 0,
+    entrada.temNascimento ? PESO.cadastro : 0,
+    entrada.temGenero ? PESO.cadastro : 0,
+    entrada.fotos >= 1 ? PESO.cadastro : 0,
+    entrada.fotos >= 2 ? PESO.segundaFoto : 0,
+    entrada.fotos >= 3 ? PESO.terceiraFoto : 0,
+    entrada.fotos >= 4 ? PESO.quartaFoto : 0,
+    entrada.temBio ? PESO.bio : 0,
     interesses === MIN_INTERESSES ? PESO.interesses : interesses * 3,
-    profile.profession.trim() ? PESO.profissao : 0,
-    profile.height ? PESO.altura : 0,
+    entrada.temProfissao ? PESO.profissao : 0,
+    entrada.temAltura ? PESO.altura : 0,
     respostasDeEstilo * PESO.estiloDeVida,
     respondeuEstadoCivil ? PESO.estadoCivil : 0,
-    textos * PESO.texto,
+    entrada.textos * PESO.texto,
   ];
-  const pct = Math.min(
+  return Math.min(
     100,
     pontos.reduce((soma, valor) => soma + valor, 0),
   );
+}
+
+export function computeCompleteness(profile: MyProfile | null, photosCount: number): Completeness {
+  if (!profile) return { pct: 0, hint: "Faltam suas informações", interestsHint: "" };
+
+  const textos = [profile.about.tempoLivre, profile.about.oQueValoriza].filter((texto) =>
+    texto.trim(),
+  ).length;
+  const entrada: EntradaDaCompletude = {
+    temNome: Boolean(profile.name),
+    temCidade: Boolean(profile.city),
+    temNascimento: Boolean(profile.birthdate),
+    temGenero: Boolean(profile.gender),
+    fotos: photosCount,
+    temBio: Boolean(profile.bio.trim()),
+    interesses: profile.interests.length,
+    temProfissao: Boolean(profile.profession.trim()),
+    temAltura: Boolean(profile.height),
+    lifestyle: profile.lifestyle,
+    relationshipStatus: profile.relationshipStatus,
+    prefereNaoDizer: profile.prefereNaoDizer,
+    textos,
+  };
+  const pct = porcentagemDoPerfil(entrada);
+  const { respondeuEstadoCivil, respostasDeEstilo } = respostas(entrada);
 
   // Separado por tela: o topo abre Editar perfil, e ele dizia "Faltam 3
   // interesses" depois que interesses saíram de lá — quem tocava não achava
