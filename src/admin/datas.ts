@@ -48,3 +48,21 @@ export function duracao(minutos: number): string {
   const resto = horas % 24;
   return resto === 0 ? `${dias} dias` : `${dias} dias e ${resto} h`;
 }
+
+/**
+ * "hoje", "ontem", "há 5 dias", "12/08/2026" — o último dia de uso. O registro
+ * é por dia (atividade_diaria), então não há hora para mostrar. Passado um
+ * mês, a data diz mais que "há 43 dias".
+ */
+export function diaDeUso(dia: string | null): string {
+  if (!dia) return "nunca";
+  const [ano, mes, d] = dia.split("-").map(Number);
+  const alvo = new Date(ano, mes - 1, d);
+  const hoje = new Date();
+  hoje.setHours(0, 0, 0, 0);
+  const dias = Math.round((hoje.getTime() - alvo.getTime()) / 86_400_000);
+  if (dias <= 0) return "hoje";
+  if (dias === 1) return "ontem";
+  if (dias <= 30) return `há ${dias} dias`;
+  return `${String(d).padStart(2, "0")}/${String(mes).padStart(2, "0")}/${ano}`;
+}

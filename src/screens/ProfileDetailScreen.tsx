@@ -46,9 +46,11 @@ interface ProfileDetailScreenProps {
    * Barra de baixo. "swipe" só vale para quem veio da fila do Descobrir: com
    * match já feito não faz sentido curtir ou dispensar de novo. "own" é a
    * pessoa vendo o próprio perfil como os outros o veem: sem curtir, sem
-   * denunciar, e com o caminho para corrigir o que não gostou.
+   * denunciar, e com o caminho para corrigir o que não gostou. "admin" é o
+   * painel abrindo o perfil numa aba própria: só mostra, sem voltar (a lista
+   * continua na outra aba), sem curtir e sem denunciar.
    */
-  bottomAction?: "swipe" | "backToChat" | "openChat" | "own";
+  bottomAction?: "swipe" | "backToChat" | "openChat" | "own" | "admin";
 }
 
 export function ProfileDetailScreen({
@@ -208,19 +210,23 @@ export function ProfileDetailScreen({
     );
   }
 
+  const soMostra = bottomAction === "own" || bottomAction === "admin";
+
   return (
     <div className={styles.screen}>
-      <button type="button" className={styles.backButton} onClick={onBack} aria-label="Voltar">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path
-            d="M15 4l-8 8 8 8"
-            stroke="#16211A"
-            strokeWidth={3}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </button>
+      {bottomAction !== "admin" && (
+        <button type="button" className={styles.backButton} onClick={onBack} aria-label="Voltar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path
+              d="M15 4l-8 8 8 8"
+              stroke="#16211A"
+              strokeWidth={3}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
+      )}
 
       <div className={styles.scroll}>
         {bottomAction === "own" && (
@@ -292,7 +298,7 @@ export function ProfileDetailScreen({
             </div>
           )}
 
-          {bottomAction !== "own" && (
+          {!soMostra && (
             <button type="button" className={styles.reportLink} onClick={() => setReportOpen(true)}>
               Denunciar este perfil
             </button>
@@ -311,40 +317,42 @@ export function ProfileDetailScreen({
         />
       )}
 
-      <div className={bottomAction === "swipe" ? styles.actions : styles.backToChatBar}>
-        {bottomAction === "backToChat" ? (
-          <button type="button" className={styles.backToChatButton} onClick={onBack}>
-            Voltar à conversa
-          </button>
-        ) : bottomAction === "own" ? (
-          <button type="button" className={styles.backToChatButton} onClick={onEdit}>
-            Editar perfil
-          </button>
-        ) : bottomAction === "openChat" ? (
-          <button type="button" className={styles.backToChatButton} onClick={onOpenChat}>
-            Abrir conversa
-          </button>
-        ) : (
-          <>
-            <button
-              type="button"
-              className={`${styles.actionButton} ${styles.actionClose}`}
-              onClick={onDislike}
-              aria-label="Dispensar perfil"
-            >
-              <CloseIcon size={24} />
+      {bottomAction !== "admin" && (
+        <div className={bottomAction === "swipe" ? styles.actions : styles.backToChatBar}>
+          {bottomAction === "backToChat" ? (
+            <button type="button" className={styles.backToChatButton} onClick={onBack}>
+              Voltar à conversa
             </button>
-            <button
-              type="button"
-              className={`${styles.actionButton} ${styles.actionLike}`}
-              onClick={onLike}
-              aria-label="Curtir perfil"
-            >
-              <HeartIcon size={48} />
+          ) : bottomAction === "own" ? (
+            <button type="button" className={styles.backToChatButton} onClick={onEdit}>
+              Editar perfil
             </button>
-          </>
-        )}
-      </div>
+          ) : bottomAction === "openChat" ? (
+            <button type="button" className={styles.backToChatButton} onClick={onOpenChat}>
+              Abrir conversa
+            </button>
+          ) : (
+            <>
+              <button
+                type="button"
+                className={`${styles.actionButton} ${styles.actionClose}`}
+                onClick={onDislike}
+                aria-label="Dispensar perfil"
+              >
+                <CloseIcon size={24} />
+              </button>
+              <button
+                type="button"
+                className={`${styles.actionButton} ${styles.actionLike}`}
+                onClick={onLike}
+                aria-label="Curtir perfil"
+              >
+                <HeartIcon size={48} />
+              </button>
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 }

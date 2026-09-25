@@ -7,11 +7,13 @@ import {
 import { aoMudarSessao, sair, usuarioAtual } from "../lib/api/auth";
 import { mensagemDeErro } from "../lib/errors";
 import { erroDeConfiguracao } from "../lib/supabaseClient";
+import { AdminProfilePage } from "./AdminProfilePage";
 import { AdminShell, type AbaDoPainel, type AvisosDoPainel } from "./AdminShell";
 import { LoginScreen } from "./LoginScreen";
 import { ModerationScreen } from "./ModerationScreen";
 import { NumbersScreen } from "./NumbersScreen";
 import { PhotosScreen } from "./PhotosScreen";
+import { UsersScreen } from "./UsersScreen";
 import { VerificationScreen } from "./VerificationScreen";
 import styles from "./AdminApp.module.css";
 
@@ -27,6 +29,14 @@ const SEM_AVISOS: AvisosDoPainel = {
  * a mesma espera de quando abriu, e o destaque das 24 h nunca acenderia.
  */
 const RELER_DENUNCIAS_MS = 5 * 60 * 1000;
+
+/**
+ * `?perfil=<id>` abre o perfil de uma pessoa em vez das abas: é o endereço do
+ * "Ver perfil" da lista de Usuários, que abre em outra aba do navegador. Na
+ * mesma página, e não numa página nova do build, para passar pelo mesmo login
+ * e pela mesma checagem de admin.
+ */
+const PERFIL_ABERTO = new URLSearchParams(window.location.search).get("perfil");
 
 type Etapa =
   | { tipo: "carregando" }
@@ -104,7 +114,7 @@ export function AdminApp() {
   // de uma contagem só, lado a lado; a fila de verdade fica para quando a aba
   // for aberta.
   useEffect(() => {
-    if (etapa.tipo !== "painel") return;
+    if (etapa.tipo !== "painel" || PERFIL_ABERTO) return;
     lerEsperaDasDenuncias();
     void contarVerificacoesPendentes()
       .then(anotarVerificacoes)
@@ -153,6 +163,9 @@ export function AdminApp() {
       />
     );
   }
+  if (PERFIL_ABERTO) {
+    return <AdminProfilePage userId={PERFIL_ABERTO} />;
+  }
   return (
     <AdminShell
       aba={aba}
@@ -168,6 +181,7 @@ export function AdminApp() {
       {aba === "moderacao" && <ModerationScreen onContagem={anotarDenuncias} />}
       {aba === "verificacao" && <VerificationScreen onContagem={anotarVerificacoes} />}
       {aba === "fotos" && <PhotosScreen onContagem={ignorarContagem} />}
+      {aba === "usuarios" && <UsersScreen />}
     </AdminShell>
   );
 }

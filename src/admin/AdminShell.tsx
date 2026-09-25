@@ -3,7 +3,7 @@ import { PRAZO_DA_DENUNCIA_HORAS } from "../lib/api/admin";
 import { duracao } from "./datas";
 import styles from "./AdminShell.module.css";
 
-export type AbaDoPainel = "numeros" | "moderacao" | "verificacao" | "fotos";
+export type AbaDoPainel = "numeros" | "moderacao" | "verificacao" | "fotos" | "usuarios";
 
 /**
  * `contador` diz de qual aviso cada aba vive. Fotos não tem: foto entra no ar
@@ -15,6 +15,7 @@ const ABAS: { valor: AbaDoPainel; rotulo: string; contador?: keyof AvisosDoPaine
   { valor: "moderacao", rotulo: "Moderação", contador: "denunciasAbertas" },
   { valor: "verificacao", rotulo: "Verificação", contador: "verificacoesPendentes" },
   { valor: "fotos", rotulo: "Fotos" },
+  { valor: "usuarios", rotulo: "Usuários" },
 ];
 
 export interface AvisosDoPainel {

@@ -1,0 +1,420 @@
+.conteudo {
+  flex: 1;
+  width: 100%;
+  /* Mais larga que as outras telas: são onze colunas. */
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 32px 40px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.tituloLinha {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.h1 {
+  margin: 0;
+  font: 900 30px var(--font-display);
+}
+
+.intervalo {
+  font: 400 14px var(--font-ui);
+  color: var(--color-ink-60);
+}
+
+/* ───────── busca, ordem e filtros ───────── */
+.busca {
+  display: flex;
+  gap: 10px;
+}
+
+.campo,
+.ordem {
+  height: 44px;
+  border: 1px solid var(--color-line-2);
+  border-radius: var(--radius-field);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font: 500 15px var(--font-ui);
+  padding: 0 14px;
+}
+
+.campo {
+  flex: 1;
+  min-width: 0;
+}
+
+.ordem {
+  flex: none;
+  cursor: pointer;
+}
+
+.filtros {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.filtro {
+  height: 36px;
+  padding: 0 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-line-2);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font: 600 13px var(--font-ui);
+  cursor: pointer;
+}
+
+.filtroNumero {
+  font-weight: 500;
+  color: var(--color-ink-60);
+}
+
+.filtroAtivo {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  color: #fff;
+}
+
+.filtroAtivo .filtroNumero {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.erro {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #fdecec;
+  color: #8a1c15;
+  border-radius: 16px;
+  padding: 14px 18px;
+  font: 600 15px var(--font-ui);
+}
+
+.erroBotao {
+  margin-left: auto;
+  height: 40px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--color-ink);
+  color: #fff;
+  font: 700 14px var(--font-ui);
+  cursor: pointer;
+}
+
+.vazio {
+  background: var(--color-surface);
+  border-radius: 18px;
+  padding: 48px 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.vazioTitulo {
+  margin: 0;
+  font: 800 18px var(--font-ui);
+}
+
+.vazioApoio {
+  margin: 0;
+  font: 400 14px var(--font-ui);
+  color: var(--color-ink-60);
+}
+
+/* ───────── tabela ───────── */
+.tabela {
+  background: var(--color-surface);
+  border-radius: 18px;
+  padding: 4px 0;
+  transition: opacity 0.2s var(--ease-standard);
+}
+
+.tabelaCarregando {
+  opacity: 0.45;
+}
+
+.linha {
+  display: grid;
+  grid-template-columns:
+    44px minmax(0, 1.7fr) minmax(0, 1fr) 72px 84px 52px 84px 64px 72px
+    minmax(0, 1.2fr) 88px;
+  gap: 14px;
+  align-items: center;
+  padding: 10px 20px;
+  border-top: 1px solid var(--color-line-3);
+}
+
+.linha:first-child {
+  border-top: 0;
+}
+
+.linha:not(.cabecalho):hover {
+  background: var(--color-bg);
+}
+
+.cabecalho {
+  font: 700 11px var(--font-ui);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--color-ink-40);
+  padding-top: 12px;
+  padding-bottom: 8px;
+}
+
+.somenteLeitor {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.celulaFoto {
+  display: flex;
+}
+
+.avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center 25%;
+  background: var(--color-line-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatarReprovado {
+  box-shadow:
+    0 0 0 2px var(--color-surface),
+    0 0 0 4px var(--color-danger);
+}
+
+.avatarVazio {
+  border: 1.5px dashed var(--color-line-2);
+  background: var(--color-surface);
+  color: var(--color-ink-40);
+  font: 700 14px var(--font-ui);
+}
+
+.pessoa {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.nome {
+  font: 700 15px var(--font-ui);
+  color: var(--color-ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.email {
+  font: 500 13px var(--font-ui);
+  color: var(--color-ink-60);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.texto {
+  font: 500 14px var(--font-ui);
+  color: var(--color-ink-60);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Azul separa o que a pessoa recebeu do que ela deu, na mesma célula. */
+.recebeu {
+  color: var(--color-blue);
+}
+
+.reprovadas {
+  color: var(--color-danger);
+}
+
+.selos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.selo {
+  font: 700 11px var(--font-ui);
+  background: var(--color-line-3);
+  color: var(--color-ink-60);
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+}
+
+.alerta {
+  background: #fff2e0;
+  color: #8a5300;
+}
+
+.grave {
+  background: #fdecec;
+  color: #8a1c15;
+}
+
+.lilas {
+  background: var(--color-accent-soft);
+  color: var(--color-accent-2);
+}
+
+.semSelo {
+  color: var(--color-ink-40);
+}
+
+.celulaLink {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.link {
+  font: 700 13px var(--font-ui);
+  color: var(--color-accent-2);
+  text-decoration: none;
+  white-space: nowrap;
+  padding: 8px 0;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+.paginas {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  font: 500 14px var(--font-ui);
+  color: var(--color-ink-60);
+}
+
+.paginas > span {
+  margin-right: auto;
+}
+
+.pagina {
+  height: 38px;
+  padding: 0 16px;
+  border: 1px solid var(--color-line-2);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font: 700 13px var(--font-ui);
+  cursor: pointer;
+}
+
+.pagina:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+
+/* ───────── celular: um cartão por pessoa ───────── */
+@media (max-width: 720px) {
+  .conteudo {
+    padding: 20px 16px 32px;
+    gap: 14px;
+  }
+
+  .h1 {
+    font-size: 26px;
+  }
+
+  .busca {
+    flex-direction: column;
+  }
+
+  .campo {
+    flex: none;
+  }
+
+  .cabecalho {
+    display: none;
+  }
+
+  .linha {
+    grid-template-columns: 44px minmax(0, 1fr) auto;
+    grid-template-areas:
+      "foto pessoa link"
+      "foto . ."
+      "foto selos selos";
+    column-gap: 12px;
+    row-gap: 6px;
+    align-items: start;
+    padding: 14px 16px;
+  }
+
+  .linha:nth-child(2) {
+    border-top: 0;
+  }
+
+  .celulaFoto {
+    grid-area: foto;
+  }
+
+  .pessoa {
+    grid-area: pessoa;
+  }
+
+  .celulaLink {
+    grid-area: link;
+  }
+
+  .selos {
+    grid-area: selos;
+  }
+
+  /* No cartão cabem a cidade e o último acesso, que é o que ajuda a achar a
+     pessoa; entrada e fotos ficam no perfil. */
+  .texto {
+    grid-row: 2;
+    font-size: 12px;
+  }
+
+  .texto::before {
+    content: attr(data-rotulo) " ";
+    color: var(--color-ink-40);
+  }
+
+  .texto:nth-child(3) {
+    grid-column: 2;
+  }
+
+  .texto:nth-child(3)::before {
+    content: none;
+  }
+
+  .texto:nth-child(5) {
+    grid-column: 3;
+    text-align: right;
+  }
+
+  .texto:nth-child(4),
+  .texto:nth-child(6),
+  .texto:nth-child(7),
+  .texto:nth-child(8),
+  .texto:nth-child(9) {
+    display: none;
+  }
+}

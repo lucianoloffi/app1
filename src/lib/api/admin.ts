@@ -1,7 +1,8 @@
 import { supabase } from "../supabaseClient";
 import { lancaSeErro } from "../errors";
 import { apagarSelfies, assinarFotos, assinarSelfies } from "./photos";
-import type { VerificationStatus } from "../../types";
+import type { Profile, VerificationStatus } from "../../types";
+import { paraPerfis, type LinhaPerfilPublico } from "./mapeamento";
 
 /** Os períodos do painel; todos terminam hoje (dia de São Paulo). */
 export type PeriodoDoPainel = "hoje" | "7d" | "30d" | "90d";
@@ -631,4 +632,184 @@ export async function contarVerificacoesPendentes(): Promise<number> {
   const { data, error } = await supabase.rpc("painel_verificacoes_pendentes");
   lancaSeErro(error);
   return Number(data ?? 0);
+}
+
+// ───────────────────────── usuários ─────────────────────────
+
+/** Quantas pessoas a aba Usuários mostra por vez. */
+export const USUARIOS_POR_PAGINA = 50;
+
+export type FiltroDeUsuarios =
+  | "todos"
+  | "com_denuncia"
+  | "suspensos"
+  | "banidos"
+  | "sem_foto"
+  | "incompletos"
+  | "teste";
+
+export type OrdemDeUsuarios = "recentes" | "acesso" | "denuncias";
+
+export interface UsuarioDoPainel {
+  id: string;
+  nome: string;
+  email: string | null;
+  idade: number | null;
+  cidade: string | null;
+  entrouEm: string;
+  /** Último dia com o app aberto (atividade_diaria); null = nunca abriu. */
+  ultimoAcesso: string | null;
+  /** URL assinada da foto principal; vazia sem foto ou se a assinatura falhou. */
+  capa: string;
+  capaReprovada: boolean;
+  fotos: number;
+  fotosReprovadas: number;
+  curtidasDadas: number;
+  curtidasRecebidas: number;
+  /** Todos os matches que já teve, inclusive os desfeitos (historico_matches). */
+  matches: number;
+  /**
+   * Desses matches, em quantos houve mensagem, de qualquer um dos dois. Vem do
+   * histórico, então conta também a conversa de match desfeito, cujas
+   * mensagens já foram apagadas.
+   */
+  conversas: number;
+  cadastroCompleto: boolean;
+  visivel: boolean;
+  teste: boolean;
+  statusModeracao: StatusDeModeracao;
+  suspensaoTerminaEm: string | null;
+  verificacaoStatus: VerificationStatus;
+  denunciasAbertas: number;
+}
+
+export interface ListaDeUsuarios {
+  /** Quantas pessoas passam no filtro e na busca, somando todas as páginas. */
+  total: number;
+  /** Contagem de cada filtro, com a busca aplicada, para os botões. */
+  contagens: Record<FiltroDeUsuarios, number>;
+  itens: UsuarioDoPainel[];
+}
+
+interface LinhaDoUsuario {
+  id: string;
+  nome: string | null;
+  email: string | null;
+  idade: number | null;
+  cidade: string | null;
+  entrou_em: string;
+  ultimo_acesso: string | null;
+  capa_path: string | null;
+  capa_status: StatusDaFoto | null;
+  fotos: number;
+  fotos_reprovadas: number;
+  curtidas_dadas: number;
+  curtidas_recebidas: number;
+  matches: number;
+  conversas: number;
+  cadastro_completo: boolean;
+  visivel: boolean;
+  teste: boolean;
+  status_moderacao: StatusDeModeracao;
+  suspensao_termina_em: string | null;
+  verificacao_status: VerificationStatus;
+  denuncias_abertas: number;
+}
+
+export async function carregarUsuarios(consulta: {
+  busca: string;
+  filtro: FiltroDeUsuarios;
+  ordem: OrdemDeUsuarios;
+  pagina: number;
+}): Promise<ListaDeUsuarios> {
+  const { data, error } = await supabase.rpc("painel_usuarios", {
+    p_busca: consulta.busca.trim(),
+    p_filtro: consulta.filtro,
+    p_ordem: consulta.ordem,
+    p_pagina: consulta.pagina,
+  });
+  lancaSeErro(error);
+
+  const resposta = data as {
+    total: number;
+    contagens: Record<FiltroDeUsuarios, number>;
+    itens: LinhaDoUsuario[] | null;
+  };
+  const linhas = resposta.itens ?? [];
+  // Só a capa: a lista é para achar a pessoa, o resto das fotos está no perfil.
+  const urls = await assinarFotos(linhas.map((linha) => linha.capa_path ?? ""));
+
+  return {
+    total: resposta.total,
+    contagens: resposta.contagens,
+    itens: linhas.map((linha) => ({
+      id: linha.id,
+      nome: linha.nome ?? "",
+      email: linha.email,
+      idade: linha.idade,
+      cidade: linha.cidade,
+      entrouEm: linha.entrou_em,
+      ultimoAcesso: linha.ultimo_acesso,
+      capa: linha.capa_path ? (urls.get(linha.capa_path) ?? "") : "",
+      capaReprovada: linha.capa_status === "rejeitada",
+      fotos: linha.fotos,
+      fotosReprovadas: linha.fotos_reprovadas,
+      curtidasDadas: linha.curtidas_dadas,
+      curtidasRecebidas: linha.curtidas_recebidas,
+      matches: linha.matches,
+      conversas: linha.conversas,
+      cadastroCompleto: linha.cadastro_completo,
+      visivel: linha.visivel,
+      teste: linha.teste,
+      statusModeracao: linha.status_moderacao,
+      suspensaoTerminaEm: linha.suspensao_termina_em,
+      verificacaoStatus: linha.verificacao_status,
+      denunciasAbertas: linha.denuncias_abertas,
+    })),
+  };
+}
+
+/** O perfil como os outros o veem, mais o que só o painel precisa saber. */
+export interface PerfilNoPainel {
+  perfil: Profile;
+  email: string | null;
+  statusModeracao: StatusDeModeracao;
+  suspensaoTerminaEm: string | null;
+  denunciasAbertas: number;
+  visivel: boolean;
+  /** Fotos que existem mas não aparecem para os outros (reprovadas). */
+  fotosForaDoPerfil: number;
+}
+
+/**
+ * O perfil completo de qualquer pessoa, para a aba que o painel abre. Não dá
+ * para usar a `perfil_do_match`: ela só devolve quem deu match com a conta
+ * logada. `perfil_para_admin` devolve o mesmo formato do `perfil_publico`
+ * (por isso passa pelo mesmo `paraPerfis`) e confere `is_admin()`.
+ * null = a conta não existe mais.
+ */
+export async function carregarPerfilParaAdmin(userId: string): Promise<PerfilNoPainel | null> {
+  const { data, error } = await supabase.rpc("perfil_para_admin", { p_user_id: userId });
+  lancaSeErro(error);
+  const linha = data as
+    | (LinhaPerfilPublico & {
+        email: string | null;
+        status_moderacao: StatusDeModeracao;
+        suspensao_termina_em: string | null;
+        denuncias_abertas: number;
+        visivel: boolean;
+        fotos_fora_do_perfil: number;
+      })
+    | null;
+  if (!linha) return null;
+  const [perfil] = await paraPerfis([linha]);
+  return {
+    perfil,
+    email: linha.email,
+    statusModeracao: linha.status_moderacao,
+    suspensaoTerminaEm: linha.suspensao_termina_em,
+    denunciasAbertas: linha.denuncias_abertas,
+    visivel: linha.visivel,
+    fotosForaDoPerfil: linha.fotos_fora_do_perfil,
+  };
 }
