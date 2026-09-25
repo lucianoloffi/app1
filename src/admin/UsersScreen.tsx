@@ -9,6 +9,7 @@ import {
 } from "../lib/api/admin";
 import { mensagemDeErro } from "../lib/errors";
 import { dataCurta, dataHora, diaDeUso } from "./datas";
+import { MenuDaConta } from "./MenuDaConta";
 import styles from "./UsersScreen.module.css";
 
 /**
@@ -71,6 +72,12 @@ export function UsersScreen() {
   const [dados, setDados] = useState<{ consulta: Consulta; lista: ListaDeUsuarios } | null>(null);
   const [erro, setErro] = useState<string | null>(null);
   const [tentativa, setTentativa] = useState(0);
+  /**
+   * O aviso de uma decisão tomada pelos três pontinhos. Guarda a consulta em
+   * que foi dado e só aparece nela: trocar de filtro ou de página o apaga, sem
+   * precisar limpar em cada botão.
+   */
+  const [aviso, setAviso] = useState<{ consulta: Consulta; texto: string } | null>(null);
 
   useEffect(() => {
     const relogio = window.setTimeout(() => {
@@ -187,6 +194,12 @@ export function UsersScreen() {
         </div>
       )}
 
+      {aviso && mesmaConsulta(aviso.consulta, consulta) && (
+        <p className={styles.aviso} role="status">
+          {aviso.texto}
+        </p>
+      )}
+
       {lista && lista.itens.length === 0 && (
         <div className={styles.vazio}>
           <p className={styles.vazioTitulo}>
@@ -223,9 +236,20 @@ export function UsersScreen() {
               <span role="columnheader">
                 <span className={styles.somenteLeitor}>Perfil</span>
               </span>
+              <span role="columnheader">
+                <span className={styles.somenteLeitor}>Ações</span>
+              </span>
             </div>
             {lista.itens.map((usuario) => (
-              <LinhaDoUsuario key={usuario.id} usuario={usuario} />
+              <LinhaDoUsuario
+                key={usuario.id}
+                usuario={usuario}
+                onFeito={(texto) => {
+                  setAviso({ consulta, texto });
+                  // Mesma consulta: a lista relê sem sumir, e o selo troca.
+                  setTentativa((t) => t + 1);
+                }}
+              />
             ))}
           </div>
 
@@ -256,7 +280,13 @@ export function UsersScreen() {
   );
 }
 
-function LinhaDoUsuario({ usuario }: { usuario: UsuarioDoPainel }) {
+function LinhaDoUsuario({
+  usuario,
+  onFeito,
+}: {
+  usuario: UsuarioDoPainel;
+  onFeito: (aviso: string) => void;
+}) {
   const nome = usuario.nome || "Sem nome";
   return (
     <div className={styles.linha} role="row">
@@ -338,6 +368,9 @@ function LinhaDoUsuario({ usuario }: { usuario: UsuarioDoPainel }) {
         >
           Ver perfil <span aria-hidden="true">↗</span>
         </a>
+      </span>
+      <span role="cell" className={styles.celulaMenu}>
+        <MenuDaConta usuario={usuario} onFeito={onFeito} />
       </span>
     </div>
   );

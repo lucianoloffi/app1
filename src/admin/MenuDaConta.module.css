@@ -1,0 +1,118 @@
+.area {
+  position: relative;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.botao {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: none;
+  color: var(--color-ink-60);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.botao:hover,
+.botaoAberto {
+  background: var(--color-line-3);
+  color: var(--color-ink);
+}
+
+/* Abaixo dos pontinhos, alinhado pela direita: a coluna é a última da linha,
+   e alinhado pela esquerda sairia da tabela. */
+.painel {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 10;
+  min-width: 190px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-line-3);
+  border-radius: 14px;
+  box-shadow: 0 12px 32px -12px rgba(22, 33, 26, 0.35);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+}
+
+.item {
+  height: 40px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  color: var(--color-ink);
+  font: 600 14px var(--font-ui);
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.item:hover,
+.item:focus-visible {
+  background: var(--color-bg);
+  outline: none;
+}
+
+.itemGrave {
+  color: var(--color-danger);
+}
+
+.confirmacao {
+  width: 280px;
+  padding: 14px;
+  gap: 8px;
+}
+
+.pergunta {
+  margin: 0;
+  font: 700 14px/1.4 var(--font-ui);
+  color: var(--color-ink);
+}
+
+.nota {
+  margin: 0;
+  font: 500 13px/1.4 var(--font-ui);
+  color: var(--color-ink-60);
+}
+
+.erro {
+  margin: 0;
+  font: 600 13px/1.4 var(--font-ui);
+  color: var(--color-danger);
+}
+
+.botoes {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.acao {
+  height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--color-line-2);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font: 700 13px var(--font-ui);
+  cursor: pointer;
+}
+
+.acao:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+/* O mesmo vermelho do Confirmar da aba Moderação. */
+.acaoGrave {
+  border-color: #f0b3ad;
+  background: #fdecec;
+  color: #8a1c15;
+}

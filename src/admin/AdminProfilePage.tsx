@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import {
-  DIAS_DE_SUSPENSAO,
   carregarPerfilParaAdmin,
   moderarConta,
   type AcaoNaConta,
@@ -8,7 +7,14 @@ import {
 } from "../lib/api/admin";
 import { mensagemDeErro } from "../lib/errors";
 import { ProfileDetailScreen } from "../screens/ProfileDetailScreen";
-import { AccountEmail } from "./AccountEmail";
+import {
+  ROTULO_DA_ACAO,
+  acoesPossiveis,
+  avisoDaAcao,
+  nomeDeVerdade,
+  notaDasDenuncias,
+  perguntaDaAcao,
+} from "./acoesNaConta";
 import { dataHora } from "./datas";
 import styles from "./AdminProfilePage.module.css";
 
@@ -79,21 +85,14 @@ export function AdminProfilePage({ userId }: { userId: string }) {
   }
 
   const { dados } = estado;
-  const nome = dados.perfil.name || "a pessoa";
+  const nome = nomeDeVerdade(dados.perfil.name);
 
   async function aplicar(acao: AcaoNaConta) {
     setAplicando(true);
     setErroDaAcao(null);
     try {
       const feito = await moderarConta(userId, acao);
-      // "Conta de", e não "Fulano suspenso": o nome não diz o gênero.
-      setAviso(
-        acao === "suspender"
-          ? `Conta de ${feito.nome} suspensa até ${dataHora(feito.terminaEm)}.`
-          : acao === "banir"
-            ? `Conta de ${feito.nome} banida.`
-            : `Acesso de ${feito.nome} devolvido.`,
-      );
+      setAviso(avisoDaAcao(acao, feito));
       setConfirmando(null);
       // Relê sem voltar ao "Carregando…": a faixa troca de selo e de botões,
       // e o perfil continua na tela.
@@ -111,21 +110,7 @@ export function AdminProfilePage({ userId }: { userId: string }) {
     setConfirmando(acao);
   }
 
-  const sobSancao = dados.statusModeracao !== "ativo";
-  const pergunta =
-    confirmando === "suspender"
-      ? `Suspender ${nome} por ${DIAS_DE_SUSPENSAO} dias?`
-      : confirmando === "banir"
-        ? `Banir ${nome}? O acesso é cortado até alguém reativar.`
-        : `Devolver o acesso de ${nome}?`;
-  // A decisão pela conta não fecha denúncia nenhuma (0036): quem decide
-  // aqui pode não ter lido nenhuma, e uma delas pode pedir mais.
-  const notaDasDenuncias =
-    confirmando && confirmando !== "reativar" && dados.denunciasAbertas > 0
-      ? dados.denunciasAbertas === 1
-        ? "A denúncia aberta continua na fila de Moderação."
-        : `As ${dados.denunciasAbertas} denúncias abertas continuam na fila de Moderação.`
-      : null;
+  const nota = confirmando ? notaDasDenuncias(confirmando, dados.denunciasAbertas) : null;
   const avisos = [
     dados.statusModeracao === "banido" ? "banido" : null,
     dados.statusModeracao === "suspenso"
@@ -153,7 +138,9 @@ export function AdminProfilePage({ userId }: { userId: string }) {
             </span>
           ))}
         </div>
-        <AccountEmail email={dados.email} />
+        {/* Sem botão de copiar, para a faixa ficar limpa: o e-mail se
+            seleciona inteiro com um clique (user-select: all). */}
+        {dados.email && <p className={styles.email}>{dados.email}</p>}
         {/* Sem esta linha, a foto reprovada simplesmente não estaria no
             perfil, e quem abre para conferir uma denúncia de foto acharia que
             a pessoa nunca a enviou. */}
@@ -168,8 +155,8 @@ export function AdminProfilePage({ userId }: { userId: string }) {
           {confirmando ? (
             <>
               <span className={styles.pergunta}>
-                {pergunta}
-                {notaDasDenuncias && <span className={styles.notaAcao}> {notaDasDenuncias}</span>}
+                {perguntaDaAcao(confirmando, nome)}
+                {nota && <span className={styles.notaAcao}> {nota}</span>}
               </span>
               <button
                 type="button"
@@ -189,27 +176,16 @@ export function AdminProfilePage({ userId }: { userId: string }) {
               </button>
             </>
           ) : (
-            <>
-              {dados.statusModeracao === "ativo" && (
-                <button type="button" className={styles.botao} onClick={() => pedir("suspender")}>
-                  Suspender {DIAS_DE_SUSPENSAO} dias
-                </button>
-              )}
-              {dados.statusModeracao !== "banido" && (
-                <button
-                  type="button"
-                  className={`${styles.botao} ${styles.botaoGrave}`}
-                  onClick={() => pedir("banir")}
-                >
-                  Banir
-                </button>
-              )}
-              {sobSancao && (
-                <button type="button" className={styles.botao} onClick={() => pedir("reativar")}>
-                  Reativar conta
-                </button>
-              )}
-            </>
+            acoesPossiveis(dados.statusModeracao).map((acao) => (
+              <button
+                key={acao}
+                type="button"
+                className={acao === "banir" ? `${styles.botao} ${styles.botaoGrave}` : styles.botao}
+                onClick={() => pedir(acao)}
+              >
+                {ROTULO_DA_ACAO[acao]}
+              </button>
+            ))
           )}
         </div>
         {aviso && (

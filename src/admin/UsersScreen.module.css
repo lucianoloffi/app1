@@ -1,7 +1,7 @@
 .conteudo {
   flex: 1;
   width: 100%;
-  /* Mais larga que as outras telas: são onze colunas. */
+  /* Mais larga que as outras telas: são doze colunas. */
   max-width: 1280px;
   margin: 0 auto;
   padding: 32px 40px 48px;
@@ -148,7 +148,7 @@
   display: grid;
   grid-template-columns:
     44px minmax(0, 1.7fr) minmax(0, 1fr) 72px 84px 52px 84px 64px 72px
-    minmax(0, 1.2fr) 88px;
+    minmax(0, 1.2fr) 80px 32px;
   gap: 14px;
   align-items: center;
   padding: 10px 20px;
@@ -289,6 +289,11 @@
   justify-content: flex-end;
 }
 
+.celulaMenu {
+  display: flex;
+  justify-content: flex-end;
+}
+
 .link {
   font: 700 13px var(--font-ui);
   color: var(--color-accent-2);
@@ -299,6 +304,15 @@
 
 .link:hover {
   text-decoration: underline;
+}
+
+.aviso {
+  margin: 0;
+  background: var(--color-accent-soft);
+  color: var(--color-accent-2);
+  border-radius: 16px;
+  padding: 14px 18px;
+  font: 600 15px var(--font-ui);
 }
 
 .paginas {
@@ -354,11 +368,11 @@
   }
 
   .linha {
-    grid-template-columns: 44px minmax(0, 1fr) auto;
+    grid-template-columns: 44px minmax(0, 1fr) auto auto;
     grid-template-areas:
-      "foto pessoa link"
-      "foto . ."
-      "foto selos selos";
+      "foto pessoa link menu"
+      "foto . . ."
+      "foto selos selos selos";
     column-gap: 12px;
     row-gap: 6px;
     align-items: start;
@@ -379,6 +393,11 @@
 
   .celulaLink {
     grid-area: link;
+  }
+
+  .celulaMenu {
+    grid-area: menu;
+    margin-top: -4px;
   }
 
   .selos {
@@ -406,7 +425,7 @@
   }
 
   .texto:nth-child(5) {
-    grid-column: 3;
+    grid-column: 3 / 5;
     text-align: right;
   }
 

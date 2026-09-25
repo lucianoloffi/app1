@@ -47,6 +47,14 @@
   border-radius: var(--radius-pill);
 }
 
+.email {
+  margin: 0;
+  font: 600 14px var(--font-ui);
+  color: var(--color-ink);
+  user-select: all;
+  overflow-wrap: anywhere;
+}
+
 .nota {
   margin: 0;
   max-width: 560px;
