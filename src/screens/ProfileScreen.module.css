@@ -208,9 +208,18 @@
   color: var(--color-ink-40);
 }
 
+/* O mesmo selo do perfil de outra pessoa, apagado pela metade: com o selo
+   dado, a linha já não pede nada, e o roxo forte chamava para uma ação que
+   não existe mais. */
 .verifyHintDone {
-  font: 600 13px var(--font-ui);
+  font: 700 11px var(--font-ui);
   color: var(--color-accent-2);
+  background: var(--color-accent-soft);
+  border: 1px solid var(--color-accent-line);
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+  opacity: 0.5;
 }
 
 .rowChevron {

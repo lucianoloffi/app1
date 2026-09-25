@@ -276,6 +276,7 @@ export function ProfileScreen({
             Verificar meu perfil
             {aviso && (
               <span className={verified ? styles.verifyHintDone : styles.verifyHint}>
+                {verified && <span aria-hidden="true">✓ </span>}
                 {aviso}
               </span>
             )}
