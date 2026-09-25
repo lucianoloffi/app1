@@ -496,7 +496,13 @@ sob o filtro novo depois de um erro, e o retângulo cinza em volta das ilustraç
   (`ProfileDetailScreen`, 24/09). A descrição (`bio`) é 500 17px na cor do
   texto (`--color-ink`), perto das respostas entre as fotos (500 18px). Antes
   era 400 15px em cinza e parecia nota de rodapé ao lado do nome forte e dos
-  blocos. Descrição vazia não ocupa espaço. A linha abaixo do nome junta
+  blocos. Descrição vazia não ocupa espaço.
+  **Espaços** (decisão do Lu na prévia, 24/09): entrelinha de 1,35 na
+  descrição e de 1,3 nos textos entre as fotos (eram 1,5 e 1,45, e os
+  parágrafos pareciam soltos). O corpo separa tudo por 20px, mas a descrição
+  fica a 12px da cidade e a 28px dos interesses (`margin: -8px 0 8px` no
+  `.bio`): ela completa o nome, e os interesses já são outro assunto.
+  A linha abaixo do nome junta
   profissão, cidade e distância com " · " só entre o que existe
   (`metaParts`). Profissão é opcional e, sem ela, a linha começava com
   "· Joinville/SC".
