@@ -622,6 +622,23 @@ um minuto. Se a migration só adiciona (coluna, função), aplique-a **antes** d
 ela tira permissão ou algo que o cliente antigo usa (como a `0010`), aplique-a logo
 **depois** do deploy e saiba que o fluxo afetado falha nessa janela curta.
 
+**Conferir no banco que a migration entrou, antes do push.** Em 25/09 a `0031` foi
+dada como aplicada sem ter sido rodada no SQL Editor. O push foi, e salvar a tela
+Interesses falhou para todo mundo até ela rodar: a API recusava a coluna nova
+(`Could not find the 'prefere_nao_dizer' column of 'profiles' in the schema
+cache`), e a tela mostrava esse texto em inglês. Uma consulta só de leitura pela
+CLI tira a dúvida:
+
+```bash
+supabase db query --linked "select column_name from information_schema.columns where table_schema='public' and table_name='profiles' and column_name='prefere_nao_dizer'"
+```
+
+Resposta com `"rows": []` quer dizer que a migration não está no banco. Para função
+nova, consultar `pg_proc` pelo `proname`. Desde então o `errors.ts` traduz esse erro
+(`schema cache`, `PGRST204`/`PGRST202`, coluna ou função que não existe) para
+"Não deu para salvar agora. Tente de novo em alguns minutos.", mas a mensagem só
+disfarça: o fluxo continua quebrado até a migration rodar.
+
 O workflow fixa `ubuntu-24.04` (o `ubuntu-latest` passa a ser o Ubuntu 26 em
 19/10/2026) e Node 22 (o 20 saiu de suporte em 30/04/2026). Migrar para o Ubuntu 26
 é uma decisão a testar, não algo a deixar o calendário decidir.
