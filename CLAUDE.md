@@ -460,16 +460,38 @@ sob o filtro novo depois de um erro, e o retângulo cinza em volta das ilustraç
   valores" e do estilo de vida.
 - **Blocos do perfil de outra pessoa** (`ProfileDetailScreen`, 24/09). Estilo
   de vida e valores aparecem em blocos cinza-claros (`--color-bg`), dois por
-  linha, com o nome do campo pequeno em maiúsculas e a resposta embaixo. Antes
-  era uma lista de rótulo à esquerda e valor à direita, que parecia formulário.
-  São dois grupos: "Sobre <primeiro nome>" (relacionamento, altura, bebida,
-  atividade, filhos, fumo e alimentação) e "Valores" (religião e política).
-  Alimentação fica no primeiro de propósito, embora no cadastro seja de "Seus
-  valores": é hábito, não convicção. Com número ímpar, o último bloco ocupa a
-  linha toda. "Status de relacionamento" virou "Relacionamento" para caber em
-  meia largura. Decisões do Lu na prévia: o grupo Valores em lilás foi testado
-  e saiu (ficou o mesmo cinza), e a resposta é 600 15px, porque 700 16px
-  competia com o nome no topo. Grupo sem nenhuma resposta não aparece.
+  linha, cada um com **só um ícone roxo e a resposta**, sem o nome do campo.
+  Antes era uma lista de rótulo à esquerda e valor à direita, que parecia
+  formulário. São dois grupos: "Sobre <primeiro nome>" (relacionamento, altura,
+  bebida, atividade, filhos, fumo e alimentação) e "Valores" (religião e
+  política). Alimentação fica no primeiro de propósito, embora no cadastro seja
+  de "Seus valores": é hábito, não convicção. Grupo sem resposta não aparece.
+  - **Frases que se explicam sozinhas** (`src/data/factPhrases.ts`). Sem o
+    rótulo, "Não" ao lado do cigarro e "Tenho" ao lado dos filhos não diziam
+    nada. Por isso a tela usa `*_PHRASE` ("Não fumo", "Tenho filhos",
+    "Política é importante") e não os `*_LABEL` de `types.ts`, que continuam
+    valendo no cadastro e nas folhas, onde a pergunta está escrita. "Fumo"
+    sozinho parecia o substantivo e virou "Sou fumante". Opção nova numa
+    dessas listas precisa de frase aqui também (o `Record` acusa se faltar).
+  - **Gênero:** `concordaGenero` troca "o(a)" por "a" ou "o" e "Ateu/Ateia"
+    pela forma certa. Mulher aparecia como "Ateu", e todos como "Solteiro(a)".
+    Para `outros`, fica com "(a)".
+  - **Largura:** frase com mais de `FRASE_CURTA_MAXIMA` (20) caracteres ou
+    palavra com mais de `PALAVRA_CURTA_MAXIMA` (12) ocupa a linha toda e vai
+    para o fim do grupo (`arrangeFacts`). Em meia largura, "Atividade física
+    algumas vezes na semana" ia a quatro linhas e "relacionamento" era
+    partido no meio. Por isso atividade física e política sempre ocupam a
+    linha, e a ordem dentro do grupo pode mudar. Bloco curto que sobrar sem
+    par também ocupa a linha. Foram conferidas todas as respostas de todos os
+    campos, nos três gêneros, em 390 px.
+  - **Ícones** (`src/components/icons/FactIcons.tsx`): SVG próprio, traço
+    fino, 22 px, sem biblioteca. Religião é um brilho, de propósito, para não
+    usar símbolo de uma religião. O leitor de tela ouve o nome do campo antes
+    da resposta ("Fumo: Não fumo"), num texto escondido (`.paraLeitor`).
+  - **Decisões do Lu na prévia:** o grupo Valores em lilás foi testado e saiu
+    (ficou o mesmo cinza); a resposta é 600 15px, porque 700 16px competia com
+    o nome no topo; a versão com o nome do campo pequeno em cima e ícone de
+    16 px foi trocada por esta, só ícone e frase.
 
 ## Convenções
 
