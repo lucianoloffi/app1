@@ -263,6 +263,48 @@ sob o filtro novo depois de um erro, e o retângulo cinza em volta das ilustraç
 - **Ordem da aba Números** (25/09): cartões, o gráfico na largura toda e, na linha
   de baixo, o funil (2/3) ao lado das cidades (1/3). Sozinho numa linha, o funil
   ficava com faixas compridas e espaço sobrando. No celular, um embaixo do outro.
+- **Aba Usuários do painel** (`UsersScreen.tsx` + `painel_usuarios`, migration
+  `0035`, 25/09). As filas só mostram quem espera decisão; esta lista mostra
+  todas as contas, para achar o perfil impróprio que ninguém denunciou ou ver
+  quem acabou de entrar. Uma pessoa por linha: avatar com a capa (a principal,
+  mesmo reprovada, com anel vermelho; sem foto, iniciais em círculo
+  tracejado), nome e idade com o e-mail embaixo, cidade, entrada (ano curto),
+  último acesso (por dia, da `atividade_diaria`), fotos, curtiu / recebeu,
+  matches, conversas, situação e "Ver perfil ↗". Busca por nome, e-mail ou
+  cidade (`strpos`, para `_` e `%` digitados não virarem curinga), sete botões
+  de filtro com contagem (a busca vale dentro deles), três ordens e páginas de
+  50. Os perfis `@lovi.test` só aparecem no botão "Perfis de teste", como no
+  funil. Suspensão vencida aparece como conta ativa.
+  **O que cada número conta:** curtidas são os swipes `like` de hoje (desfazer
+  o match apaga os dois swipes, e elas saem da conta). Matches vêm da
+  `historico_matches`, **inclusive os desfeitos** (decisão do Lu): quem deu 20
+  matches e desfez 19 é sinal que a contagem de hoje esconderia. Conversas são
+  os mesmos matches com `primeira_mensagem_em`, e por isso também sobrevivem
+  ao match desfeito, que apaga as mensagens mas não o histórico. Os quatro
+  números são calculados só para as 50 da página.
+  **Decisões do Lu na prévia:** fotos como "2·1", com o número de reprovadas
+  em vermelho (ponto no meio da linha, não ponto final, para não ler "dois
+  vírgula um"); "Curtiu / recebeu" numa coluna só, com o "recebeu" e os
+  números recebidos em azul (`--color-blue`, token criado para isso); os
+  filtros continuam botões de uma escolha. Uma versão com quatro menus
+  combináveis (Novos usuários, Status, Perfil, Comportamento) foi montada e
+  descartada. No celular, a linha vira cartão só com cidade e último acesso.
+  A tela é mais larga que as outras (1280 px), por causa das onze colunas.
+  **"Ver perfil"** abre `?perfil=<id>` na mesma página do painel, em outra aba
+  do navegador: passa pelo mesmo login e pela mesma checagem de admin, sem
+  página nova no build. `AdminApp` mostra então a `AdminProfilePage`, que usa a
+  **mesma** `ProfileDetailScreen` do app com `bottomAction="admin"` (sem voltar,
+  sem curtir, sem denunciar), na largura do celular. O que só o painel precisa
+  (e-mail com copiar, sanção, denúncias abertas, perfil oculto e quantas fotos
+  reprovadas não aparecem) fica numa faixa lilás acima, fora do perfil. Quem
+  monta os dados é `perfil_para_admin`, com as mesmas colunas do
+  `perfil_publico` (passa pelo mesmo `paraPerfis`), mas para qualquer pessoa,
+  inclusive sob sanção, sem distância e só com fotos aprovadas. A
+  `perfil_do_match` não servia: exige match com quem está logado. Campo novo
+  no perfil dos outros entra também na `perfil_para_admin`. Conta excluída
+  depois de a lista abrir mostra "Essa conta não existe mais".
+  A lista de todas as contas é acesso novo da moderação e ainda **não está na
+  política de privacidade** (ver Pendências).
 - **Verificação e fotos no painel** (migration `0021`): as duas filas que faltavam.
   A de **verificação** é por PESSOA, não por pedido: `solicitar_verificacao` insere
   uma linha por selfie enviada e não impede a segunda, então agrupar evita a mesma
@@ -756,7 +798,12 @@ Em ordem de importância:
    sem uso e não há backup automático — um beta com gente real não pode acordar com
    o app fora do ar nem perder dados. Decisão do Lu em 22/09: fica para depois.
 4. **Painel admin completo:** retenção D7, ranking de 10 cidades e contas
-   excluídas. O funil entrou em 25/09 (`0032`/`0033`). Os registros já existem
+   excluídas. O funil entrou em 25/09 (`0032`/`0033`) e a aba Usuários também
+   (`0035`). Nela faltam: a linha na política de privacidade (1.9) dizendo que
+   a moderação vê a lista de todas as contas, antes de abrir para gente de
+   fora; e suspender, banir e excluir a partir da lista. Excluir pede uma Edge
+   Function nova com service role, porque a `delete-account` só apaga quem
+   está logado. Os registros já existem
    desde a `0013`; falta só consultar e desenhar.
 5. **Provas de assédio: o que ainda falta.** A denúncia já guarda cópia da conversa
    e sobrevive à exclusão da conta do denunciado (`0015`). O que continua em aberto:
