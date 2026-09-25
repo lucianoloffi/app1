@@ -1,7 +1,7 @@
 # Política de Privacidade — Lovi
 
 **Última atualização:** 25 de setembro de 2026
-**Versão:** 1.7
+**Versão:** 1.8
 
 Esta política explica quais dados o Lovi coleta, por que coleta e o que você
 pode fazer a respeito. Ela segue a Lei Geral de Proteção de Dados (Lei
@@ -33,6 +33,10 @@ excluiremos os dados imediatamente.
 - A **selfie de verificação**, se você pedir o selo de perfil verificado
 - Gênero, altura, profissão, status de relacionamento
 - Descrição pessoal ("Sobre você"), o que você busca, interesses e estilo de vida
+  (inclusive se você fuma)
+- Se você responder: sua alimentação, sua religião ou crença, a importância que
+  a política tem para você num relacionamento, o que você gosta de fazer no
+  tempo livre e o que você valoriza em uma pessoa
 - Suas preferências de busca, incluindo por quais gêneros você tem interesse
 - Mensagens trocadas com outros usuários
 
@@ -54,6 +58,8 @@ pela LGPD:
 - **Fotos**, que podem revelar características pessoais
 - **Localização**
 - A **selfie de verificação**, que é uma imagem do seu rosto
+- **Religião ou crença** e a **importância que a política tem para você** num
+  relacionamento, se você responder
 
 Esses dados só são tratados mediante seu **consentimento específico e destacado**,
 solicitado separadamente no momento do cadastro. Você pode revogar esse
@@ -65,6 +71,12 @@ selo — e o consentimento é o ato de enviá-la. Ela **não** passa por
 reconhecimento facial nem por qualquer análise automática: uma pessoa da nossa
 equipe compara a selfie com as fotos do seu perfil e decide. Terminada a
 análise, o arquivo é **apagado** (veja a seção 6.2).
+
+Religião e política também são **opcionais**, e o consentimento é o ato de
+responder. As respostas aparecem no seu perfil para outros usuários (veja a
+seção 6) e não são usadas para filtrar quem aparece para você. Você pode
+apagar a resposta quando quiser, em Perfil › Interesses, tocando de novo na
+opção marcada, sem encerrar a conta.
 
 ---
 
@@ -81,6 +93,8 @@ análise, o arquivo é **apagado** (veja a seção 6.2).
 | Localização | Mostrar pessoas próximas e calcular distância | Consentimento específico |
 | Fotos | Compor seu perfil | Consentimento específico |
 | Selfie de verificação | Confirmar que o perfil é de quem diz ser | Consentimento específico |
+| Religião ou crença e importância da política | Exibir no seu perfil, para ajudar a achar quem pensa parecido | Consentimento específico |
+| Alimentação, fumo, tempo livre e o que você valoriza em uma pessoa | Exibir no seu perfil | Execução de contrato |
 | Mensagens | Permitir conversas entre matches | Execução de contrato |
 | Denúncias e bloqueios | Segurança da comunidade e moderação | Legítimo interesse |
 | Cópia da conversa anexada a uma denúncia | Analisar a denúncia e proteger quem foi alvo | Legítimo interesse |
@@ -94,6 +108,9 @@ Outros usuários do Lovi veem apenas:
 - Seu nome, sua idade, suas fotos aprovadas
 - Sua descrição, gênero, profissão, altura, status de relacionamento
 - Seus interesses e estilo de vida, o que você busca
+- Se você responder: sua alimentação, religião ou crença, a importância da
+  política num relacionamento, o que gosta de fazer no tempo livre e o que
+  valoriza em uma pessoa
 - Sua cidade e a **distância aproximada** até você, em quilômetros
 
 Outros usuários **nunca** veem:

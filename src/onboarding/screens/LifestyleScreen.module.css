@@ -1,40 +1,5 @@
-.groups {
-  display: flex;
-  flex-direction: column;
-  gap: 30px;
-}
-
-.group {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.groupHeader {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.iconBox {
-  flex: none;
-  width: 28px;
-  height: 28px;
-  border-radius: 10px;
-  background: var(--color-bg);
-  border: 1px solid #e2e6df;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.groupTitle {
-  font: 600 12px var(--font-ui);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-accent-2);
-}
-
+/* Sem margem própria: o espaço até as opções é o contentGap da tela. Com o
+   Fumo, a tela passou da altura do celular e o link ficava cortado embaixo. */
 .skipLink {
   align-self: center;
   border: 0;
@@ -44,5 +9,4 @@
   color: var(--color-ink-40);
   text-decoration: underline;
   padding: 4px;
-  margin-top: 18px;
 }

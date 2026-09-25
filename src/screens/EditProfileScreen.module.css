@@ -178,8 +178,10 @@
   box-shadow: 0 0 0 4px rgba(var(--color-accent-rgb), 0.14);
 }
 
+/* Cabe umas cinco linhas: com 74px a bio mostrava três, e os exemplos das
+   duas perguntas de baixo ficavam cortados na última linha. */
 .textarea {
-  height: 74px;
+  height: 124px;
   resize: none;
   font-family: var(--font-ui);
   line-height: 1.45;

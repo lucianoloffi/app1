@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import type {
+  AboutTexts,
   FilterGender,
   Gender,
   Intention,
@@ -7,6 +8,7 @@ import type {
   OnboardingState,
   OnboardingStep,
   RelationshipStatus,
+  Values,
 } from "../types";
 import { cadastrar } from "../lib/api/auth";
 import { enviarFoto, removerFoto, type FotoDoPerfil } from "../lib/api/photos";
@@ -15,6 +17,7 @@ import { registrarConsentimentos } from "../lib/api/privacy";
 import { erroNoFormulario, mensagemDeErro, type CampoDeErro, type ErroNoFormulario } from "../lib/errors";
 import { MAX_INTERESTS, MAX_ONBOARDING_PHOTOS } from "./constants";
 import { LoginFlow } from "./LoginFlow";
+import { AboutScreen } from "./screens/AboutScreen";
 import { AccountScreen, type DocumentoLegal } from "./screens/AccountScreen";
 import { ChooseInterestsScreen } from "./screens/ChooseInterestsScreen";
 import { EmailConfirmationScreen } from "./screens/EmailConfirmationScreen";
@@ -25,6 +28,7 @@ import { NameBirthdateScreen } from "./screens/NameBirthdateScreen";
 import { PhotosScreen } from "./screens/PhotosScreen";
 import { ProfessionHeightStatusScreen } from "./screens/ProfessionHeightStatusScreen";
 import { SuccessScreen } from "./screens/SuccessScreen";
+import { ValuesScreen } from "./screens/ValuesScreen";
 import { WelcomeScreen } from "./screens/WelcomeScreen";
 
 const INITIAL_STATE: OnboardingState = {
@@ -43,7 +47,9 @@ const INITIAL_STATE: OnboardingState = {
   photos: [null, null, null, null],
   intention: null,
   interests: [],
-  lifestyle: { bebida: null, atividade: null, filhos: null },
+  values: { alimentacao: null, religiao: null, politica: null },
+  about: { tempoLivre: "", oQueValoriza: "" },
+  lifestyle: { bebida: null, atividade: null, filhos: null, fumo: null },
   profession: "",
   height: 1.7,
   relationshipStatus: null,
@@ -175,13 +181,16 @@ export function OnboardingFlow({
       await concluirCadastro(state);
       goTo("success");
     } catch (problema) {
-      // Nome e bio ficam três telas para trás: um erro deles só aparece aqui,
+      // Nome e bio ficam telas para trás: um erro deles só aparece aqui,
       // no fim. Em vez de um aviso solto, a pessoa volta ao campo e vê o erro
       // embaixo dele. Profissão é desta tela mesma.
       const erro = erroNoFormulario(problema);
       if (erro.campo === "nome" || erro.campo === "bio") {
         setErroDoPerfil(erro);
         goTo("name-birthdate");
+      } else if (erro.campo === "tempoLivre" || erro.campo === "oQueValoriza") {
+        setErroDoPerfil(erro);
+        goTo("about");
       } else if (erro.campo === "profissao") {
         setErroDoPerfil(erro);
       } else {
@@ -311,6 +320,16 @@ export function OnboardingFlow({
           intention={state.intention}
           onChangeIntention={(intention: Intention) => setState((prev) => ({ ...prev, intention }))}
           onBack={() => goTo("photos")}
+          onNext={() => goTo("values")}
+        />
+      );
+
+    case "values":
+      return (
+        <ValuesScreen
+          values={state.values}
+          onChange={(values: Values) => setState((prev) => ({ ...prev, values }))}
+          onBack={() => goTo("intention")}
           onNext={() => goTo("interests")}
         />
       );
@@ -330,7 +349,22 @@ export function OnboardingFlow({
             }))
           }
           onOverMax={() => onShowToast(`Máximo de ${MAX_INTERESTS} interesses`)}
-          onBack={() => goTo("intention")}
+          onBack={() => goTo("values")}
+          onNext={() => goTo("about")}
+        />
+      );
+
+    case "about":
+      return (
+        <AboutScreen
+          about={state.about}
+          error={erroDoPerfil}
+          onChange={(about: AboutTexts) => {
+            if (about.tempoLivre !== state.about.tempoLivre) limpaErroDoCampo("tempoLivre");
+            if (about.oQueValoriza !== state.about.oQueValoriza) limpaErroDoCampo("oQueValoriza");
+            setState((prev) => ({ ...prev, about }));
+          }}
+          onBack={() => goTo("interests")}
           onNext={() => goTo("lifestyle")}
         />
       );
@@ -340,7 +374,7 @@ export function OnboardingFlow({
         <LifestyleScreen
           lifestyle={state.lifestyle}
           onChange={(lifestyle: Lifestyle) => setState((prev) => ({ ...prev, lifestyle }))}
-          onBack={() => goTo("interests")}
+          onBack={() => goTo("about")}
           onNext={() => goTo("profession-height-status")}
         />
       );

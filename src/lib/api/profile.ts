@@ -79,10 +79,20 @@ export async function carregarMeuPerfil(): Promise<MeuPerfilCompleto | null> {
       intention: perfil.intencao ?? "conhecer",
       interestedIn: prefs?.interesse_em ?? "todos",
       interests: (interesses ?? []).map((linha) => linha.interesse),
+      values: {
+        alimentacao: perfil.alimentacao ?? null,
+        religiao: perfil.religiao ?? null,
+        politica: perfil.politica ?? null,
+      },
+      about: {
+        tempoLivre: perfil.tempo_livre ?? "",
+        oQueValoriza: perfil.o_que_valoriza ?? "",
+      },
       lifestyle: {
         bebida: perfil.bebida ?? null,
         atividade: perfil.atividade ?? null,
         filhos: perfil.filhos ?? null,
+        fumo: perfil.fumo ?? null,
       },
       profession: perfil.profissao ?? "",
       height: perfil.altura_m === null ? 1.7 : Number(perfil.altura_m),
@@ -181,6 +191,13 @@ export async function salvarPerfil(perfil: MyProfile): Promise<void> {
       bebida: perfil.lifestyle.bebida,
       atividade: perfil.lifestyle.atividade,
       filhos: perfil.lifestyle.filhos,
+      fumo: perfil.lifestyle.fumo,
+      alimentacao: perfil.values.alimentacao,
+      religiao: perfil.values.religiao,
+      politica: perfil.values.politica,
+      // Só espaços é o mesmo que não ter escrito nada.
+      tempo_livre: perfil.about.tempoLivre.trim() || null,
+      o_que_valoriza: perfil.about.oQueValoriza.trim() || null,
     })
     .eq("id", id);
   lancaSeErro(error);
@@ -227,6 +244,13 @@ export async function concluirCadastro(estado: OnboardingState): Promise<void> {
       bebida: estado.lifestyle.bebida,
       atividade: estado.lifestyle.atividade,
       filhos: estado.lifestyle.filhos,
+      fumo: estado.lifestyle.fumo,
+      alimentacao: estado.values.alimentacao,
+      religiao: estado.values.religiao,
+      politica: estado.values.politica,
+      // Só espaços é o mesmo que não ter escrito nada.
+      tempo_livre: estado.about.tempoLivre.trim() || null,
+      o_que_valoriza: estado.about.oQueValoriza.trim() || null,
     })
     .eq("id", id);
   lancaSeErro(error);

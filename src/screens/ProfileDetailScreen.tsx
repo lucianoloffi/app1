@@ -3,11 +3,15 @@ import { CloseIcon, HeartIcon } from "../components/icons/ActionIcons";
 import { ReportSheet } from "../components/ReportSheet";
 import {
   ACTIVITY_LABEL,
+  DIET_LABEL,
   DRINK_LABEL,
   heightLabel,
   INTENTION_LABEL,
   KIDS_LABEL,
+  POLITICS_LABEL,
   RELATIONSHIP_STATUS_LABEL,
+  RELIGION_LABEL,
+  SMOKE_LABEL,
   type Profile,
 } from "../types";
 import styles from "./ProfileDetailScreen.module.css";
@@ -61,9 +65,27 @@ export function ProfileDetailScreen({
   if (profile.lifestyle?.filhos) {
     lifeRows.push({ label: "Filhos", value: KIDS_LABEL[profile.lifestyle.filhos] });
   }
+  if (profile.lifestyle?.fumo) {
+    lifeRows.push({ label: "Fuma", value: SMOKE_LABEL[profile.lifestyle.fumo] });
+  }
+  if (profile.values?.alimentacao) {
+    lifeRows.push({ label: "Alimentação", value: DIET_LABEL[profile.values.alimentacao] });
+  }
+  if (profile.values?.religiao) {
+    lifeRows.push({ label: "Religião", value: RELIGION_LABEL[profile.values.religiao] });
+  }
+  if (profile.values?.politica) {
+    lifeRows.push({ label: "Política", value: POLITICS_LABEL[profile.values.politica] });
+  }
   if (profile.height) {
     lifeRows.push({ label: "Altura", value: heightLabel(profile.height) });
   }
+
+  // Em terceira pessoa: quem lê é o outro, não quem respondeu.
+  const answers = [
+    { label: "No tempo livre", text: profile.about?.tempoLivre ?? "" },
+    { label: "Valoriza em uma pessoa", text: profile.about?.oQueValoriza ?? "" },
+  ].filter((answer) => answer.text.trim());
 
   // Todas as fotos depois da principal, uma embaixo da outra. Antes eram sempre
   // duas miniaturas: quem tinha 6 fotos mostrava só 3, e quem tinha 1 aparecia
@@ -116,6 +138,13 @@ export function ProfileDetailScreen({
           </div>
 
           <p className={styles.bio}>{profile.bio}</p>
+
+          {answers.map((answer) => (
+            <div key={answer.label} className={styles.answer}>
+              <span className={styles.answerLabel}>{answer.label}</span>
+              <p className={styles.answerText}>{answer.text}</p>
+            </div>
+          ))}
 
           <div className={styles.chipsRow}>
             {profile.interests.map((interest) => {

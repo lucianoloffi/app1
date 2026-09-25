@@ -13,11 +13,13 @@ import {
   type FotoDoPerfil,
 } from "../lib/api/photos";
 import { mensagemDeErro, type ErroNoFormulario } from "../lib/errors";
+import { ABOUT_EXAMPLE, ABOUT_QUESTION } from "../data/about";
 import {
   BIO_MAXIMA,
   MAX_PROFILE_PHOTOS,
   NOME_MAXIMO,
   PROFISSAO_MAXIMA,
+  TEXTO_LIVRE_MAXIMO,
 } from "../onboarding/constants";
 import { formatBirthdate, onlyDigits } from "../onboarding/phoneFormat";
 import type { Gender, MyProfile, PerfilEditavel } from "../types";
@@ -46,10 +48,13 @@ interface EditProfileScreenProps {
   profile: MyProfile;
   onCancel: () => void;
   /**
-   * Só os campos editáveis: o que é do servidor o App preserva. Interesses e
-   * estilo de vida têm tela própria (`InterestsScreen`) e não passam por aqui.
+   * Só os campos editáveis: o que é do servidor o App preserva. Interesses,
+   * valores e estilo de vida têm tela própria (`InterestsScreen`) e não
+   * passam por aqui.
    */
-  onSave: (edicao: Omit<PerfilEditavel, "interests" | "lifestyle" | "relationshipStatus">) => void;
+  onSave: (
+    edicao: Omit<PerfilEditavel, "interests" | "values" | "lifestyle" | "relationshipStatus">,
+  ) => void;
   onShowToast: (message: string) => void;
   onOpenGuidelines?: () => void;
   /** Erro do servidor ao salvar que pertence a um campo: aparece embaixo dele. */
@@ -74,6 +79,8 @@ export function EditProfileScreen({
   const [profession, setProfession] = useState(profile.profession);
   const [height, setHeight] = useState(profile.height);
   const [bio, setBio] = useState(profile.bio);
+  const [tempoLivre, setTempoLivre] = useState(profile.about.tempoLivre);
+  const [oQueValoriza, setOQueValoriza] = useState(profile.about.oQueValoriza);
   const [fotos, setFotos] = useState<FotoDoPerfil[]>([]);
   const [fotosOcupado, setFotosOcupado] = useState(false);
   const photos = fotos.map((foto) => ({ url: foto.url, status: foto.status }));
@@ -117,7 +124,11 @@ export function EditProfileScreen({
   }
 
   const textoLongoDemais =
-    name.length > NOME_MAXIMO || profession.length > PROFISSAO_MAXIMA || bio.length > BIO_MAXIMA;
+    name.length > NOME_MAXIMO ||
+    profession.length > PROFISSAO_MAXIMA ||
+    bio.length > BIO_MAXIMA ||
+    tempoLivre.length > TEXTO_LIVRE_MAXIMO ||
+    oQueValoriza.length > TEXTO_LIVRE_MAXIMO;
   const podeSalvar = cidadeValida(city);
 
   function handleSave() {
@@ -136,6 +147,7 @@ export function EditProfileScreen({
       birthdate,
       gender,
       bio,
+      about: { tempoLivre, oQueValoriza },
       photos,
       intention: profile.intention,
       interestedIn: profile.interestedIn,
@@ -297,6 +309,34 @@ export function EditProfileScreen({
           onChange={aoMudar("bio", setBio)}
           maxLength={BIO_MAXIMA}
           serverError={erroDo("bio")}
+          groupClassName={styles.fieldGroup}
+          labelClassName={styles.label}
+          inputClassName={`${styles.input} ${styles.textarea}`}
+        />
+
+        <LimitedTextField
+          id="editar-tempo-livre"
+          label={ABOUT_QUESTION.tempoLivre}
+          multiline
+          placeholder={ABOUT_EXAMPLE.tempoLivre}
+          value={tempoLivre}
+          onChange={aoMudar("tempoLivre", setTempoLivre)}
+          maxLength={TEXTO_LIVRE_MAXIMO}
+          serverError={erroDo("tempoLivre")}
+          groupClassName={styles.fieldGroup}
+          labelClassName={styles.label}
+          inputClassName={`${styles.input} ${styles.textarea}`}
+        />
+
+        <LimitedTextField
+          id="editar-o-que-valoriza"
+          label={ABOUT_QUESTION.oQueValoriza}
+          multiline
+          placeholder={ABOUT_EXAMPLE.oQueValoriza}
+          value={oQueValoriza}
+          onChange={aoMudar("oQueValoriza", setOQueValoriza)}
+          maxLength={TEXTO_LIVRE_MAXIMO}
+          serverError={erroDo("oQueValoriza")}
           groupClassName={styles.fieldGroup}
           labelClassName={styles.label}
           inputClassName={`${styles.input} ${styles.textarea}`}

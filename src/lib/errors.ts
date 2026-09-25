@@ -5,6 +5,7 @@ import {
   INTERESSE_MAXIMO,
   NOME_MAXIMO,
   PROFISSAO_MAXIMA,
+  TEXTO_LIVRE_MAXIMO,
 } from "../onboarding/constants";
 
 /** Campo do formulário a que um erro se refere, quando dá para saber. */
@@ -16,6 +17,8 @@ export type CampoDeErro =
   | "nome"
   | "profissao"
   | "bio"
+  | "tempoLivre"
+  | "oQueValoriza"
   | "interesses";
 
 export interface ErroNoFormulario {
@@ -61,6 +64,8 @@ const MENSAGENS: { teste: RegExp; texto: string; campo?: CampoDeErro }[] = [
   { teste: /profiles_nome_tamanho/i, texto: `O nome pode ter até ${NOME_MAXIMO} caracteres.`, campo: "nome" },
   { teste: /profiles_profissao_tamanho/i, texto: `A profissão pode ter até ${PROFISSAO_MAXIMA} caracteres.`, campo: "profissao" },
   { teste: /profiles_bio_tamanho/i, texto: `O "Sobre você" pode ter até ${BIO_MAXIMA} caracteres.`, campo: "bio" },
+  { teste: /profiles_tempo_livre_tamanho/i, texto: `Este texto pode ter até ${TEXTO_LIVRE_MAXIMO} caracteres.`, campo: "tempoLivre" },
+  { teste: /profiles_o_que_valoriza_tamanho/i, texto: `Este texto pode ter até ${TEXTO_LIVRE_MAXIMO} caracteres.`, campo: "oQueValoriza" },
   { teste: /profile_interests_interesse_tamanho/i, texto: `Cada interesse pode ter até ${INTERESSE_MAXIMO} caracteres.`, campo: "interesses" },
   { teste: /duplicate key|unique constraint/i, texto: "Esse valor já está em uso." },
   { teste: /violates row-level security|permission denied/i, texto: "Você não tem permissão para fazer isso." },

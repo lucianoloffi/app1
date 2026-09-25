@@ -81,6 +81,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: var(--space-3);
   padding: 12px 0;
   border-bottom: 1px solid var(--color-line-3);
 }
@@ -90,9 +91,34 @@
   color: var(--color-ink-60);
 }
 
+/* "Não faz diferença para mim" é longo: se quebrar, fica alinhado à direita. */
 .lifeValue {
   font: 600 15px var(--font-ui);
   color: var(--color-ink);
+  text-align: right;
+}
+
+.answer {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: #fff;
+  border-radius: 14px;
+  padding: 14px 16px;
+}
+
+.answerLabel {
+  font: 600 12px var(--font-ui);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-ink-40);
+}
+
+.answerText {
+  margin: 0;
+  font: 400 15px/1.5 var(--font-ui);
+  color: #3b443e;
+  overflow-wrap: anywhere;
 }
 
 .backToChatButton {

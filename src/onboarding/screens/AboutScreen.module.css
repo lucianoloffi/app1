@@ -1,0 +1,4 @@
+.textarea {
+  composes: textarea from "../fields.module.css";
+  min-height: 124px;
+}

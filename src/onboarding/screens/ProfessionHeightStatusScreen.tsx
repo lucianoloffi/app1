@@ -35,7 +35,7 @@ export function ProfessionHeightStatusScreen({
 }: ProfessionHeightStatusScreenProps) {
   return (
     <OnboardingLayout
-      progress={9}
+      progress={11}
       onBack={onBack}
       title="Suas informações"
       support="Opcional. Aparece no seu perfil completo."

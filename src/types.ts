@@ -8,11 +8,43 @@ export type FilterGender = "homem" | "mulher" | "todos";
 export type Drink = "nao-bebo" | "socialmente" | "frequentemente";
 export type Activity = "todo-dia" | "algumas-vezes" | "raramente";
 export type Kids = "tenho" | "nao-tenho" | "quero-ter" | "nao-quero";
+/** Mesmas chaves do check de `profiles.fumo` (migration 0030). */
+export type Smoke = "sim" | "nao" | "as_vezes";
 
 export interface Lifestyle {
   bebida: Drink | null;
   atividade: Activity | null;
   filhos: Kids | null;
+  fumo: Smoke | null;
+}
+
+/**
+ * Mesmas chaves dos checks de `profiles.alimentacao`, `religiao` e `politica`
+ * (migration 0030). Sem resposta é null: não há valor "prefiro não responder".
+ */
+export type Diet = "como_de_tudo" | "vegetariano" | "vegano" | "outra";
+export type Religion =
+  | "catolica"
+  | "evangelica"
+  | "espirita"
+  | "umbanda_candomble"
+  | "judaica"
+  | "outra"
+  | "agnostico"
+  | "ateu"
+  | "sem_religiao";
+export type Politics = "muito_importante" | "importante" | "pouco_importante" | "nao_faz_diferenca";
+
+export interface Values {
+  alimentacao: Diet | null;
+  religiao: Religion | null;
+  politica: Politics | null;
+}
+
+/** Os dois textos de "Conte mais sobre você". Vazio é "". */
+export interface AboutTexts {
+  tempoLivre: string;
+  oQueValoriza: string;
 }
 
 /**
@@ -40,6 +72,8 @@ export interface Profile {
   bio: string;
   photos: string[];
   lifestyle?: Lifestyle;
+  values?: Values;
+  about?: AboutTexts;
   relationshipStatus?: RelationshipStatus;
   height?: number;
   /** Selo de verificado. Só o "sim ou não" sai do servidor (migration 0022). */
@@ -74,7 +108,9 @@ export type OnboardingStep =
   | "gender-interest-city"
   | "photos"
   | "intention"
+  | "values"
   | "interests"
+  | "about"
   | "lifestyle"
   | "profession-height-status"
   | "success"
@@ -96,6 +132,8 @@ export interface OnboardingState {
   photos: (string | null)[];
   intention: Intention | null;
   interests: string[];
+  values: Values;
+  about: AboutTexts;
   lifestyle: Lifestyle;
   profession: string;
   height: number;
@@ -137,6 +175,8 @@ export interface MyProfile {
   intention: Intention;
   interestedIn: FilterGender;
   interests: string[];
+  values: Values;
+  about: AboutTexts;
   lifestyle: Lifestyle;
   profession: string;
   height: number;
@@ -175,6 +215,8 @@ export type PerfilEditavel = Pick<
   | "intention"
   | "interestedIn"
   | "interests"
+  | "values"
+  | "about"
   | "lifestyle"
   | "profession"
   | "height"
@@ -224,6 +266,42 @@ export const KIDS_LABEL: Record<Kids, string> = {
   "nao-tenho": "Não tenho",
   "quero-ter": "Quero ter",
   "nao-quero": "Não quero",
+};
+
+export const SMOKE_LABEL: Record<Smoke, string> = {
+  sim: "Sim",
+  nao: "Não",
+  as_vezes: "Às vezes",
+};
+
+export const DIET_LABEL: Record<Diet, string> = {
+  como_de_tudo: "Como de tudo",
+  vegetariano: "Vegetariano(a)",
+  vegano: "Vegano(a)",
+  outra: "Outra",
+};
+
+/**
+ * Na ordem da tela: as religiões, "Outra" fechando o grupo e, por último,
+ * quem não tem religião. Nessa ordem as opções cabem em três linhas em 390 px.
+ */
+export const RELIGION_LABEL: Record<Religion, string> = {
+  catolica: "Católica",
+  evangelica: "Evangélica",
+  espirita: "Espírita",
+  umbanda_candomble: "Umbanda / Candomblé",
+  judaica: "Judaica",
+  outra: "Outra",
+  agnostico: "Agnóstico",
+  ateu: "Ateu",
+  sem_religiao: "Sem religião",
+};
+
+export const POLITICS_LABEL: Record<Politics, string> = {
+  muito_importante: "Muito importante",
+  importante: "Importante",
+  pouco_importante: "Pouco importante",
+  nao_faz_diferenca: "Não faz diferença para mim",
 };
 
 export const RELATIONSHIP_STATUS_LABEL: Record<RelationshipStatus, string> = {

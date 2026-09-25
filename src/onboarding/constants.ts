@@ -6,7 +6,9 @@ export const PROGRESS_STEPS: OnboardingStep[] = [
   "gender-interest-city",
   "photos",
   "intention",
+  "values",
   "interests",
+  "about",
   "lifestyle",
   "profession-height-status",
 ];
@@ -101,3 +103,5 @@ export const PROFISSAO_MAXIMA = 60;
 export const BIO_MAXIMA = 500;
 /** O maior de INTEREST_OPTIONS tem 17 ("Cerveja artesanal"); folga para os próximos. */
 export const INTERESSE_MAXIMO = 30;
+/** "No tempo livre" e "O que você valoriza em uma pessoa" (migration 0030). */
+export const TEXTO_LIVRE_MAXIMO = 200;

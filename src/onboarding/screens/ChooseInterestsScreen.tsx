@@ -25,7 +25,7 @@ export function ChooseInterestsScreen({
 }: ChooseInterestsScreenProps) {
   return (
     <OnboardingLayout
-      progress={7}
+      progress={8}
       onBack={onBack}
       title="Do que você gosta?"
       support={`Escolha até ${MAX_INTERESTS}. É opcional e dá para mudar depois.`}

@@ -3,7 +3,7 @@ import { TOTAL_PROGRESS_SEGMENTS } from "./constants";
 import styles from "./OnboardingLayout.module.css";
 
 interface OnboardingLayoutProps {
-  /** 0 esconde a barra; 1–9 preenche os segmentos correspondentes. */
+  /** 0 esconde a barra; de 1 em diante preenche os segmentos correspondentes. */
   progress?: number;
   onBack?: () => void;
   title: string;

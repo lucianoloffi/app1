@@ -29,8 +29,14 @@ export function computeCompleteness(profile: MyProfile | null, photosCount: numb
   if (!profile) return { pct: 0, hint: "Faltam suas informações", interestsHint: "" };
 
   const lifestyleComplete = Boolean(
-    profile.lifestyle.bebida && profile.lifestyle.atividade && profile.lifestyle.filhos,
+    profile.lifestyle.bebida &&
+      profile.lifestyle.atividade &&
+      profile.lifestyle.filhos &&
+      profile.lifestyle.fumo,
   );
+  // Valores (religião e política são dado sensível) e os dois textos de
+  // "Conte mais sobre você" ficam fora da conta de propósito: a porcentagem
+  // não pode virar pressão para responder o que é opcional.
 
   const fields = [
     Boolean(profile.name),

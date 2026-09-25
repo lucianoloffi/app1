@@ -2,14 +2,17 @@ import { useState } from "react";
 import { InterestBottomSheet } from "../components/InterestBottomSheet";
 import { RowBottomSheet } from "../components/RowBottomSheet";
 import { SelectedInterests } from "../components/SelectedInterests";
-import { LIFE_GROUPS, STATUS_OPTIONS } from "../data/lifestyle";
+import { LIFE_GROUPS, STATUS_OPTIONS, VALUE_GROUPS } from "../data/lifestyle";
 import type { ErroNoFormulario } from "../lib/errors";
 import { MAX_INTERESTS } from "../onboarding/constants";
-import type { Lifestyle, MyProfile, RelationshipStatus } from "../types";
+import type { Lifestyle, MyProfile, RelationshipStatus, Values } from "../types";
 import styles from "./InterestsScreen.module.css";
 
 /** O que esta tela devolve: o resto do perfil continua como está. */
-export type EdicaoDeInteresses = Pick<MyProfile, "interests" | "lifestyle" | "relationshipStatus">;
+export type EdicaoDeInteresses = Pick<
+  MyProfile,
+  "interests" | "values" | "lifestyle" | "relationshipStatus"
+>;
 
 interface InterestsScreenProps {
   profile: MyProfile;
@@ -31,6 +34,7 @@ export function InterestsScreen({
   onClearError,
 }: InterestsScreenProps) {
   const [interests, setInterests] = useState<string[]>(profile.interests);
+  const [values, setValues] = useState<Values>(profile.values);
   const [lifestyle, setLifestyle] = useState<Lifestyle>(profile.lifestyle);
   const [relationshipStatus, setRelationshipStatus] = useState<RelationshipStatus | null>(
     profile.relationshipStatus,
@@ -49,7 +53,7 @@ export function InterestsScreen({
         <button
           type="button"
           className={`${styles.headerAction} ${styles.headerActionAccent}`}
-          onClick={() => onSave({ interests, lifestyle, relationshipStatus })}
+          onClick={() => onSave({ interests, values, lifestyle, relationshipStatus })}
         >
           Concluído
         </button>
@@ -71,6 +75,24 @@ export function InterestsScreen({
               {erroDosInteresses}
             </p>
           )}
+        </div>
+
+        {/* Sem "prefiro não responder" (decisão de 24/09): para deixar em
+            branco, toca-se de novo na opção marcada. */}
+        <div className={styles.group}>
+          <span className={styles.label}>Valores</span>
+          {VALUE_GROUPS.map((group) => (
+            <RowBottomSheet
+              key={group.key}
+              label={group.shortTitle}
+              iconPath={group.icon}
+              value={values[group.key]}
+              options={group.options}
+              emptyLabel="Escolher"
+              semOpcaoVazia
+              onChange={(value) => setValues((prev) => ({ ...prev, [group.key]: value }) as Values)}
+            />
+          ))}
         </div>
 
         <div className={styles.group}>

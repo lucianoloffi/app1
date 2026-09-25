@@ -13,6 +13,11 @@ interface RowBottomSheetProps {
   options: Option[];
   onChange: (value: string | null) => void;
   emptyLabel?: string;
+  /**
+   * Sem a linha "Prefiro não dizer" no fim da lista. Para voltar a deixar em
+   * branco, toca-se de novo na opção marcada, como nos chips do cadastro.
+   */
+  semOpcaoVazia?: boolean;
 }
 
 export function RowBottomSheet({
@@ -22,6 +27,7 @@ export function RowBottomSheet({
   options,
   onChange,
   emptyLabel = "Prefiro não dizer",
+  semOpcaoVazia,
 }: RowBottomSheetProps) {
   const [open, setOpen] = useState(false);
   const current = options.find((option) => option.value === value);
@@ -74,7 +80,7 @@ export function RowBottomSheet({
               </button>
             </div>
             <div className={styles.optionList}>
-              {[...options, { value: "", label: emptyLabel }].map((option) => {
+              {(semOpcaoVazia ? options : [...options, { value: "", label: emptyLabel }]).map((option) => {
                 const isActive =
                   option.value === "" ? value === null : value === option.value;
                 return (
@@ -83,7 +89,9 @@ export function RowBottomSheet({
                     type="button"
                     className={isActive ? `${styles.option} ${styles.optionActive}` : styles.option}
                     onClick={() => {
-                      onChange(option.value === "" ? null : option.value);
+                      onChange(
+                        option.value === "" || (semOpcaoVazia && isActive) ? null : option.value,
+                      );
                       setOpen(false);
                     }}
                   >
