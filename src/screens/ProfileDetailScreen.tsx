@@ -49,36 +49,61 @@ export function ProfileDetailScreen({
     [profile, myInterests],
   );
 
-  const lifeRows: { label: string; value: string }[] = [];
+  // Em blocos de dois por linha, não em lista: a lista de rótulo à esquerda e
+  // valor à direita parecia um formulário a preencher, não uma pessoa.
+  type Fact = { label: string; value: string };
+  const aboutFacts: Fact[] = [];
   if (profile.relationshipStatus) {
-    lifeRows.push({
-      label: "Status de relacionamento",
+    aboutFacts.push({
+      label: "Relacionamento",
       value: RELATIONSHIP_STATUS_LABEL[profile.relationshipStatus],
     });
   }
+  if (profile.height) {
+    aboutFacts.push({ label: "Altura", value: heightLabel(profile.height) });
+  }
   if (profile.lifestyle?.bebida) {
-    lifeRows.push({ label: "Bebida", value: DRINK_LABEL[profile.lifestyle.bebida] });
+    aboutFacts.push({ label: "Bebida", value: DRINK_LABEL[profile.lifestyle.bebida] });
   }
   if (profile.lifestyle?.atividade) {
-    lifeRows.push({ label: "Atividade física", value: ACTIVITY_LABEL[profile.lifestyle.atividade] });
+    aboutFacts.push({ label: "Atividade física", value: ACTIVITY_LABEL[profile.lifestyle.atividade] });
   }
   if (profile.lifestyle?.filhos) {
-    lifeRows.push({ label: "Filhos", value: KIDS_LABEL[profile.lifestyle.filhos] });
+    aboutFacts.push({ label: "Filhos", value: KIDS_LABEL[profile.lifestyle.filhos] });
   }
   if (profile.lifestyle?.fumo) {
-    lifeRows.push({ label: "Fuma", value: SMOKE_LABEL[profile.lifestyle.fumo] });
+    aboutFacts.push({ label: "Fuma", value: SMOKE_LABEL[profile.lifestyle.fumo] });
   }
+
   if (profile.values?.alimentacao) {
-    lifeRows.push({ label: "Alimentação", value: DIET_LABEL[profile.values.alimentacao] });
+    aboutFacts.push({ label: "Alimentação", value: DIET_LABEL[profile.values.alimentacao] });
   }
+
+  const valueFacts: Fact[] = [];
   if (profile.values?.religiao) {
-    lifeRows.push({ label: "Religião", value: RELIGION_LABEL[profile.values.religiao] });
+    valueFacts.push({ label: "Religião", value: RELIGION_LABEL[profile.values.religiao] });
   }
   if (profile.values?.politica) {
-    lifeRows.push({ label: "Política", value: POLITICS_LABEL[profile.values.politica] });
+    valueFacts.push({ label: "Política", value: POLITICS_LABEL[profile.values.politica] });
   }
-  if (profile.height) {
-    lifeRows.push({ label: "Altura", value: heightLabel(profile.height) });
+
+  const firstName = profile.name.split(" ")[0];
+
+  function renderFacts(title: string, facts: Fact[]) {
+    if (facts.length === 0) return null;
+    return (
+      <section className={styles.factSection}>
+        <h2 className={styles.factTitle}>{title}</h2>
+        <div className={styles.factGrid}>
+          {facts.map((fact) => (
+            <div key={fact.label} className={styles.fact}>
+              <span className={styles.factLabel}>{fact.label}</span>
+              <span className={styles.factValue}>{fact.value}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+    );
   }
 
   // Em terceira pessoa: quem lê é o outro, não quem respondeu.
@@ -170,16 +195,8 @@ export function ProfileDetailScreen({
             })}
           </div>
 
-          {lifeRows.length > 0 && (
-            <div className={styles.lifeList}>
-              {lifeRows.map((row) => (
-                <div key={row.label} className={styles.lifeRow}>
-                  <span className={styles.lifeLabel}>{row.label}</span>
-                  <span className={styles.lifeValue}>{row.value}</span>
-                </div>
-              ))}
-            </div>
-          )}
+          {renderFacts(`Sobre ${firstName}`, aboutFacts)}
+          {renderFacts("Valores", valueFacts)}
 
           {answersWithoutPhoto.map(renderAnswer)}
 
