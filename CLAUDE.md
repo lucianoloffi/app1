@@ -223,6 +223,46 @@ sob o filtro novo depois de um erro, e o retângulo cinza em volta das ilustraç
   sair. No toque, fica até o próximo toque, senão sumiria ao tirar o dedo, e
   `touch-action: pan-y` deixa arrastar de lado para trocar o dia sem travar a
   rolagem da página.
+- **Gráfico que segue o período** (`DailyChart.tsx` + `painel_serie`, migration
+  `0034`, 25/09). Antes o gráfico mostrava sempre os últimos 30 dias, com um dia
+  a cada cinco na base. Agora segue o filtro: Hoje por hora (0h a 23h no eixo, a
+  linha para na hora atual), 7 e 30 dias por dia, com todos os dias na base (só
+  o número; o mês numa segunda linha, no primeiro dia e na virada) e 90 dias por
+  semana, de segunda a domingo. Quando os rótulos não cabem (celular), sai um a
+  cada tantos (`LARGURA_DO_ROTULO`). O título e a nota embaixo mudam com o
+  período, e o balão diz "Hoje, das 10h às 11h", "Qua, 24/09" ou "Semana de
+  14/09". Números e série carregam juntos (`Promise.all`), para os cartões e o
+  gráfico trocarem de período ao mesmo tempo: se a `painel_serie` falhar, a aba
+  inteira mostra o erro.
+  **Ativos por hora** pedem a hora de uso, que a `atividade_diaria` não tinha. A
+  `registrar_atividade` passou a gravar também em `atividade_por_hora` (uma
+  linha por pessoa por hora de uso, só do servidor, apagada com a conta). Vale
+  desde 25/09. É "registro de acesso", que a política já previa, e por isso não
+  mudou texto legal. Na semana, cada pessoa conta uma vez. Os novos usuários
+  incluem os perfis de teste, como o cartão "Novos usuários", para os dois
+  baterem. A `painel_numeros` ainda devolve `por_dia`, que o painel não lê mais.
+- **Funil no painel** (`Funnel.tsx` + `painel_funil`, migrations `0032` e `0033`,
+  25/09). Na aba Números: das contas criadas no período, quantas concluíram o
+  cadastro, curtiram, deram match, conversaram e tiveram resposta, a partir dos
+  marcos da `0013`. É por coorte, as contas **criadas** no período, acompanhadas
+  até hoje: misturar quem entrou ontem com quem entrou há um mês esconde o
+  buraco. Os perfis de teste (`@lovi.test`, do `npm run popular`) e as contas de
+  admin ficam de fora. Com poucas pessoas reais, eles dobrariam o topo.
+  Armadilha da primeira versão: `u.email ilike ... or papel = 'admin'` é **nulo**
+  para quem não tem `papel`, e `not nulo` descartava todas as contas reais (o
+  funil saía zerado). Daí os `coalesce(..., false)`.
+  **Desenho** (decisão do Lu na prévia): faixas centralizadas que estreitam, com
+  o número de pessoas dentro e só "↓ 82% seguiram" entre uma e outra, e uma
+  frase com a maior perda embaixo. Uma informação por lugar. A primeira versão
+  (barras à esquerda, dois números por linha) parecia lista. A segunda, com
+  contorno do período anterior, variação em pontos e tabela colorida por semana,
+  ficou confusa. "Semana a semana" (`0033`) responde uma pergunta só: de quem
+  criou a conta naquela semana, quantos já deram match.
+  O "seguiram" tem `position: relative; z-index: 1` porque o `clip-path` do
+  trapézio o põe numa camada acima do texto comum, e o texto sumia atrás dele.
+- **Ordem da aba Números** (25/09): cartões, o gráfico na largura toda e, na linha
+  de baixo, o funil (2/3) ao lado das cidades (1/3). Sozinho numa linha, o funil
+  ficava com faixas compridas e espaço sobrando. No celular, um embaixo do outro.
 - **Verificação e fotos no painel** (migration `0021`): as duas filas que faltavam.
   A de **verificação** é por PESSOA, não por pedido: `solicitar_verificacao` insere
   uma linha por selfie enviada e não impede a segunda, então agrupar evita a mesma
@@ -421,6 +461,11 @@ sob o filtro novo depois de um erro, e o retângulo cinza em volta das ilustraç
   por isso vem depois da última palavra. Numa coluna própria, ele prendia espaço
   à direita e um nome como "Luciano Marques da Silva" quebrava em três linhas.
   Leitor de tela ouve "Perfil verificado" (`role="img"` + `aria-label`).
+  Ao lado de "Verificar meu perfil", o aviso de quem já tem o selo é o mesmo
+  selo do perfil de outra pessoa ("✓ verificado", borda e fundo lilás claro),
+  com **opacidade de 50%** (25/09): com o selo dado, não há nada a fazer ali, e
+  o roxo forte parecia chamar para uma ação. "em análise" e "envie outra selfie"
+  continuam texto, porque ainda pedem atenção.
 - **Intenção: quatro opções** (migration `0028`): `serio` (Relacionamento sério),
   `conhecer` (Conhecer alguém), `casual` (Algo casual) e `nao_sei` (Ainda não sei).
   Antes eram três, com `amizade`. A `0028` passou quem tinha `amizade` para
@@ -710,8 +755,9 @@ Em ordem de importância:
 3. **Plano pago do Supabase.** No gratuito o projeto é pausado depois de alguns dias
    sem uso e não há backup automático — um beta com gente real não pode acordar com
    o app fora do ar nem perder dados. Decisão do Lu em 22/09: fica para depois.
-4. **Painel admin completo:** funil, retenção D7, ranking de 10 cidades e contas
-   excluídas. Os registros já existem desde a `0013`; falta só consultar e desenhar.
+4. **Painel admin completo:** retenção D7, ranking de 10 cidades e contas
+   excluídas. O funil entrou em 25/09 (`0032`/`0033`). Os registros já existem
+   desde a `0013`; falta só consultar e desenhar.
 5. **Provas de assédio: o que ainda falta.** A denúncia já guarda cópia da conversa
    e sobrevive à exclusão da conta do denunciado (`0015`). O que continua em aberto:
    `desfazer_match` apaga as mensagens de conversas que **nunca** foram denunciadas,
