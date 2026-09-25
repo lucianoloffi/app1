@@ -47,6 +47,7 @@ interface ProfileScreenProps {
   filters: Filters;
   verified: boolean;
   onOpenEdit: () => void;
+  onViewProfile: () => void;
   onOpenInterests: () => void;
   onOpenFilters: () => void;
   onOpenSettings: () => void;
@@ -60,6 +61,7 @@ export function ProfileScreen({
   filters,
   verified,
   onOpenEdit,
+  onViewProfile,
   onOpenInterests,
   onOpenFilters,
   onOpenSettings,
@@ -80,7 +82,11 @@ export function ProfileScreen({
 
   return (
     <div className={styles.screen}>
-      <button type="button" className={styles.header} onClick={onOpenEdit}>
+      {/* O topo inteiro era um botão para Editar perfil, e não havia como ver o
+          perfil pronto, do jeito que aparece para os outros. Agora são dois
+          links lado a lado, e o topo deixou de ser botão (não cabe botão
+          dentro de botão). */}
+      <div className={styles.header}>
         <div className={styles.ringWrap}>
           <svg
             className={styles.ring}
@@ -158,23 +164,20 @@ export function ProfileScreen({
             {age !== null ? ` · ${age} anos` : ""}
           </p>
           {hint && <p className={styles.hint}>{hint}</p>}
+          <div className={styles.headerLinks}>
+            <button type="button" className={styles.headerLink} onClick={onOpenEdit}>
+              Editar perfil
+            </button>
+            <button
+              type="button"
+              className={`${styles.headerLink} ${styles.headerLinkClaro}`}
+              onClick={onViewProfile}
+            >
+              Visualizar
+            </button>
+          </div>
         </div>
-        <svg
-          className={styles.chevron}
-          width="18"
-          height="18"
-          viewBox="0 0 24 24"
-          fill="none"
-          aria-hidden="true"
-        >
-          <path
-            d="M9 5l7 7-7 7"
-            stroke="currentColor"
-            strokeWidth={2.2}
-            strokeLinecap="round"
-          />
-        </svg>
-      </button>
+      </div>
 
       <div className={styles.section}>
         {/* Aqui também, e não só em Editar perfil: é esta a tela que a pessoa

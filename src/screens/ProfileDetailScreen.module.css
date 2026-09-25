@@ -315,3 +315,20 @@
   background: var(--color-coral);
   box-shadow: var(--shadow-btn-like);
 }
+
+/* Faixa acima da foto no modo "own": sem ela, a tela é idêntica à de outra
+   pessoa, e quem abriu por engano não saberia que está vendo a si mesmo. */
+.ownBanner {
+  flex: none;
+  margin: 0;
+  padding: 12px 68px;
+  min-height: 80px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background: var(--color-accent-soft);
+  color: var(--color-accent-2);
+  font: 700 13px var(--font-ui);
+}

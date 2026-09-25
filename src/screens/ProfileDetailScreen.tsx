@@ -40,11 +40,15 @@ interface ProfileDetailScreenProps {
   onReport: (profile: Profile, motivo: string) => void;
   /** Volta para a conversa quando o perfil foi aberto de dentro dela. */
   onOpenChat?: () => void;
+  /** Só no modo "own": abre Editar perfil. */
+  onEdit?: () => void;
   /**
    * Barra de baixo. "swipe" só vale para quem veio da fila do Descobrir: com
-   * match já feito não faz sentido curtir ou dispensar de novo.
+   * match já feito não faz sentido curtir ou dispensar de novo. "own" é a
+   * pessoa vendo o próprio perfil como os outros o veem: sem curtir, sem
+   * denunciar, e com o caminho para corrigir o que não gostou.
    */
-  bottomAction?: "swipe" | "backToChat" | "openChat";
+  bottomAction?: "swipe" | "backToChat" | "openChat" | "own";
 }
 
 export function ProfileDetailScreen({
@@ -55,6 +59,7 @@ export function ProfileDetailScreen({
   onDislike,
   onReport,
   onOpenChat,
+  onEdit,
   bottomAction = "swipe",
 }: ProfileDetailScreenProps) {
   const [reportOpen, setReportOpen] = useState(false);
@@ -218,13 +223,20 @@ export function ProfileDetailScreen({
       </button>
 
       <div className={styles.scroll}>
+        {bottomAction === "own" && (
+          <p className={styles.ownBanner}>Assim seu perfil aparece para os outros</p>
+        )}
         <div className={styles.photoWrap}>
-          <img
-            className={styles.photo}
-            src={profile.photos[0]}
-            alt={`Foto de ${profile.name}`}
-            style={{ objectPosition: "center 25%" }}
-          />
+          {/* Só falta foto no modo "own", com todas reprovadas: sem foto
+              aprovada ninguém chega a este perfil pela fila. */}
+          {profile.photos[0] && (
+            <img
+              className={styles.photo}
+              src={profile.photos[0]}
+              alt={`Foto de ${profile.name}`}
+              style={{ objectPosition: "center 25%" }}
+            />
+          )}
           <span className={styles.intentionBadge}>{INTENTION_LABEL[profile.intention]}</span>
         </div>
 
@@ -280,9 +292,11 @@ export function ProfileDetailScreen({
             </div>
           )}
 
-          <button type="button" className={styles.reportLink} onClick={() => setReportOpen(true)}>
-            Denunciar este perfil
-          </button>
+          {bottomAction !== "own" && (
+            <button type="button" className={styles.reportLink} onClick={() => setReportOpen(true)}>
+              Denunciar este perfil
+            </button>
+          )}
         </div>
       </div>
 
@@ -301,6 +315,10 @@ export function ProfileDetailScreen({
         {bottomAction === "backToChat" ? (
           <button type="button" className={styles.backToChatButton} onClick={onBack}>
             Voltar à conversa
+          </button>
+        ) : bottomAction === "own" ? (
+          <button type="button" className={styles.backToChatButton} onClick={onEdit}>
+            Editar perfil
           </button>
         ) : bottomAction === "openChat" ? (
           <button type="button" className={styles.backToChatButton} onClick={onOpenChat}>

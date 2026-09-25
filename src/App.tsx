@@ -63,8 +63,36 @@ import {
   type Profile,
   type Tab,
 } from "./types";
+import { ageFromBirthdate } from "./utils/age";
 
 type Stage = "carregando" | "onboarding" | "main";
+
+/**
+ * O próprio perfil como os outros o veem. Só as fotos aprovadas: a reprovada
+ * a dona continua vendo em Editar perfil, mas os outros não (fotos_le). Sem
+ * distância, que é sempre de quem olha até aqui.
+ */
+function perfilComoOsOutrosVeem(perfil: MyProfile): Profile {
+  return {
+    id: "",
+    name: perfil.name,
+    age: ageFromBirthdate(perfil.birthdate) ?? 0,
+    gender: perfil.gender,
+    profession: perfil.profession,
+    city: perfil.city,
+    distanceKm: null,
+    intention: perfil.intention,
+    interests: perfil.interests,
+    bio: perfil.bio,
+    photos: perfil.photos.filter((foto) => foto.status === "aprovada").map((foto) => foto.url),
+    lifestyle: perfil.lifestyle,
+    values: perfil.values,
+    about: perfil.about,
+    relationshipStatus: perfil.relationshipStatus ?? undefined,
+    height: perfil.height,
+    verified: perfil.verificationStatus === "aprovada",
+  };
+}
 
 const INITIAL_FILTERS: Filters = {
   intentions: TODAS_AS_INTENCOES,
@@ -96,6 +124,7 @@ export default function App() {
   const [chatProfile, setChatProfile] = useState<Profile | null>(null);
 
   const [editingProfile, setEditingProfile] = useState(false);
+  const [viewingOwnProfile, setViewingOwnProfile] = useState(false);
   const [interestsOpen, setInterestsOpen] = useState(false);
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -648,6 +677,24 @@ export default function App() {
       );
     }
 
+    if (viewingOwnProfile && myProfile) {
+      return (
+        <ProfileDetailScreen
+          profile={perfilComoOsOutrosVeem(myProfile)}
+          myInterests={[]}
+          bottomAction="own"
+          onBack={() => setViewingOwnProfile(false)}
+          onEdit={() => {
+            setViewingOwnProfile(false);
+            setEditingProfile(true);
+          }}
+          onLike={() => {}}
+          onDislike={() => {}}
+          onReport={() => {}}
+        />
+      );
+    }
+
     if (editingProfile && myProfile) {
       return (
         <EditProfileScreen
@@ -871,6 +918,7 @@ export default function App() {
                 filters={filters}
                 verified={verificado}
                 onOpenEdit={() => setEditingProfile(true)}
+                onViewProfile={() => setViewingOwnProfile(true)}
                 onOpenInterests={() => setInterestsOpen(true)}
                 onOpenFilters={() => setFiltersOpen(true)}
                 onOpenSettings={() => setSettingsOpen(true)}
