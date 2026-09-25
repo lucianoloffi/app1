@@ -303,8 +303,9 @@ sob o filtro novo depois de um erro, e o retângulo cinza em volta das ilustraç
   `perfil_do_match` não servia: exige match com quem está logado. Campo novo
   no perfil dos outros entra também na `perfil_para_admin`. Conta excluída
   depois de a lista abrir mostra "Essa conta não existe mais".
-  A lista de todas as contas é acesso novo da moderação e ainda **não está na
-  política de privacidade** (ver Pendências).
+  A lista de todas as contas é acesso novo da moderação, e por isso entrou na
+  política de privacidade 1.9 (seção 6.3). O que a lista mostra ou deixa de
+  mostrar mudou? A 6.3 muda junto.
 - **Verificação e fotos no painel** (migration `0021`): as duas filas que faltavam.
   A de **verificação** é por PESSOA, não por pedido: `solicitar_verificacao` insere
   uma linha por selfie enviada e não impede a segunda, então agrupar evita a mesma
@@ -799,9 +800,7 @@ Em ordem de importância:
    o app fora do ar nem perder dados. Decisão do Lu em 22/09: fica para depois.
 4. **Painel admin completo:** retenção D7, ranking de 10 cidades e contas
    excluídas. O funil entrou em 25/09 (`0032`/`0033`) e a aba Usuários também
-   (`0035`). Nela faltam: a linha na política de privacidade (1.9) dizendo que
-   a moderação vê a lista de todas as contas, antes de abrir para gente de
-   fora; e suspender, banir e excluir a partir da lista. Excluir pede uma Edge
+   (`0035`). Nela falta suspender, banir e excluir a partir da lista. Excluir pede uma Edge
    Function nova com service role, porque a `delete-account` só apaga quem
    está logado. Os registros já existem
    desde a `0013`; falta só consultar e desenhar.
@@ -839,7 +838,7 @@ Em ordem de importância:
   `LEGAL_UPDATED_AT` não é lida por nenhum código; o que o usuário vê é o texto dos
   `.md`, e o consentimento registra só a `versao`. Antes de lançar, os **textos** (não
   só a data) precisam de revisão jurídica: o app trata dado sensível sob a LGPD.
-- **Privacidade está na 1.8 e diretrizes na 1.1.** A 1.1 (21/09) trouxe a moderação:
+- **Privacidade está na 1.9 e diretrizes na 1.1.** A 1.1 (21/09) trouxe a moderação:
   cópia da conversa na denúncia, o que o admin enxerga, e a denúncia que sobrevive à
   exclusão da conta. A 1.2 (21/09, junto da `0021`) trouxe a selfie de verificação —
   que ela é coletada, que uma pessoa a compara com as fotos do perfil, que não passa
@@ -869,6 +868,20 @@ Em ordem de importância:
   de responder e apagáveis sem encerrar a conta. Não caiu na exceção acima
   porque não é uso novo de dado que já existia, é dado novo, pedido com o aviso
   na hora. Mesmo assim, é um ponto para a revisão jurídica.
+  A 1.9 (25/09, junto da `0035`) pôs a seção 6.3, "A lista de contas da
+  moderação": a aba Usuários do painel mostra todas as contas sem precisar
+  de denúncia, com e-mail, capa (mesmo reprovada), datas, números de
+  curtidas, matches e conversas e a situação da conta, e abre o perfil como
+  os outros o veem. São só números: nada de com quem, nem do que foi escrito.
+  Entrou também a linha na tabela da seção 5 (legítimo interesse), e a 6.1,
+  que dizia que o e-mail só aparecia na análise de uma denúncia, passou a
+  apontar para a 6.3. **Ponto para a revisão jurídica:** pelo "Ver perfil",
+  a moderação vê religião e política de qualquer pessoa, sem denúncia.
+  Esses dois são tratados por consentimento, e a seção 11 exige novo aceite
+  para uso novo desse tipo de dado. A leitura adotada é que não é uso novo
+  (quem modera vê o mesmo que qualquer usuário), e o Lu decidiu em 25/09
+  deixar assim e levar à revisão. A alternativa, se a revisão discordar, é
+  esconder os dois no perfil do painel quando não houver denúncia aberta.
 - **Validação no cliente é UX, não segurança.** O mínimo de senha real é o do Supabase
   Auth; o cliente só antecipa a mensagem.
 - **Dado sensível.** Interesse (indica orientação sexual), cidade, fotos e telefone
