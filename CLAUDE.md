@@ -299,8 +299,10 @@ sob o filtro novo depois de um erro, e o retângulo cinza em volta das ilustraç
   **Decisões do Lu na prévia:** fotos como "2·1", com o número de reprovadas
   em vermelho (ponto no meio da linha, não ponto final, para não ler "dois
   vírgula um"); "Curtiu / recebeu" numa coluna só, com o "recebeu" e os
-  números recebidos em azul (`--color-blue`, token criado para isso); os
-  filtros continuam botões de uma escolha. Uma versão com quatro menus
+  números recebidos em azul (`--color-blue`, token criado para isso); na
+  coluna Último acesso, "hoje" em azul e negrito, para ver de relance quem
+  está ativo (quem decide é `usouHoje` em `datas.ts`, pela data, e não o
+  texto na tela); os filtros continuam botões de uma escolha. Uma versão com quatro menus
   combináveis (Novos usuários, Status, Perfil, Comportamento) foi montada e
   descartada. Depois: a coluna do nome ficou mais larga, e o link virou
   "Perfil ↗". Para caber tudo, a cidade e os selos da situação quebram linha
