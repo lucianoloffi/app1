@@ -1,7 +1,7 @@
 # Política de Privacidade — Lovi
 
 **Última atualização:** 25 de setembro de 2026
-**Versão:** 1.8
+**Versão:** 1.9
 
 Esta política explica quais dados o Lovi coleta, por que coleta e o que você
 pode fazer a respeito. Ela segue a Lei Geral de Proteção de Dados (Lei
@@ -98,6 +98,7 @@ opção marcada, sem encerrar a conta.
 | Mensagens | Permitir conversas entre matches | Execução de contrato |
 | Denúncias e bloqueios | Segurança da comunidade e moderação | Legítimo interesse |
 | Cópia da conversa anexada a uma denúncia | Analisar a denúncia e proteger quem foi alvo | Legítimo interesse |
+| Dados do perfil, e-mail e números de uso (dias de acesso, curtidas, matches e conversas) | Permitir que a moderação encontre contas que violem as Diretrizes antes de alguém denunciar e acompanhe as contas novas (seção 6.3) | Legítimo interesse |
 | Dados técnicos e logs | Segurança, prevenção a fraude e correção de erros | Legítimo interesse |
 
 ---
@@ -134,7 +135,8 @@ suficiente para decidir. Nessa análise, e **somente** nela, temos acesso a:
 - O motivo e a descrição escritos por quem denunciou
 - O **e-mail da sua conta**, que serve para identificá-la com certeza — nomes
   de perfil se repetem — ao aplicar uma decisão, conferir uma exclusão de conta
-  ou responder a uma contestação
+  ou responder a uma contestação. O e-mail aparece também na lista de
+  contas da seção 6.3
 - Uma **cópia das mensagens trocadas entre as duas pessoas**, feita no momento
   em que a denúncia é aberta
 
@@ -177,6 +179,30 @@ que violem as Diretrizes da Comunidade. Reprovar não apaga a foto: ela deixa de
 ser exibida aos outros usuários, continua visível para você e pode ser
 restabelecida se a reprovação tiver sido um engano. Uma foto que seja objeto de
 uma denúncia continua guardada enquanto a denúncia existir.
+
+---
+
+## 6.3. A lista de contas da moderação
+
+Nem todo perfil que viola as Diretrizes da Comunidade chega a ser denunciado.
+Para encontrá-los, e para acompanhar quem acabou de entrar, nossa equipe de
+moderação consulta uma lista de todas as contas. Nela aparecem, de cada conta:
+
+- Nome, idade, cidade e o **e-mail da conta**
+- A foto principal do perfil, mesmo que tenha sido reprovada, e quantas fotos
+  a conta tem e quantas foram reprovadas
+- A data do cadastro e o último dia em que o app foi aberto
+- **Quantas** curtidas a pessoa deu e recebeu, quantos matches teve e em
+  quantos deles houve conversa
+- A situação da conta: se está suspensa ou encerrada, se tem denúncias abertas,
+  se o perfil é verificado, se está oculto e se o cadastro foi concluído
+
+Da lista, quem modera pode abrir o seu perfil **como os outros usuários o
+veem** (seção 6): só as fotos aprovadas e sem a distância.
+
+São só números. A lista **não** mostra quem você curtiu, com quem deu match
+ou conversou, nem o que foi escrito nas conversas. Também não mostra o seu
+telefone, as suas coordenadas nem as suas preferências de busca.
 
 ---
 
