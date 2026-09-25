@@ -442,9 +442,15 @@ sob o filtro novo depois de um erro, e o retângulo cinza em volta das ilustraç
   "Outra" e, por fim, quem não tem religião) é a que faz as nove opções caberem
   em três linhas em 390 px. As três perguntas cabem na tela sem rolar.
   **Os outros veem as respostas**: as seis colunas entram no `perfil_publico`
-  e o `ProfileDetailScreen` mostra as escolhas na lista do estilo de vida e os
-  textos em cartões abaixo da bio ("No tempo livre", "Valoriza em uma pessoa").
-  Nada disso filtra a fila. Religião e política são dado sensível: o
+  e o `ProfileDetailScreen` mostra as escolhas na lista do estilo de vida. Os
+  textos ("No tempo livre", "Valoriza em uma pessoa") **entremeiam as fotos**
+  (decisão do Lu em 24/09), para o fim do perfil não ser só imagem: com duas
+  fotos ou mais além da capa, cada texto vai embaixo de uma (o primeiro sob a
+  segunda foto, o outro sob a terceira); com uma só, os dois vão embaixo dela;
+  só com a capa, seguem a lista do estilo de vida. Quem respondeu só um tem o
+  texto sob a segunda foto, sem buraco. Sem cartão, com o texto em itálico de
+  20 px. A fonte não tem itálico próprio e o navegador inclina as letras.
+  Antes eram cartões brancos logo abaixo da bio. Nada disso filtra a fila. Religião e política são dado sensível: o
   consentimento é o ato de responder, como na selfie (política 1.8, seção 4).
   `ChoiceGroups` (`src/onboarding/`) desenha os grupos de chips de "Seus
   valores" e do estilo de vida.
