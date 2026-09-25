@@ -1,4 +1,5 @@
 import type {
+  CampoQuePodeRecusar,
   Filters,
   Intention,
   ModerationStatus,
@@ -97,6 +98,7 @@ export async function carregarMeuPerfil(): Promise<MeuPerfilCompleto | null> {
       profession: perfil.profissao ?? "",
       height: perfil.altura_m === null ? 1.7 : Number(perfil.altura_m),
       relationshipStatus: perfil.status_relacionamento ?? null,
+      prefereNaoDizer: perfil.prefere_nao_dizer ?? [],
       email: usuario.email ?? "",
       phone: perfil.telefone ?? "",
       visible: perfil.visivel,
@@ -173,6 +175,16 @@ export async function cidadeMaisProxima(
   return { nome: linha.nome, uf: linha.uf, distanciaKm: linha.distancia_km };
 }
 
+/**
+ * Só vale a recusa de quem continua sem resposta: quem recusou e depois
+ * escolheu uma opção respondeu, e a recusa antiga não pode ficar gravada.
+ */
+function recusasEmVigor(perfil: MyProfile): CampoQuePodeRecusar[] {
+  return perfil.prefereNaoDizer.filter((campo) =>
+    campo === "relacionamento" ? !perfil.relationshipStatus : !perfil.lifestyle[campo],
+  );
+}
+
 /** Salva os campos editáveis do perfil (tela Editar perfil). */
 export async function salvarPerfil(perfil: MyProfile): Promise<void> {
   const id = await meuId();
@@ -198,6 +210,7 @@ export async function salvarPerfil(perfil: MyProfile): Promise<void> {
       // Só espaços é o mesmo que não ter escrito nada.
       tempo_livre: perfil.about.tempoLivre.trim() || null,
       o_que_valoriza: perfil.about.oQueValoriza.trim() || null,
+      prefere_nao_dizer: recusasEmVigor(perfil),
     })
     .eq("id", id);
   lancaSeErro(error);

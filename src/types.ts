@@ -165,6 +165,14 @@ export interface MyPhoto {
   status: PhotoStatus;
 }
 
+/**
+ * Perguntas com "Prefiro não dizer" (na tela Interesses). A escolha grava o
+ * campo como null e o nome aqui, em `profiles.prefere_nao_dizer` (migration
+ * 0031): sem isso, recusar e nunca ter respondido eram a mesma coisa, e o
+ * anel do Perfil cobrava para sempre quem recusou.
+ */
+export type CampoQuePodeRecusar = keyof Lifestyle | "relacionamento";
+
 export interface MyProfile {
   name: string;
   city: string;
@@ -181,6 +189,8 @@ export interface MyProfile {
   profession: string;
   height: number;
   relationshipStatus: RelationshipStatus | null;
+  /** Só a dona vê. Os outros não sabem se foi recusa ou falta de resposta. */
+  prefereNaoDizer: CampoQuePodeRecusar[];
   email?: string;
   phone?: string;
   visible?: boolean;
@@ -221,6 +231,7 @@ export type PerfilEditavel = Pick<
   | "profession"
   | "height"
   | "relationshipStatus"
+  | "prefereNaoDizer"
 >;
 
 export interface Filters {

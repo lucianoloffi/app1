@@ -53,7 +53,10 @@ interface EditProfileScreenProps {
    * passam por aqui.
    */
   onSave: (
-    edicao: Omit<PerfilEditavel, "interests" | "values" | "lifestyle" | "relationshipStatus">,
+    edicao: Omit<
+      PerfilEditavel,
+      "interests" | "values" | "lifestyle" | "relationshipStatus" | "prefereNaoDizer"
+    >,
   ) => void;
   onShowToast: (message: string) => void;
   onOpenGuidelines?: () => void;

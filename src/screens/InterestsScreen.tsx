@@ -5,13 +5,19 @@ import { SelectedInterests } from "../components/SelectedInterests";
 import { LIFE_GROUPS, STATUS_OPTIONS, VALUE_GROUPS } from "../data/lifestyle";
 import type { ErroNoFormulario } from "../lib/errors";
 import { MAX_INTERESTS } from "../onboarding/constants";
-import type { Lifestyle, MyProfile, RelationshipStatus, Values } from "../types";
+import type {
+  CampoQuePodeRecusar,
+  Lifestyle,
+  MyProfile,
+  RelationshipStatus,
+  Values,
+} from "../types";
 import styles from "./InterestsScreen.module.css";
 
 /** O que esta tela devolve: o resto do perfil continua como está. */
 export type EdicaoDeInteresses = Pick<
   MyProfile,
-  "interests" | "values" | "lifestyle" | "relationshipStatus"
+  "interests" | "values" | "lifestyle" | "relationshipStatus" | "prefereNaoDizer"
 >;
 
 interface InterestsScreenProps {
@@ -39,7 +45,20 @@ export function InterestsScreen({
   const [relationshipStatus, setRelationshipStatus] = useState<RelationshipStatus | null>(
     profile.relationshipStatus,
   );
+  const [prefereNaoDizer, setPrefereNaoDizer] = useState<CampoQuePodeRecusar[]>(
+    profile.prefereNaoDizer,
+  );
   const [interestSheetOpen, setInterestSheetOpen] = useState(false);
+
+  // Escolher uma opção desfaz a recusa; a API também a limpa ao salvar, mas
+  // aqui a folha precisa mostrar a opção nova marcada, não as duas.
+  function recusar(campo: CampoQuePodeRecusar, recusou: boolean) {
+    setPrefereNaoDizer((prev) =>
+      recusou
+        ? [...prev.filter((item) => item !== campo), campo]
+        : prev.filter((item) => item !== campo),
+    );
+  }
 
   const erroDosInteresses = error?.campo === "interesses" ? error.texto : null;
 
@@ -53,7 +72,9 @@ export function InterestsScreen({
         <button
           type="button"
           className={`${styles.headerAction} ${styles.headerActionAccent}`}
-          onClick={() => onSave({ interests, values, lifestyle, relationshipStatus })}
+          onClick={() =>
+            onSave({ interests, values, lifestyle, relationshipStatus, prefereNaoDizer })
+          }
         >
           Concluído
         </button>
@@ -102,7 +123,11 @@ export function InterestsScreen({
             iconPath="M9.6 14.8a4.2 4.2 0 110-8.4 4.2 4.2 0 010 8.4zm0-1.8a2.4 2.4 0 100-4.8 2.4 2.4 0 000 4.8zm4.8 4.8a4.2 4.2 0 110-8.4 4.2 4.2 0 010 8.4zm0-1.8a2.4 2.4 0 100-4.8 2.4 2.4 0 000 4.8z"
             value={relationshipStatus}
             options={STATUS_OPTIONS}
-            onChange={(value) => setRelationshipStatus(value as RelationshipStatus | null)}
+            recusado={prefereNaoDizer.includes("relacionamento")}
+            onChange={(value) => {
+              setRelationshipStatus(value as RelationshipStatus | null);
+              recusar("relacionamento", value === null);
+            }}
           />
           {LIFE_GROUPS.map((group) => (
             <RowBottomSheet
@@ -111,9 +136,11 @@ export function InterestsScreen({
               iconPath={group.icon}
               value={lifestyle[group.key]}
               options={group.options}
-              onChange={(value) =>
-                setLifestyle((prev) => ({ ...prev, [group.key]: value }) as Lifestyle)
-              }
+              recusado={prefereNaoDizer.includes(group.key)}
+              onChange={(value) => {
+                setLifestyle((prev) => ({ ...prev, [group.key]: value }) as Lifestyle);
+                recusar(group.key, value === null);
+              }}
             />
           ))}
         </div>

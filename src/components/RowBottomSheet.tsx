@@ -18,6 +18,12 @@ interface RowBottomSheetProps {
    * branco, toca-se de novo na opção marcada, como nos chips do cadastro.
    */
   semOpcaoVazia?: boolean;
+  /**
+   * A pessoa escolheu "Prefiro não dizer". Sem isso, o campo vazio aparecia
+   * como "Prefiro não dizer" mesmo em pergunta nunca aberta, como se ela
+   * tivesse escolhido: agora a pergunta sem resposta mostra "Escolher".
+   */
+  recusado?: boolean;
 }
 
 export function RowBottomSheet({
@@ -28,9 +34,11 @@ export function RowBottomSheet({
   onChange,
   emptyLabel = "Prefiro não dizer",
   semOpcaoVazia,
+  recusado = false,
 }: RowBottomSheetProps) {
   const [open, setOpen] = useState(false);
   const current = options.find((option) => option.value === value);
+  const textoSemValor = semOpcaoVazia || recusado ? emptyLabel : "Escolher";
 
   return (
     <>
@@ -42,8 +50,10 @@ export function RowBottomSheet({
         </span>
         <span className={styles.main}>
           <span className={styles.label}>{label}</span>
-          <span className={current ? styles.value : `${styles.value} ${styles.valueEmpty}`}>
-            {current?.label ?? emptyLabel}
+          <span
+            className={current || recusado ? styles.value : `${styles.value} ${styles.valueEmpty}`}
+          >
+            {current?.label ?? textoSemValor}
           </span>
         </span>
         <svg
@@ -82,7 +92,7 @@ export function RowBottomSheet({
             <div className={styles.optionList}>
               {(semOpcaoVazia ? options : [...options, { value: "", label: emptyLabel }]).map((option) => {
                 const isActive =
-                  option.value === "" ? value === null : value === option.value;
+                  option.value === "" ? value === null && recusado : value === option.value;
                 return (
                   <button
                     key={option.label}
