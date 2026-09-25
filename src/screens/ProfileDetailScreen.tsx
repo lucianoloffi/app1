@@ -1,20 +1,34 @@
 import { Fragment, useMemo, useState } from "react";
 import { CloseIcon, HeartIcon } from "../components/icons/ActionIcons";
+import { FactIcon, type FactIconName } from "../components/icons/FactIcons";
 import { ReportSheet } from "../components/ReportSheet";
 import {
-  ACTIVITY_LABEL,
-  DIET_LABEL,
-  DRINK_LABEL,
-  heightLabel,
-  INTENTION_LABEL,
-  KIDS_LABEL,
-  POLITICS_LABEL,
-  RELATIONSHIP_STATUS_LABEL,
-  RELIGION_LABEL,
-  SMOKE_LABEL,
-  type Profile,
-} from "../types";
+  ACTIVITY_PHRASE,
+  DIET_PHRASE,
+  DRINK_PHRASE,
+  KIDS_PHRASE,
+  POLITICS_PHRASE,
+  RELIGION_PHRASE,
+  SMOKE_PHRASE,
+  concordaGenero,
+} from "../data/factPhrases";
+import { heightLabel, INTENTION_LABEL, RELATIONSHIP_STATUS_LABEL, type Profile } from "../types";
 import styles from "./ProfileDetailScreen.module.css";
+
+/**
+ * Até aqui, a resposta cabe em duas linhas num bloco de meia largura. A
+ * palavra também tem limite: "relacionamento" e "Vegetariano(a)" não cabem na
+ * largura do bloco e eram partidas no meio.
+ */
+const FRASE_CURTA_MAXIMA = 20;
+const PALAVRA_CURTA_MAXIMA = 12;
+
+function cabeEmMeiaLargura(frase: string) {
+  return (
+    frase.length <= FRASE_CURTA_MAXIMA &&
+    frase.split(" ").every((palavra) => palavra.length <= PALAVRA_CURTA_MAXIMA)
+  );
+}
 
 interface ProfileDetailScreenProps {
   profile: Profile;
@@ -51,43 +65,81 @@ export function ProfileDetailScreen({
 
   // Em blocos de dois por linha, não em lista: a lista de rótulo à esquerda e
   // valor à direita parecia um formulário a preencher, não uma pessoa.
-  type Fact = { label: string; value: string };
+  type Fact = { icon: FactIconName; label: string; value: string };
   const aboutFacts: Fact[] = [];
+  const valueFacts: Fact[] = [];
+  const lifestyle = profile.lifestyle;
+  const values = profile.values;
   if (profile.relationshipStatus) {
     aboutFacts.push({
+      icon: "relacionamento",
       label: "Relacionamento",
       value: RELATIONSHIP_STATUS_LABEL[profile.relationshipStatus],
     });
   }
   if (profile.height) {
-    aboutFacts.push({ label: "Altura", value: heightLabel(profile.height) });
+    aboutFacts.push({ icon: "altura", label: "Altura", value: heightLabel(profile.height) });
   }
-  if (profile.lifestyle?.bebida) {
-    aboutFacts.push({ label: "Bebida", value: DRINK_LABEL[profile.lifestyle.bebida] });
+  if (lifestyle?.bebida) {
+    aboutFacts.push({ icon: "bebida", label: "Bebida", value: DRINK_PHRASE[lifestyle.bebida] });
   }
-  if (profile.lifestyle?.atividade) {
-    aboutFacts.push({ label: "Atividade física", value: ACTIVITY_LABEL[profile.lifestyle.atividade] });
+  if (lifestyle?.atividade) {
+    aboutFacts.push({
+      icon: "atividade",
+      label: "Atividade física",
+      value: ACTIVITY_PHRASE[lifestyle.atividade],
+    });
   }
-  if (profile.lifestyle?.filhos) {
-    aboutFacts.push({ label: "Filhos", value: KIDS_LABEL[profile.lifestyle.filhos] });
+  if (lifestyle?.filhos) {
+    aboutFacts.push({ icon: "filhos", label: "Filhos", value: KIDS_PHRASE[lifestyle.filhos] });
   }
-  if (profile.lifestyle?.fumo) {
-    aboutFacts.push({ label: "Fuma", value: SMOKE_LABEL[profile.lifestyle.fumo] });
+  if (lifestyle?.fumo) {
+    aboutFacts.push({ icon: "fumo", label: "Fumo", value: SMOKE_PHRASE[lifestyle.fumo] });
   }
-
-  if (profile.values?.alimentacao) {
-    aboutFacts.push({ label: "Alimentação", value: DIET_LABEL[profile.values.alimentacao] });
+  // No cadastro, alimentação é de "Seus valores"; aqui é hábito, e fica em "Sobre".
+  if (values?.alimentacao) {
+    aboutFacts.push({
+      icon: "alimentacao",
+      label: "Alimentação",
+      value: DIET_PHRASE[values.alimentacao],
+    });
   }
-
-  const valueFacts: Fact[] = [];
-  if (profile.values?.religiao) {
-    valueFacts.push({ label: "Religião", value: RELIGION_LABEL[profile.values.religiao] });
+  if (values?.religiao) {
+    valueFacts.push({
+      icon: "religiao",
+      label: "Religião",
+      value: RELIGION_PHRASE[values.religiao],
+    });
   }
-  if (profile.values?.politica) {
-    valueFacts.push({ label: "Política", value: POLITICS_LABEL[profile.values.politica] });
+  if (values?.politica) {
+    valueFacts.push({
+      icon: "politica",
+      label: "Política",
+      value: POLITICS_PHRASE[values.politica],
+    });
   }
 
   const firstName = profile.name.split(" ")[0];
+
+  // Frase longa em meia largura ia a três ou quatro linhas ("Atividade física
+  // algumas vezes na semana") e deixava a linha de blocos alta e torta. Ela
+  // ocupa a linha toda e vai para o fim do grupo, depois dos pares. Se sobrar
+  // um bloco curto sem par, ele também ocupa a linha, para não ficar buraco.
+  function arrangeFacts(facts: Fact[]) {
+    const withText = facts.map((fact) => ({
+      ...fact,
+      value: concordaGenero(fact.value, profile.gender),
+    }));
+    const short = withText.filter((fact) => cabeEmMeiaLargura(fact.value));
+    const long = withText.filter((fact) => !cabeEmMeiaLargura(fact.value));
+    return [
+      ...short.map((fact, index) => ({
+        ...fact,
+        wide: short.length % 2 === 1 && index === short.length - 1,
+      })),
+      ...long.map((fact) => ({ ...fact, wide: true })),
+    ];
+  }
 
   function renderFacts(title: string, facts: Fact[]) {
     if (facts.length === 0) return null;
@@ -95,10 +147,16 @@ export function ProfileDetailScreen({
       <section className={styles.factSection}>
         <h2 className={styles.factTitle}>{title}</h2>
         <div className={styles.factGrid}>
-          {facts.map((fact) => (
-            <div key={fact.label} className={styles.fact}>
-              <span className={styles.factLabel}>{fact.label}</span>
-              <span className={styles.factValue}>{fact.value}</span>
+          {arrangeFacts(facts).map((fact) => (
+            <div
+              key={fact.label}
+              className={fact.wide ? `${styles.fact} ${styles.factWide}` : styles.fact}
+            >
+              <FactIcon name={fact.icon} size={22} />
+              <span className={styles.factValue}>
+                <span className={styles.paraLeitor}>{fact.label}: </span>
+                {fact.value}
+              </span>
             </div>
           ))}
         </div>

@@ -83,36 +83,49 @@
   color: var(--color-ink-40);
 }
 
-/* Dois por linha. Com número ímpar, o último ocupa a linha toda em vez de
-   deixar um buraco à direita. */
+/* Dois por linha. Quem ocupa a linha toda (frase longa, ou o bloco curto
+   que sobrou sem par) é decidido no componente, em `arrangeFacts`. */
 .factGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
 }
 
+/* Só ícone e resposta: o rótulo ("Bebida", "Filhos") fica para o leitor de
+   tela, que não vê o ícone. */
 .fact {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
+  align-items: center;
+  gap: 10px;
   padding: 14px 16px;
   border-radius: 16px;
   background: var(--color-bg);
   min-width: 0;
+  /* Referência do texto escondido para leitor de tela (.paraLeitor). */
+  position: relative;
 }
 
-.fact:last-child:nth-child(odd) {
+.fact svg {
+  flex: none;
+  color: var(--color-accent-2);
+}
+
+.factWide {
   grid-column: 1 / -1;
 }
 
-.factLabel {
-  font: 600 11px var(--font-ui);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--color-ink-40);
+/* Só para leitor de tela: fora da vista, mas lido junto da resposta. */
+.paraLeitor {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
-/* "Não faz diferença para mim" é longo: quebra dentro do bloco. */
+/* Frase longa já vai em bloco de linha inteira (`arrangeFacts`); partir a
+   palavra é só a última defesa, para nada vazar do bloco. */
 .factValue {
   font: 600 15px/1.3 var(--font-ui);
   color: var(--color-ink);
@@ -120,7 +133,7 @@
 }
 
 /* Sem cartão: entre as fotos, o texto solto respira melhor. O título roxo o
-   separa da bio e da lista do estilo de vida. Houve itálico, mas a fonte não
+   separa da bio e dos blocos do estilo de vida. Houve itálico, mas a fonte não
    tem a versão itálica carregada, e o navegador só inclinava as letras. */
 .answer {
   display: flex;
