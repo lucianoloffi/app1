@@ -442,12 +442,12 @@ sob o filtro novo depois de um erro, e o retângulo cinza em volta das ilustraç
   "Outra" e, por fim, quem não tem religião) é a que faz as nove opções caberem
   em três linhas em 390 px. As três perguntas cabem na tela sem rolar.
   **Os outros veem as respostas**: as seis colunas entram no `perfil_publico`
-  e o `ProfileDetailScreen` mostra as escolhas na lista do estilo de vida. Os
+  e o `ProfileDetailScreen` mostra as escolhas nos blocos do perfil (abaixo). Os
   textos ("No tempo livre", "Valoriza em uma pessoa") **entremeiam as fotos**
   (decisão do Lu em 24/09), para o fim do perfil não ser só imagem: com duas
   fotos ou mais além da capa, cada texto vai embaixo de uma (o primeiro sob a
   segunda foto, o outro sob a terceira); com uma só, os dois vão embaixo dela;
-  só com a capa, seguem a lista do estilo de vida. Quem respondeu só um tem o
+  só com a capa, seguem os blocos. Quem respondeu só um tem o
   texto sob a segunda foto, sem buraco. Sem cartão: texto normal de 18 px e
   título em roxo (`--color-accent-2`). Antes eram cartões brancos logo abaixo
   da bio. Houve itálico por uma tarde e saiu: o `index.html` carrega a Plus
@@ -458,6 +458,18 @@ sob o filtro novo depois de um erro, e o retângulo cinza em volta das ilustraç
   consentimento é o ato de responder, como na selfie (política 1.8, seção 4).
   `ChoiceGroups` (`src/onboarding/`) desenha os grupos de chips de "Seus
   valores" e do estilo de vida.
+- **Blocos do perfil de outra pessoa** (`ProfileDetailScreen`, 24/09). Estilo
+  de vida e valores aparecem em blocos cinza-claros (`--color-bg`), dois por
+  linha, com o nome do campo pequeno em maiúsculas e a resposta embaixo. Antes
+  era uma lista de rótulo à esquerda e valor à direita, que parecia formulário.
+  São dois grupos: "Sobre <primeiro nome>" (relacionamento, altura, bebida,
+  atividade, filhos, fumo e alimentação) e "Valores" (religião e política).
+  Alimentação fica no primeiro de propósito, embora no cadastro seja de "Seus
+  valores": é hábito, não convicção. Com número ímpar, o último bloco ocupa a
+  linha toda. "Status de relacionamento" virou "Relacionamento" para caber em
+  meia largura. Decisões do Lu na prévia: o grupo Valores em lilás foi testado
+  e saiu (ficou o mesmo cinza), e a resposta é 600 15px, porque 700 16px
+  competia com o nome no topo. Grupo sem nenhuma resposta não aparece.
 
 ## Convenções
 
