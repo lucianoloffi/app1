@@ -1,5 +1,11 @@
 import { useEffect, useState } from "react";
-import { carregarNumeros, type NumerosDoPainel, type PeriodoDoPainel } from "../lib/api/admin";
+import {
+  carregarNumeros,
+  carregarSerie,
+  type NumerosDoPainel,
+  type PeriodoDoPainel,
+  type SerieDoPainel,
+} from "../lib/api/admin";
 import { mensagemDeErro } from "../lib/errors";
 import { DailyChart } from "./DailyChart";
 import { Funnel } from "./Funnel";
@@ -19,6 +25,17 @@ const PERIODOS: { valor: PeriodoDoPainel; rotulo: string }[] = [
  */
 const INICIO_DOS_REGISTROS = "21/09/2026";
 
+/** Dia em que a hora de uso passou a ser gravada (migration 0034). */
+const INICIO_DAS_HORAS = "25/09/2026";
+
+/** O título do gráfico diz o formato: ele segue o filtro de período. */
+const TITULO_DO_GRAFICO: Record<PeriodoDoPainel, string> = {
+  hoje: "Hoje, por hora",
+  "7d": "Últimos 7 dias",
+  "30d": "Últimos 30 dias",
+  "90d": "Últimos 90 dias, por semana",
+};
+
 const numero = (n: number) => n.toLocaleString("pt-BR");
 const dataCurta = (iso: string) => iso.split("-").reverse().slice(0, 2).join("/");
 const porcentagem = (parte: number, todo: number) =>
@@ -28,7 +45,11 @@ export function NumbersScreen() {
   const [periodo, setPeriodo] = useState<PeriodoDoPainel>("30d");
   // Guarda o período junto com os números: enquanto não chegam os do período
   // escolhido, a tela sabe que está carregando sem um estado a mais.
-  const [dados, setDados] = useState<{ periodo: PeriodoDoPainel; numeros: NumerosDoPainel } | null>(
+  const [dados, setDados] = useState<{
+    periodo: PeriodoDoPainel;
+    numeros: NumerosDoPainel;
+    serie: SerieDoPainel;
+  } | null>(
     null,
   );
   const [erro, setErro] = useState<string | null>(null);
@@ -36,10 +57,11 @@ export function NumbersScreen() {
 
   useEffect(() => {
     let ativo = true;
-    carregarNumeros(periodo)
-      .then((numeros) => {
+    // Juntos, para os cartões e o gráfico mudarem de período ao mesmo tempo.
+    Promise.all([carregarNumeros(periodo), carregarSerie(periodo)])
+      .then(([numeros, serie]) => {
         if (!ativo) return;
-        setDados({ periodo, numeros });
+        setDados({ periodo, numeros, serie });
         setErro(null);
       })
       .catch((problema) => {
@@ -140,7 +162,7 @@ export function NumbersScreen() {
 
           <section className={styles.bloco}>
             <div className={styles.blocoTopo}>
-              <h2 className={styles.h2}>Últimos 30 dias</h2>
+              <h2 className={styles.h2}>{TITULO_DO_GRAFICO[dados!.periodo]}</h2>
               <span className={styles.legenda}>
                 <span className={styles.legendaAtivos} aria-hidden="true" />
                 Usuários ativos
@@ -150,14 +172,17 @@ export function NumbersScreen() {
                 Novos usuários
               </span>
             </div>
-            <DailyChart dias={n.porDia} />
+            <DailyChart serie={dados!.serie} />
             <p className={styles.nota}>
-              Os dias de uso passaram a ser registrados em {INICIO_DOS_REGISTROS}. Antes disso,
-              só conta como ativo quem curtiu ou mandou mensagem no dia.
+              {dados!.periodo === "hoje"
+                ? `Ativos são quem usou o app naquela hora. A hora de uso passou a ser registrada em ${INICIO_DAS_HORAS}.`
+                : `Os dias de uso passaram a ser registrados em ${INICIO_DOS_REGISTROS}. Antes disso, só conta como ativo quem curtiu ou mandou mensagem no dia.`}
+              {dados!.periodo === "90d" &&
+                " Na semana, cada pessoa conta uma vez, mesmo usando em vários dias."}
             </p>
           </section>
 
-          {/* O funil ao lado das cidades, e o gráfico dos 30 dias em cima, na
+          {/* O funil ao lado das cidades, e o gráfico em cima, na
               largura toda (pedido do Lu em 25/09): com o funil sozinho numa
               linha, as faixas ficavam compridas e sobrava espaço dos lados. */}
           <div className={styles.linhaDeBaixo}>

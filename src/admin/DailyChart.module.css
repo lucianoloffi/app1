@@ -101,3 +101,9 @@
 .linhaNovos {
   stroke: var(--color-coral);
 }
+
+/* O mês embaixo dos números do dia: só no primeiro e na virada. */
+.mes {
+  font: 700 12px var(--font-ui);
+  fill: var(--color-ink);
+}

@@ -14,13 +14,6 @@ export interface CidadeDoPainel {
   outros: number;
 }
 
-export interface DiaDoPainel {
-  /** aaaa-mm-dd */
-  dia: string;
-  novos: number;
-  ativos: number;
-}
-
 export interface NumerosDoPainel {
   /** aaaa-mm-dd, primeiro e último dia do período */
   inicio: string;
@@ -31,8 +24,6 @@ export interface NumerosDoPainel {
   ativosComMatch: number;
   matches: number;
   matchesComConversa: number;
-  /** Sempre os últimos 30 dias, seja qual for o período. */
-  porDia: DiaDoPainel[];
   /** As 5 cidades com mais usuários ativos no período. */
   cidades: CidadeDoPainel[];
 }
@@ -57,8 +48,30 @@ interface LinhaDoPainel {
   ativos_com_match: number;
   matches: number;
   matches_com_conversa: number;
-  por_dia: DiaDoPainel[] | null;
   cidades: CidadeDoPainel[] | null;
+}
+
+/** Como o gráfico da aba Números agrupa os pontos, conforme o período. */
+export type Granularidade = "hora" | "dia" | "semana";
+
+export interface PontoDaSerie {
+  /** "AAAA-MM-DDTHH:00" (hora, em São Paulo), "AAAA-MM-DD" (dia) ou a segunda-feira (semana). */
+  inicio: string;
+  novos: number;
+  ativos: number;
+}
+
+export interface SerieDoPainel {
+  granularidade: Granularidade;
+  pontos: PontoDaSerie[];
+}
+
+/** Os pontos do gráfico no formato do período (migration 0034). */
+export async function carregarSerie(periodo: PeriodoDoPainel): Promise<SerieDoPainel> {
+  const { data, error } = await supabase.rpc("painel_serie", { p_periodo: periodo });
+  lancaSeErro(error);
+  const linha = data as { granularidade: Granularidade; pontos: PontoDaSerie[] | null };
+  return { granularidade: linha.granularidade, pontos: linha.pontos ?? [] };
 }
 
 export async function carregarNumeros(periodo: PeriodoDoPainel): Promise<NumerosDoPainel> {
@@ -74,7 +87,6 @@ export async function carregarNumeros(periodo: PeriodoDoPainel): Promise<Numeros
     ativosComMatch: linha.ativos_com_match,
     matches: linha.matches,
     matchesComConversa: linha.matches_com_conversa,
-    porDia: linha.por_dia ?? [],
     cidades: linha.cidades ?? [],
   };
 }
