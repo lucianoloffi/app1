@@ -85,9 +85,27 @@ export async function carregarNumeros(periodo: PeriodoDoPainel): Promise<Numeros
  * Contas criadas no período e até onde cada uma chegou (migration 0032). Sem
  * os perfis de teste (@lovi.test) e sem as contas de admin.
  */
+/** Quantas pessoas chegaram a cada etapa. */
+export interface EtapasDoFunil {
+  contas: number;
+  cadastro: number;
+  curtida: number;
+  match: number;
+  conversa: number;
+  resposta: number;
+}
+
+/** Contas criadas numa semana (segunda a domingo) e até onde chegaram. */
+export interface SemanaDoFunil extends EtapasDoFunil {
+  /** Segunda-feira da semana, "AAAA-MM-DD". */
+  semana: string;
+}
+
 export interface FunilDoPainel {
   inicio: string;
   fim: string;
+  /** Semanas de entrada, da mais antiga para a mais nova. */
+  semanas?: SemanaDoFunil[];
   contas: number;
   cadastro: number;
   curtida: number;
@@ -101,7 +119,11 @@ export interface FunilDoPainel {
 export async function carregarFunil(periodo: PeriodoDoPainel): Promise<FunilDoPainel> {
   const { data, error } = await supabase.rpc("painel_funil", { p_periodo: periodo });
   lancaSeErro(error);
-  const linha = data as Omit<FunilDoPainel, "foraDaConta"> & { fora_da_conta: number };
+  const linha = data as Omit<FunilDoPainel, "foraDaConta" | "semanas"> & {
+    fora_da_conta: number;
+    /** Desde a 0033. */
+    semanas?: SemanaDoFunil[] | null;
+  };
   return {
     inicio: linha.inicio,
     fim: linha.fim,
@@ -112,6 +134,7 @@ export async function carregarFunil(periodo: PeriodoDoPainel): Promise<FunilDoPa
     conversa: linha.conversa,
     resposta: linha.resposta,
     foraDaConta: linha.fora_da_conta,
+    semanas: linha.semanas ?? [],
   };
 }
 

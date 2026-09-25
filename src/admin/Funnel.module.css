@@ -5,7 +5,7 @@
   padding: 24px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 18px;
   transition: opacity 0.2s var(--ease-standard);
 }
 
@@ -25,57 +25,86 @@
   font: 800 18px var(--font-ui);
 }
 
+.h3 {
+  margin: 0;
+  font: 800 15px var(--font-ui);
+}
+
 .apoio {
   font: 400 13px var(--font-ui);
   color: var(--color-ink-60);
 }
 
-.etapas {
+/* ─── o funil ─── */
+
+.funil {
   margin: 0;
   padding: 0;
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  max-width: 820px;
 }
 
-.etapa {
+/* Nome à esquerda e o desenho à direita, nas mesmas colunas na faixa e na
+   passagem, para a área entre as faixas encaixar nelas. */
+.etapa,
+.passagem {
   display: grid;
-  grid-template-columns: 190px minmax(0, 1fr) 48px 170px;
+  grid-template-columns: 180px minmax(0, 1fr);
   align-items: center;
-  gap: 16px;
+  column-gap: 20px;
 }
 
 .rotulo {
   font: 600 14px var(--font-ui);
 }
 
-/* Trilho claro com a barra por cima: o tamanho da barra é a fração de quem
-   criou a conta, e o trilho mostra o quanto falta até todas. */
-.trilho {
-  height: 12px;
-  border-radius: 4px;
-  background: var(--color-bg);
-  overflow: hidden;
+/* A faixa é centralizada: é o estreitamento dos dois lados que faz a forma
+   de funil. O número vai dentro dela. */
+.pista {
+  display: flex;
+  justify-content: center;
 }
 
-.barra {
-  display: block;
-  height: 100%;
-  min-width: 2px;
-  border-radius: 4px;
+.faixa {
+  height: 40px;
+  border-radius: 6px;
   background: var(--color-accent);
-}
-
-.valor {
-  font: 800 16px var(--font-ui);
-  text-align: right;
+  color: #fff;
+  font: 800 17px var(--font-ui);
   font-variant-numeric: tabular-nums;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
+/* Quem ficou pelo caminho: um trapézio do tamanho de uma faixa ao da
+   seguinte, na cor clara. As larguras chegam em --topo e --base. O texto
+   "seguiram" fica na mesma célula, por cima. */
+.ligacao {
+  grid-column: 2;
+  grid-row: 1;
+  height: 30px;
+  background: var(--color-accent-soft);
+  clip-path: polygon(
+    calc(50% - var(--topo) / 2) 0,
+    calc(50% + var(--topo) / 2) 0,
+    calc(50% + var(--base) / 2) 100%,
+    calc(50% - var(--base) / 2) 100%
+  );
+}
+
+/* position + z-index: o clip-path põe o trapézio numa camada acima do texto
+   comum, e sem isto o "seguiram" ficava escondido atrás dele. */
 .seguiram {
-  font: 400 13px var(--font-ui);
-  color: var(--color-ink-60);
+  position: relative;
+  z-index: 1;
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: center;
+  font: 700 13px var(--font-ui);
+  color: var(--color-accent-2);
 }
 
 .destaque {
@@ -87,10 +116,59 @@
   font: 600 14px/1.4 var(--font-ui);
 }
 
-.nota {
-  margin: 0;
-  font: 400 12px/1.45 var(--font-ui);
+/* ─── semana a semana ─── */
+
+.semanas {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 18px;
+  border-top: 1px solid var(--color-line-3);
+}
+
+.listaSemanas {
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 820px;
+}
+
+.semana {
+  display: grid;
+  grid-template-columns: 180px minmax(0, 1fr) 210px;
+  align-items: center;
+  column-gap: 20px;
+}
+
+.semanaData {
+  font: 600 14px var(--font-ui);
+}
+
+.semanaTrilho {
+  height: 12px;
+  border-radius: 4px;
+  background: var(--color-bg);
+  overflow: hidden;
+}
+
+.semanaBarra {
+  display: block;
+  height: 100%;
+  border-radius: 4px;
+  background: var(--color-accent);
+}
+
+.semanaTexto {
+  font: 400 13px var(--font-ui);
   color: var(--color-ink-60);
+}
+
+.semanaTexto strong {
+  font-weight: 800;
+  color: var(--color-ink);
 }
 
 .vazio {
@@ -122,8 +200,7 @@
   cursor: pointer;
 }
 
-/* No celular, nome e números numa linha e a barra embaixo, na largura toda:
-   quatro colunas deixavam a barra com poucos pixels. */
+/* No celular: o nome em cima e a faixa embaixo, na largura toda. */
 @media (max-width: 720px) {
   .bloco {
     padding: 16px;
@@ -131,28 +208,22 @@
   }
 
   .etapa {
-    grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-areas:
-      "rotulo valor"
-      "trilho trilho"
-      "seguiram seguiram";
+    grid-template-columns: minmax(0, 1fr);
     row-gap: 6px;
-    column-gap: 12px;
   }
 
-  .rotulo {
-    grid-area: rotulo;
+  .passagem {
+    grid-template-columns: minmax(0, 1fr);
+    margin: 4px 0;
   }
 
-  .valor {
-    grid-area: valor;
-  }
-
-  .trilho {
-    grid-area: trilho;
-  }
-
+  .ligacao,
   .seguiram {
-    grid-area: seguiram;
+    grid-column: 1;
+  }
+
+  .semana {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 4px;
   }
 }
