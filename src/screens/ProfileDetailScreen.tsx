@@ -121,6 +121,17 @@ export function ProfileDetailScreen({
 
   const firstName = profile.name.split(" ")[0];
 
+  // Profissão é opcional: sem ela, a linha começava com "· Joinville/SC".
+  const metaParts = [
+    profile.profession.trim(),
+    profile.city.replace(", ", "/"),
+    profile.distanceKm === null
+      ? ""
+      : profile.distanceKm < 1
+        ? "a menos de 1 km daqui"
+        : `a ${profile.distanceKm} km daqui`,
+  ].filter(Boolean);
+
   // Frase longa em meia largura ia a três ou quatro linhas ("Atividade física
   // algumas vezes na semana") e deixava a linha de blocos alta e torta. Ela
   // ocupa a linha toda e vai para o fim do grupo, depois dos pares. Se sobrar
@@ -228,16 +239,11 @@ export function ProfileDetailScreen({
               )}
             </p>
             <p className={styles.meta}>
-              {profile.profession} · {profile.city.replace(", ", "/")}
-              {profile.distanceKm === null
-                ? ""
-                : profile.distanceKm < 1
-                  ? " · a menos de 1 km daqui"
-                  : ` · a ${profile.distanceKm} km daqui`}
+              {metaParts.join(" · ")}
             </p>
           </div>
 
-          <p className={styles.bio}>{profile.bio}</p>
+          {profile.bio.trim() && <p className={styles.bio}>{profile.bio}</p>}
 
           <div className={styles.chipsRow}>
             {profile.interests.map((interest) => {

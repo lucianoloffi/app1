@@ -198,10 +198,13 @@
   color: var(--color-ink-60);
 }
 
+/* É o que a pessoa escreveu sobre si, e deve ler como as respostas entre as
+   fotos. Em 400 15px e cinza, parecia nota de rodapé. */
 .bio {
   margin: 0;
-  font: 400 15px/1.5 var(--font-ui);
-  color: #3b443e;
+  font: 500 17px/1.5 var(--font-ui);
+  color: var(--color-ink);
+  overflow-wrap: anywhere;
 }
 
 .chipsRow {
