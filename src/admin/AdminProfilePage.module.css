@@ -54,6 +54,60 @@
   color: var(--color-accent-2);
 }
 
+.acoes {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.pergunta {
+  font: 700 14px/1.4 var(--font-ui);
+  color: var(--color-ink);
+}
+
+.notaAcao {
+  font-weight: 500;
+  color: var(--color-ink-60);
+}
+
+.botao {
+  height: 36px;
+  padding: 0 16px;
+  border: 1px solid var(--color-line-2);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font: 700 13px var(--font-ui);
+  cursor: pointer;
+}
+
+.botao:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+/* O mesmo vermelho do Banir e do Confirmar da aba Moderação. */
+.botaoGrave {
+  border-color: #f0b3ad;
+  background: #fdecec;
+  color: #8a1c15;
+}
+
+.aviso {
+  margin: 0;
+  font: 700 13px var(--font-ui);
+  color: var(--color-accent-2);
+}
+
+.erroDaAcao {
+  margin: 0;
+  font: 700 13px var(--font-ui);
+  color: var(--color-danger);
+}
+
 /* A largura do celular, como o app: é assim que os outros veem o perfil. */
 .celular {
   width: 100%;
@@ -73,7 +127,7 @@
   color: var(--color-ink-60);
 }
 
-.botao {
+.botaoTentar {
   height: 42px;
   padding: 0 18px;
   border: 0;

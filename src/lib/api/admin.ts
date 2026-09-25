@@ -813,3 +813,25 @@ export async function carregarPerfilParaAdmin(userId: string): Promise<PerfilNoP
     fotosForaDoPerfil: linha.fotos_fora_do_perfil,
   };
 }
+
+export type AcaoNaConta = "suspender" | "banir" | "reativar";
+
+/**
+ * Suspender, banir ou reativar direto pela conta, sem denúncia (migration
+ * 0036). O mesmo efeito da `moderar`, mas não resolve as denúncias abertas
+ * contra a pessoa: elas continuam na fila de Moderação.
+ */
+export async function moderarConta(
+  userId: string,
+  acao: AcaoNaConta,
+  dias: number = DIAS_DE_SUSPENSAO,
+): Promise<{ nome: string; terminaEm: string | null }> {
+  const { data, error } = await supabase.rpc("moderar_conta", {
+    p_user_id: userId,
+    p_acao: acao,
+    p_dias: dias,
+  });
+  lancaSeErro(error);
+  const resposta = data as { nome: string; termina_em: string | null };
+  return { nome: resposta.nome, terminaEm: resposta.termina_em };
+}

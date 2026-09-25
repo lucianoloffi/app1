@@ -81,6 +81,17 @@ export function UsersScreen() {
     return () => window.clearTimeout(relogio);
   }, [texto]);
 
+  // Suspender e banir acontecem na aba do perfil, em outra aba do navegador.
+  // Ao voltar para a lista, ela relê, senão o selo da pessoa continuaria o
+  // de antes. Mesma consulta, então a lista na tela não some enquanto isso.
+  useEffect(() => {
+    function aoVoltar() {
+      if (document.visibilityState === "visible") setTentativa((t) => t + 1);
+    }
+    document.addEventListener("visibilitychange", aoVoltar);
+    return () => document.removeEventListener("visibilitychange", aoVoltar);
+  }, []);
+
   useEffect(() => {
     let ativo = true;
     carregarUsuarios(consulta)

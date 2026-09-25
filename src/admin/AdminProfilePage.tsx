@@ -1,5 +1,11 @@
 import { useEffect, useState } from "react";
-import { carregarPerfilParaAdmin, type PerfilNoPainel } from "../lib/api/admin";
+import {
+  DIAS_DE_SUSPENSAO,
+  carregarPerfilParaAdmin,
+  moderarConta,
+  type AcaoNaConta,
+  type PerfilNoPainel,
+} from "../lib/api/admin";
 import { mensagemDeErro } from "../lib/errors";
 import { ProfileDetailScreen } from "../screens/ProfileDetailScreen";
 import { AccountEmail } from "./AccountEmail";
@@ -21,6 +27,11 @@ export function AdminProfilePage({ userId }: { userId: string }) {
     | { tipo: "erro"; mensagem: string }
   >({ tipo: "carregando" });
   const [tentativa, setTentativa] = useState(0);
+  /** A ação esperando o "Confirmar". */
+  const [confirmando, setConfirmando] = useState<AcaoNaConta | null>(null);
+  const [aplicando, setAplicando] = useState(false);
+  const [aviso, setAviso] = useState<string | null>(null);
+  const [erroDaAcao, setErroDaAcao] = useState<string | null>(null);
 
   useEffect(() => {
     let ativo = true;
@@ -55,7 +66,7 @@ export function AdminProfilePage({ userId }: { userId: string }) {
         <p>{estado.mensagem}</p>
         <button
           type="button"
-          className={styles.botao}
+          className={styles.botaoTentar}
           onClick={() => {
             setEstado({ tipo: "carregando" });
             setTentativa((t) => t + 1);
@@ -68,6 +79,53 @@ export function AdminProfilePage({ userId }: { userId: string }) {
   }
 
   const { dados } = estado;
+  const nome = dados.perfil.name || "a pessoa";
+
+  async function aplicar(acao: AcaoNaConta) {
+    setAplicando(true);
+    setErroDaAcao(null);
+    try {
+      const feito = await moderarConta(userId, acao);
+      // "Conta de", e não "Fulano suspenso": o nome não diz o gênero.
+      setAviso(
+        acao === "suspender"
+          ? `Conta de ${feito.nome} suspensa até ${dataHora(feito.terminaEm)}.`
+          : acao === "banir"
+            ? `Conta de ${feito.nome} banida.`
+            : `Acesso de ${feito.nome} devolvido.`,
+      );
+      setConfirmando(null);
+      // Relê sem voltar ao "Carregando…": a faixa troca de selo e de botões,
+      // e o perfil continua na tela.
+      setTentativa((t) => t + 1);
+    } catch (problema) {
+      setErroDaAcao(mensagemDeErro(problema));
+    } finally {
+      setAplicando(false);
+    }
+  }
+
+  function pedir(acao: AcaoNaConta) {
+    setAviso(null);
+    setErroDaAcao(null);
+    setConfirmando(acao);
+  }
+
+  const sobSancao = dados.statusModeracao !== "ativo";
+  const pergunta =
+    confirmando === "suspender"
+      ? `Suspender ${nome} por ${DIAS_DE_SUSPENSAO} dias?`
+      : confirmando === "banir"
+        ? `Banir ${nome}? O acesso é cortado até alguém reativar.`
+        : `Devolver o acesso de ${nome}?`;
+  // A decisão pela conta não fecha denúncia nenhuma (0036): quem decide
+  // aqui pode não ter lido nenhuma, e uma delas pode pedir mais.
+  const notaDasDenuncias =
+    confirmando && confirmando !== "reativar" && dados.denunciasAbertas > 0
+      ? dados.denunciasAbertas === 1
+        ? "A denúncia aberta continua na fila de Moderação."
+        : `As ${dados.denunciasAbertas} denúncias abertas continuam na fila de Moderação.`
+      : null;
   const avisos = [
     dados.statusModeracao === "banido" ? "banido" : null,
     dados.statusModeracao === "suspenso"
@@ -104,6 +162,64 @@ export function AdminProfilePage({ userId }: { userId: string }) {
             {dados.fotosForaDoPerfil === 1
               ? "1 foto reprovada não aparece aqui, como não aparece para os outros. Ela está na aba Fotos, em Rejeitadas."
               : `${dados.fotosForaDoPerfil} fotos reprovadas não aparecem aqui, como não aparecem para os outros. Elas estão na aba Fotos, em Rejeitadas.`}
+          </p>
+        )}
+        <div className={styles.acoes}>
+          {confirmando ? (
+            <>
+              <span className={styles.pergunta}>
+                {pergunta}
+                {notaDasDenuncias && <span className={styles.notaAcao}> {notaDasDenuncias}</span>}
+              </span>
+              <button
+                type="button"
+                className={`${styles.botao} ${styles.botaoGrave}`}
+                disabled={aplicando}
+                onClick={() => void aplicar(confirmando)}
+              >
+                {aplicando ? "Aplicando…" : "Confirmar"}
+              </button>
+              <button
+                type="button"
+                className={styles.botao}
+                disabled={aplicando}
+                onClick={() => setConfirmando(null)}
+              >
+                Cancelar
+              </button>
+            </>
+          ) : (
+            <>
+              {dados.statusModeracao === "ativo" && (
+                <button type="button" className={styles.botao} onClick={() => pedir("suspender")}>
+                  Suspender {DIAS_DE_SUSPENSAO} dias
+                </button>
+              )}
+              {dados.statusModeracao !== "banido" && (
+                <button
+                  type="button"
+                  className={`${styles.botao} ${styles.botaoGrave}`}
+                  onClick={() => pedir("banir")}
+                >
+                  Banir
+                </button>
+              )}
+              {sobSancao && (
+                <button type="button" className={styles.botao} onClick={() => pedir("reativar")}>
+                  Reativar conta
+                </button>
+              )}
+            </>
+          )}
+        </div>
+        {aviso && (
+          <p className={styles.aviso} role="status">
+            {aviso}
+          </p>
+        )}
+        {erroDaAcao && (
+          <p className={styles.erroDaAcao} role="alert">
+            {erroDaAcao}
           </p>
         )}
       </header>
