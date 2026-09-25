@@ -303,6 +303,21 @@ sob o filtro novo depois de um erro, e o retângulo cinza em volta das ilustraç
   `perfil_do_match` não servia: exige match com quem está logado. Campo novo
   no perfil dos outros entra também na `perfil_para_admin`. Conta excluída
   depois de a lista abrir mostra "Essa conta não existe mais".
+  **Suspender, banir e reativar** (migration `0036`, 25/09) ficam na faixa
+  lilás do perfil aberto, não na lista (onze colunas, não cabia, e a decisão
+  se toma olhando o perfil): conta ativa mostra "Suspender 7 dias" e "Banir",
+  suspensa mostra "Banir" e "Reativar conta", banida só "Reativar conta", com
+  a mesma confirmação da aba Moderação. A `moderar` não servia, porque decide
+  a partir de uma denúncia. `moderar_conta(user_id, acao, dias)` tem o mesmo
+  efeito em `profiles` (a sanção morde nos mesmos lugares) e registra em
+  `admin_actions` com `report_id` nulo, mas **não fecha as denúncias
+  abertas** contra a pessoa: quem decide pela lista pode não ter lido
+  nenhuma, e uma denúncia pode pedir mais que a suspensão. Elas continuam na
+  fila, e a confirmação avisa. A função **recusa moderar a própria conta**:
+  um toque errado trancaria o admin fora do app, sem o painel poder
+  desfazer. O aviso depois da ação é "Conta de Fulano suspensa", porque o
+  nome não diz o gênero. A lista relê ao voltar para a aba dela
+  (`visibilitychange`), para o selo acompanhar a decisão tomada na outra.
   A lista de todas as contas é acesso novo da moderação, e por isso entrou na
   política de privacidade 1.9 (seção 6.3). O que a lista mostra ou deixa de
   mostrar mudou? A 6.3 muda junto.
@@ -800,7 +815,8 @@ Em ordem de importância:
    o app fora do ar nem perder dados. Decisão do Lu em 22/09: fica para depois.
 4. **Painel admin completo:** retenção D7, ranking de 10 cidades e contas
    excluídas. O funil entrou em 25/09 (`0032`/`0033`) e a aba Usuários também
-   (`0035`). Nela falta suspender, banir e excluir a partir da lista. Excluir pede uma Edge
+   (`0035`), com suspender e banir (`0036`). Nela falta excluir a conta pela
+   lista, que ficou para depois (decisão do Lu em 25/09): pede uma Edge
    Function nova com service role, porque a `delete-account` só apaga quem
    está logado. Os registros já existem
    desde a `0013`; falta só consultar e desenhar.
