@@ -48,6 +48,11 @@ const MENSAGENS: { teste: RegExp; texto: string; campo?: CampoDeErro }[] = [
   // segundos à frente do banco (PGRST303). Não é culpa de quem usa, nem do
   // relógio do celular: o token nasce no servidor. Some sozinho em segundos.
   { teste: /jwt issued at future|pgrst303/i, texto: "Não deu para carregar agora. Tente de novo em alguns segundos." },
+  // App publicado antes da migration de que ele depende: a API não conhece a
+  // coluna ou a função nova (PGRST204, PGRST202). Aconteceu com a 0031, e a
+  // tela mostrava "Could not find the 'prefere_nao_dizer' column of
+  // 'profiles' in the schema cache". Para quem usa, é só esperar.
+  { teste: /schema cache|pgrst20[24]|column .* does not exist|function .* does not exist/i, texto: "Não deu para salvar agora. Tente de novo em alguns minutos." },
   { teste: /jwt expired|session.*(expired|missing)|refresh.?token/i, texto: "Sua sessão expirou. Entre de novo." },
   { teste: /failed to fetch|network|offline/i, texto: "Sem conexão. Tente de novo." },
   { teste: /rate limit|too many requests/i, texto: "Muitas tentativas. Aguarde um minuto." },
