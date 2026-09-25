@@ -492,6 +492,14 @@ sob o filtro novo depois de um erro, e o retângulo cinza em volta das ilustraç
     (ficou o mesmo cinza); a resposta é 600 15px, porque 700 16px competia com
     o nome no topo; a versão com o nome do campo pequeno em cima e ícone de
     16 px foi trocada por esta, só ícone e frase.
+- **Descrição e linha abaixo do nome no perfil de outra pessoa**
+  (`ProfileDetailScreen`, 24/09). A descrição (`bio`) é 500 17px na cor do
+  texto (`--color-ink`), perto das respostas entre as fotos (500 18px). Antes
+  era 400 15px em cinza e parecia nota de rodapé ao lado do nome forte e dos
+  blocos. Descrição vazia não ocupa espaço. A linha abaixo do nome junta
+  profissão, cidade e distância com " · " só entre o que existe
+  (`metaParts`). Profissão é opcional e, sem ela, a linha começava com
+  "· Joinville/SC".
 
 ## Convenções
 
