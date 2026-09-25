@@ -295,7 +295,7 @@ sob o filtro novo depois de um erro, e o retângulo cinza em volta das ilustraç
   página nova no build. `AdminApp` mostra então a `AdminProfilePage`, que usa a
   **mesma** `ProfileDetailScreen` do app com `bottomAction="admin"` (sem voltar,
   sem curtir, sem denunciar), na largura do celular. O que só o painel precisa
-  (e-mail com copiar, sanção, denúncias abertas, perfil oculto e quantas fotos
+  (e-mail, sanção, denúncias abertas, perfil oculto e quantas fotos
   reprovadas não aparecem) fica numa faixa lilás acima, fora do perfil. Quem
   monta os dados é `perfil_para_admin`, com as mesmas colunas do
   `perfil_publico` (passa pelo mesmo `paraPerfis`), mas para qualquer pessoa,
@@ -303,11 +303,21 @@ sob o filtro novo depois de um erro, e o retângulo cinza em volta das ilustraç
   `perfil_do_match` não servia: exige match com quem está logado. Campo novo
   no perfil dos outros entra também na `perfil_para_admin`. Conta excluída
   depois de a lista abrir mostra "Essa conta não existe mais".
-  **Suspender, banir e reativar** (migration `0036`, 25/09) ficam na faixa
-  lilás do perfil aberto, não na lista (onze colunas, não cabia, e a decisão
-  se toma olhando o perfil): conta ativa mostra "Suspender 7 dias" e "Banir",
-  suspensa mostra "Banir" e "Reativar conta", banida só "Reativar conta", com
-  a mesma confirmação da aba Moderação. A `moderar` não servia, porque decide
+  **Suspender, banir e reativar** (migration `0036`, 25/09) ficam em dois
+  lugares: na faixa lilás do perfil aberto e nos **três pontinhos** no fim de
+  cada linha da lista (`MenuDaConta.tsx`, pedido do Lu, para não precisar
+  abrir o perfil). Conta ativa mostra "Suspender 7 dias" e "Banir", suspensa
+  mostra "Banir" e "Reativar conta", banida só "Reativar conta". No menu,
+  tocar numa ação troca o menu pela confirmação no mesmo lugar, como na aba
+  Moderação; fecha com toque fora ou Esc (o foco volta aos pontinhos), e fica
+  aberto enquanto a ação vai ao servidor, para o erro não sumir. Depois da
+  decisão, o aviso aparece acima da tabela e a lista relê com a mesma
+  consulta, sem sumir; o aviso guarda a consulta em que foi dado e some ao
+  trocar de filtro ou página. O menu é alinhado pela direita, senão sairia da
+  tabela. **Os textos das duas telas moram em `acoesNaConta.ts`** (rótulos,
+  quais ações cabem em cada situação, pergunta, nota das denúncias e aviso).
+  Conta que parou o cadastro antes do nome chega como "Sem nome", e
+  `nomeDeVerdade` troca por "esta conta" ("Banir Sem nome?" não se lia). A `moderar` não servia, porque decide
   a partir de uma denúncia. `moderar_conta(user_id, acao, dias)` tem o mesmo
   efeito em `profiles` (a sanção morde nos mesmos lugares) e registra em
   `admin_actions` com `report_id` nulo, mas **não fecha as denúncias
@@ -316,7 +326,9 @@ sob o filtro novo depois de um erro, e o retângulo cinza em volta das ilustraç
   fila, e a confirmação avisa. A função **recusa moderar a própria conta**:
   um toque errado trancaria o admin fora do app, sem o painel poder
   desfazer. O aviso depois da ação é "Conta de Fulano suspensa", porque o
-  nome não diz o gênero. A lista relê ao voltar para a aba dela
+  nome não diz o gênero. Na faixa do perfil, o e-mail é texto simples, sem o
+  botão Copiar (decisão do Lu, para a faixa ficar limpa); um clique o
+  seleciona inteiro (`user-select: all`). A lista relê ao voltar para a aba dela
   (`visibilitychange`), para o selo acompanhar a decisão tomada na outra.
   A lista de todas as contas é acesso novo da moderação, e por isso entrou na
   política de privacidade 1.9 (seção 6.3). O que a lista mostra ou deixa de
