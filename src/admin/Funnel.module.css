@@ -1,0 +1,158 @@
+/* Mesma moldura dos blocos da aba Números (NumbersScreen.module.css). */
+.bloco {
+  background: var(--color-surface);
+  border-radius: 18px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transition: opacity 0.2s var(--ease-standard);
+}
+
+/* Enquanto chega o período novo, o funil antigo fica apagado em vez de sumir. */
+.carregando {
+  opacity: 0.45;
+}
+
+.titulo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.h2 {
+  margin: 0;
+  font: 800 18px var(--font-ui);
+}
+
+.apoio {
+  font: 400 13px var(--font-ui);
+  color: var(--color-ink-60);
+}
+
+.etapas {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.etapa {
+  display: grid;
+  grid-template-columns: 190px minmax(0, 1fr) 48px 170px;
+  align-items: center;
+  gap: 16px;
+}
+
+.rotulo {
+  font: 600 14px var(--font-ui);
+}
+
+/* Trilho claro com a barra por cima: o tamanho da barra é a fração de quem
+   criou a conta, e o trilho mostra o quanto falta até todas. */
+.trilho {
+  height: 12px;
+  border-radius: 4px;
+  background: var(--color-bg);
+  overflow: hidden;
+}
+
+.barra {
+  display: block;
+  height: 100%;
+  min-width: 2px;
+  border-radius: 4px;
+  background: var(--color-accent);
+}
+
+.valor {
+  font: 800 16px var(--font-ui);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.seguiram {
+  font: 400 13px var(--font-ui);
+  color: var(--color-ink-60);
+}
+
+.destaque {
+  margin: 0;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: var(--color-accent-soft);
+  color: var(--color-accent-2);
+  font: 600 14px/1.4 var(--font-ui);
+}
+
+.nota {
+  margin: 0;
+  font: 400 12px/1.45 var(--font-ui);
+  color: var(--color-ink-60);
+}
+
+.vazio {
+  margin: 0;
+  font: 400 14px var(--font-ui);
+  color: var(--color-ink-60);
+}
+
+.erro {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #fdecec;
+  color: #8a1c15;
+  border-radius: 16px;
+  padding: 14px 18px;
+  font: 600 15px var(--font-ui);
+}
+
+.erroBotao {
+  margin-left: auto;
+  height: 40px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--color-ink);
+  color: #fff;
+  font: 700 14px var(--font-ui);
+  cursor: pointer;
+}
+
+/* No celular, nome e números numa linha e a barra embaixo, na largura toda:
+   quatro colunas deixavam a barra com poucos pixels. */
+@media (max-width: 720px) {
+  .bloco {
+    padding: 16px;
+    border-radius: 16px;
+  }
+
+  .etapa {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "rotulo valor"
+      "trilho trilho"
+      "seguiram seguiram";
+    row-gap: 6px;
+    column-gap: 12px;
+  }
+
+  .rotulo {
+    grid-area: rotulo;
+  }
+
+  .valor {
+    grid-area: valor;
+  }
+
+  .trilho {
+    grid-area: trilho;
+  }
+
+  .seguiram {
+    grid-area: seguiram;
+  }
+}

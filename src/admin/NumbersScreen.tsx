@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { carregarNumeros, type NumerosDoPainel, type PeriodoDoPainel } from "../lib/api/admin";
 import { mensagemDeErro } from "../lib/errors";
 import { DailyChart } from "./DailyChart";
+import { Funnel } from "./Funnel";
 import styles from "./NumbersScreen.module.css";
 
 const PERIODOS: { valor: PeriodoDoPainel; rotulo: string }[] = [
@@ -136,6 +137,8 @@ export function NumbersScreen() {
               </span>
             </div>
           </div>
+
+          <Funnel periodo={periodo} />
 
           <div className={styles.linhaDeBaixo}>
             <section className={styles.bloco}>

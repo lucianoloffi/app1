@@ -79,6 +79,42 @@ export async function carregarNumeros(periodo: PeriodoDoPainel): Promise<Numeros
   };
 }
 
+// ───────────────────────── funil ─────────────────────────
+
+/**
+ * Contas criadas no período e até onde cada uma chegou (migration 0032). Sem
+ * os perfis de teste (@lovi.test) e sem as contas de admin.
+ */
+export interface FunilDoPainel {
+  inicio: string;
+  fim: string;
+  contas: number;
+  cadastro: number;
+  curtida: number;
+  match: number;
+  conversa: number;
+  resposta: number;
+  /** Contas de teste e de admin criadas no período, deixadas de fora. */
+  foraDaConta: number;
+}
+
+export async function carregarFunil(periodo: PeriodoDoPainel): Promise<FunilDoPainel> {
+  const { data, error } = await supabase.rpc("painel_funil", { p_periodo: periodo });
+  lancaSeErro(error);
+  const linha = data as Omit<FunilDoPainel, "foraDaConta"> & { fora_da_conta: number };
+  return {
+    inicio: linha.inicio,
+    fim: linha.fim,
+    contas: linha.contas,
+    cadastro: linha.cadastro,
+    curtida: linha.curtida,
+    match: linha.match,
+    conversa: linha.conversa,
+    resposta: linha.resposta,
+    foraDaConta: linha.fora_da_conta,
+  };
+}
+
 // ───────────────────────── moderação ─────────────────────────
 
 /**
