@@ -205,8 +205,14 @@ export default function App() {
     ativo: appLiberado,
     versaoDosFiltros,
     onMatch: () => void chats.recarregar(),
-    onLikeWithoutMatch: (profile) =>
-      showToast(`Você curtiu ${profile.name.split(" ")[0]}. Avisamos se ela curtir de volta.`),
+    // O "ela" era fixo, e quem curtia um homem lia "Avisamos se ela curtir".
+    // Para "outros", sem pronome, em vez de chutar um.
+    onLikeWithoutMatch: (profile) => {
+      const pronome = { mulher: "ela ", homem: "ele ", outros: "" }[profile.gender];
+      showToast(
+        `Você curtiu ${profile.name.split(" ")[0]}. Avisamos se ${pronome}curtir de volta.`,
+      );
+    },
     onError: aoFalhar,
   });
 
