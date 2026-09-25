@@ -370,14 +370,39 @@ sob o filtro novo depois de um erro, e o retângulo cinza em volta das ilustraç
   `Omit<PerfilEditavel, ...>`. Campo novo do perfil entra numa das duas, não nas
   duas.
   A dica do que falta (`computeCompleteness`) também é por tela. `hint`, embaixo
-  do nome no topo (que abre Editar perfil), lista só fotos, bio, profissão e
-  altura. `interestsHint`, dentro do cartão Interesses, lista interesses, estilo
+  do nome no topo, lista fotos, bio, profissão, altura e os dois textos.
+  `interestsHint`, dentro do cartão Interesses, lista interesses, estilo
   de vida e estado civil. Antes o topo dizia "Faltam 3 interesses" e quem tocava
   não achava onde preencher. A porcentagem do anel continua contando o perfil
   inteiro. Com campo novo, pôr a dica na lista da tela onde ele é preenchido.
-  Exceção de propósito: os valores e os dois textos de "Conte mais sobre você"
-  não entram na porcentagem nem nas dicas, para não virar pressão para
-  responder dado sensível (ver "Valores, fumo e dois textos").
+- **Anel de completude com pesos** (`PESO` em `src/utils/completeness.ts`,
+  25/09). Os pontos somam 100: cadastro básico 20 (nome, cidade, nascimento,
+  gênero, 1ª foto), 2ª e 3ª foto 10 cada, 4ª foto 5, bio 15, interesses 10
+  (proporcional, 3 por interesse até o terceiro), profissão 5, altura 5, estilo
+  de vida 2 por pergunta, estado civil 4 e cada texto de "Conte mais sobre
+  você" 4. Antes cada campo valia o mesmo e o anel parecia não responder:
+  estilo de vida só contava com as quatro respostas, um ou dois interesses não
+  davam nada, os textos não entravam e 100% pedia seis fotos. Mudou um peso?
+  A soma tem de continuar 100.
+  **Religião, política e alimentação valem zero, não menos**: qualquer ponto
+  deixaria o anel abaixo de 100% para quem não quer responder dado sensível.
+  Não entram nem nas dicas.
+- **"Prefiro não dizer" é resposta** (migration `0031`, 25/09). Vale para
+  bebida, atividade física, filhos, fumo e status de relacionamento, que têm
+  essa opção na folha da tela Interesses. O campo continua `null`, e o nome da
+  pergunta vai para `profiles.prefere_nao_dizer` (`MyProfile.prefereNaoDizer`,
+  tipo `CampoQuePodeRecusar`). Antes a recusa era só o `null`, igual a nunca ter
+  respondido: o anel nunca chegava a 100% para quem recusava, e a folha
+  mostrava "Prefiro não dizer" em pergunta nunca aberta. Agora pergunta sem
+  resposta mostra "Escolher" (`RowBottomSheet`, prop `recusado`), e a recusa
+  aparece na cor das respostas. Coluna à parte, e não valor novo em cada check,
+  para as chaves de bebida, fumo & cia. não mudarem em nenhum outro lugar.
+  A coluna não entra no `perfil_publico`: para os outros, recusar e não
+  responder continuam iguais. `salvarPerfil` só grava a recusa de quem
+  continua sem resposta (`recusasEmVigor`). Quem recusou antes da `0031`
+  aparece como não respondido: o banco não sabia qual `null` era escolha.
+  Pergunta nova com "Prefiro não dizer" entra no check da coluna e em
+  `CampoQuePodeRecusar`.
 - **Ver o próprio perfil** (`ProfileScreen` + `ProfileDetailScreen`, 25/09).
   Abaixo do nome, no topo do Perfil, há dois botões: **Editar perfil** (lilás) e
   **Visualizar** (branco com borda lilás; só texto roxo foi testado e parecia
@@ -427,9 +452,9 @@ sob o filtro novo depois de um erro, e o retângulo cinza em volta das ilustraç
 - **Status de relacionamento: cinco valores** (migration `0029`): `solteiro`,
   `separado`, `divorciado`, `viuvo` e `em_relacionamento`. `namorando` e `casado`
   viraram `em_relacionamento`: a diferença entre os dois não ajudava ninguém a
-  decidir um match. "Prefiro não dizer" **não é valor**, é o campo vazio (`null`).
-  Na folha da tela Interesses ele é a opção vazia do `RowBottomSheet`; no cadastro,
-  desmarcar a chip escolhida.
+  decidir um match. "Prefiro não dizer" **não é valor**: o campo fica vazio
+  (`null`) e a recusa vai para `prefere_nao_dizer` (ver "Prefiro não dizer é
+  resposta"). No cadastro, desmarcar a chip escolhida deixa sem resposta.
   A lista é uma só, `STATUS_OPTIONS` em `src/data/lifestyle.ts`, na ordem de
   `RELATIONSHIP_STATUS_LABEL` (`src/types.ts`). Antes eram duas, uma para o
   cadastro e outra para a folha, cada uma numa ordem. Mudar a lista pede migration
